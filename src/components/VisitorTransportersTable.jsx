@@ -14,29 +14,29 @@ const VisitorTransportersTable = () => {
 
   // ONLY fields that DO NOT exist in visitor table
   const [finalForm, setFinalForm] = useState({
-    qtyFinalDriver: 1,
-    finalApplication: "",
-    finalDate: "",
+    qty_final_driver: 1,
+    final_application: "",
+    final_date: "",
   });
 
   // Map DB → frontend
   const mapTransporter = (t) => ({
     visitorTransporterId: t.visitor_transporter_id,
 
-    companyName: t.company_name,
-    ownerName: t.owner_name,
-    ownerMobileNo: t.owner_mobile_no,
+    company_name: t.company_name,
+    owner_name: t.owner_name,
+    owner_mobile_no: t.owner_mobile_no,
 
-    authorisedName: t.authorised_name,
-    authorisedMobileNo: t.authorised_mobile_no,
+    authorised_name: t.authorised_name,
+    authorised_mobile_no: t.authorised_mobile_no,
 
-    gaadiType: t.gaadi_type,
-    loadingPlace: t.loading_place,
-    unloadPlace: t.unload_place,
-    monthlySalary: t.monthly_salary,
+    gaadi_type: t.gaadi_type,
+    loading_place: t.loading_place,
+    unload_place: t.unload_place,
+    monthly_salary: t.monthly_salary,
 
-    otherBenefit: t.other_benefit,
-    needTiming: t.need_timing,
+    other_benefit: t.other_benefit,
+    need_timing: t.need_timing,
     notes: t.notes,
 
     date: t.created_at?.split("T")[0],
@@ -63,9 +63,9 @@ const VisitorTransportersTable = () => {
   const openFinalModal = (row) => {
     setSelectedRow(row);
     setFinalForm({
-      qtyFinalDriver: 1,
-      finalApplication: "",
-      finalDate: "",
+      qty_final_driver: 1,
+      final_application: "",
+      final_date: "",
     });
     setShowModal(true);
   };
@@ -73,30 +73,32 @@ const VisitorTransportersTable = () => {
   const handleFinalSubmit = async () => {
     try {
       const payload = {
-        visitorTransporterId: selectedRow.visitorTransporterId,
+        visitor_transporter_id: selectedRow.visitorTransporterId,
 
-        companyName: selectedRow.companyName,
-        ownerName: selectedRow.ownerName,
-        ownerMobileNo: selectedRow.ownerMobileNo,
+        company_name: selectedRow.company_name,
+        owner_name: selectedRow.owner_name,
+        owner_mobile_no: selectedRow.owner_mobile_no,
 
-        authorisedName: selectedRow.authorisedName,
-        authorisedMobileNo: selectedRow.authorisedMobileNo,
+        authorised_name: selectedRow.authorised_name,
+        authorised_mobile_no: selectedRow.authorised_mobile_no,
 
-        gaadiType: selectedRow.gaadiType,
-        loadingPlace: selectedRow.loadingPlace,
-        unloadPlace: selectedRow.unloadPlace,
-        monthlySalary: selectedRow.monthlySalary,
+        gaadi_type: selectedRow.gaadi_type,
+        loading_place: selectedRow.loading_place,
+        unload_place: selectedRow.unload_place,
+        monthly_salary: selectedRow.monthly_salary,
 
-        otherBenefit: selectedRow.otherBenefit,
-        needTiming: selectedRow.needTiming,
+        other_benefit: selectedRow.other_benefit,
+        need_timing: selectedRow.need_timing,
         notes: selectedRow.notes,
 
-        qtyFinalDriver: finalForm.qtyFinalDriver,
-        finalApplication: finalForm.finalApplication,
-        finalDate: finalForm.finalDate,
+        qty_final_driver: finalForm.qty_final_driver,
+        final_application: finalForm.final_application,
+        final_date: finalForm.final_date,
 
-        approvalStatus: "PENDING",
+        approval_status: "PENDING",
       };
+
+      console.log("FINAL PAYLOAD 👉", payload);
 
       await saveSelectedTransporter(payload);
       await deleteTransportVisitor(selectedRow.visitorTransporterId);
@@ -151,14 +153,16 @@ const VisitorTransportersTable = () => {
                   className="hover:bg-blue-50 transition"
                 >
                   <td className="p-2 border">{t.date}</td>
-                  <td className="p-2 border font-medium">{t.companyName}</td>
-                  <td className="p-2 border">{t.ownerName}</td>
-                  <td className="p-2 border">{t.ownerMobileNo}</td>
-                  <td className="p-2 border">{t.gaadiType}</td>
-                  <td className="p-2 border">
-                    {t.loadingPlace} → {t.unloadPlace}
+                  <td className="p-2 border font-medium">
+                    {t.company_name}
                   </td>
-                  <td className="p-2 border">₹{t.monthlySalary}</td>
+                  <td className="p-2 border">{t.owner_name}</td>
+                  <td className="p-2 border">{t.owner_mobile_no}</td>
+                  <td className="p-2 border">{t.gaadi_type}</td>
+                  <td className="p-2 border">
+                    {t.loading_place} → {t.unload_place}
+                  </td>
+                  <td className="p-2 border">₹{t.monthly_salary}</td>
                   <td className="p-2 border text-center">
                     <button
                       onClick={() => openFinalModal(t)}
@@ -188,11 +192,11 @@ const VisitorTransportersTable = () => {
             <input
               type="number"
               className="w-full border p-2 mb-3"
-              value={finalForm.qtyFinalDriver}
+              value={finalForm.qty_final_driver}
               onChange={(e) =>
                 setFinalForm({
                   ...finalForm,
-                  qtyFinalDriver: e.target.value,
+                  qty_final_driver: e.target.value,
                 })
               }
             />
@@ -202,11 +206,11 @@ const VisitorTransportersTable = () => {
             </label>
             <input
               className="w-full border p-2 mb-3"
-              value={finalForm.finalApplication}
+              value={finalForm.final_application}
               onChange={(e) =>
                 setFinalForm({
                   ...finalForm,
-                  finalApplication: e.target.value,
+                  final_application: e.target.value,
                 })
               }
             />
@@ -217,11 +221,11 @@ const VisitorTransportersTable = () => {
             <input
               type="date"
               className="w-full border p-2 mb-4"
-              value={finalForm.finalDate}
+              value={finalForm.final_date}
               onChange={(e) =>
                 setFinalForm({
                   ...finalForm,
-                  finalDate: e.target.value,
+                  final_date: e.target.value,
                 })
               }
             />
