@@ -20,6 +20,9 @@ export default function TransporterStep1({ onNext }) {
     contactManagerName: "",
     contactManagerMobileNumber: "",
     emailId: "",
+    aadharNumber: "",
+    panCardNumber: "",
+    dlNumber: "",
     mobileOtp: "",
   });
 
@@ -30,10 +33,25 @@ export default function TransporterStep1({ onNext }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // mobile number validation
     if (
       ["ownerMobileNumber", "contactManagerMobileNumber"].includes(name)
     ) {
       if (!/^\d*$/.test(value) || value.length > 10) return;
+    }
+
+    // Aadhaar validation
+    if (name === "aadharNumber") {
+      if (!/^\d*$/.test(value) || value.length > 12) return;
+    }
+
+    // PAN validation (uppercase only)
+    if (name === "panCardNumber") {
+      setLocal((prev) => ({
+        ...prev,
+        [name]: value.toUpperCase(),
+      }));
+      return;
     }
 
     setLocal((prev) => ({ ...prev, [name]: value }));
@@ -64,14 +82,16 @@ export default function TransporterStep1({ onNext }) {
     if (
       !local.transportCompanyName ||
       !local.ownerName ||
-      !/^\d{10}$/.test(local.ownerMobileNumber)
+      !/^\d{10}$/.test(local.ownerMobileNumber) ||
+      !/^\d{12}$/.test(local.aadharNumber) ||
+      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(local.panCardNumber)
     ) {
-      alert("Fill required fields");
+      alert("Please fill all required fields correctly");
       return;
     }
 
     try {
-      // ✅ BACKEND PAYLOAD — SNAKE_CASE
+      // ✅ BACKEND PAYLOAD (snake_case)
       const payload = {
         transport_company_name: local.transportCompanyName,
         gst_number: local.gstNumber,
@@ -82,16 +102,17 @@ export default function TransporterStep1({ onNext }) {
         contact_manager_mobile_number:
           local.contactManagerMobileNumber,
         email_id: local.emailId,
+        aadhar_number: local.aadharNumber,
+        pan_card_number: local.panCardNumber,
+        dl_number: local.dlNumber,
       };
 
       const res = await saveTransporterDetails(payload);
 
-      // 🔑 SAVE transporter_registration_id
+      // 🔑 SAVE registration id
       dispatch(setRegistrationId(res.transporter_registration_id));
 
-      // store frontend data
       dispatch(updateStep1(local));
-
       dispatch(setStep(2));
       onNext?.();
     } catch (error) {
@@ -151,6 +172,30 @@ export default function TransporterStep1({ onNext }) {
             Send OTP
           </button>
         </div>
+
+        <input
+          name="aadharNumber"
+          placeholder="Aadhaar Number (12 digits)"
+          value={local.aadharNumber}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <input
+          name="panCardNumber"
+          placeholder="PAN Card Number"
+          value={local.panCardNumber}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <input
+          name="dlNumber"
+          placeholder="Driving Licence Number"
+          value={local.dlNumber}
+          onChange={handleChange}
+          className="input"
+        />
 
         <input
           name="contactManagerName"
