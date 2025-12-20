@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://my-backend-1-qxc9.onrender.com/api/transporter",
+  baseURL: "https://my-backend-1-qxc9.onrender.com/api/transporter-documents",
   withCredentials: true,
 });
 
@@ -16,7 +16,7 @@ export const uploadTransporterDocuments = async (
 ) => {
   try {
     const res = await api.post(
-      `/documents/upload/${transporterRegistrationId}`,
+      `/upload/${transporterRegistrationId}`,
       formData,
       {
         headers: {
