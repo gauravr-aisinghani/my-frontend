@@ -5,7 +5,7 @@ import {
   updateStep1,
   setRegistrationId,
   setStep,
-} from "../store/driverRegistrationSlice";
+} from "../store/transporterRegistrationSlice"; // ✅ UPDATED SLICE
 import { saveTransporterDetails } from "../api/transporterDetailsApi";
 
 export default function TransporterStep1({ onNext }) {
@@ -82,21 +82,10 @@ export default function TransporterStep1({ onNext }) {
 
   /* ===================== SUBMIT ===================== */
   const handleNext = async () => {
-    // 🔥 NORMALIZE VALUES (THIS FIXES YOUR ISSUE)
     const normalizedAadhar = local.aadharNumber.replace(/\s/g, "");
     const normalizedPan = local.panCardNumber.toUpperCase().trim();
 
-    // 🔍 DEBUG (keep during testing)
-    console.log("VALIDATION DATA", {
-      transportCompanyName: local.transportCompanyName,
-      ownerName: local.ownerName,
-      ownerMobileNumber: local.ownerMobileNumber,
-      normalizedAadhar,
-      normalizedPan,
-      dlNumber: local.dlNumber,
-    });
-
-    // ✅ STEP-BY-STEP VALIDATION
+    // ✅ VALIDATIONS
     if (!local.transportCompanyName.trim()) {
       alert("Transport company name required");
       return;
@@ -137,7 +126,7 @@ export default function TransporterStep1({ onNext }) {
         owner_mobile_number: local.ownerMobileNumber,
         contact_manager_name: local.contactManagerName.trim(),
         contact_manager_mobile_number:
-          local.contactManagerMobileNumber,
+          local.contactManagerMobileNumber || null,
         email_id: local.emailId.trim(),
         aadhar_number: normalizedAadhar,
         pan_card_number: normalizedPan,
@@ -146,9 +135,16 @@ export default function TransporterStep1({ onNext }) {
 
       const res = await saveTransporterDetails(payload);
 
+      if (!res?.transporter_registration_id) {
+        alert("Transporter Registration ID not received");
+        return;
+      }
+
+      // ✅ STORE ID IN TRANSPORTER SLICE
       dispatch(setRegistrationId(res.transporter_registration_id));
       dispatch(updateStep1(local));
       dispatch(setStep(2));
+
       onNext?.();
     } catch (error) {
       console.error(error);
@@ -211,7 +207,7 @@ export default function TransporterStep1({ onNext }) {
 
         <input
           name="aadharNumber"
-          placeholder="Aadhaar Number (12 digits)"
+          placeholder="Aadhaar Number"
           value={local.aadharNumber}
           onChange={handleChange}
           className="input"
