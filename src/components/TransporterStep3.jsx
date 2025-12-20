@@ -1,103 +1,134 @@
 // src/components/TransporterStep3.jsx
 import React, { useState } from "react";
-import { useTransporter } from "../context/TransporterContext";
+import { useSelector } from "react-redux";
+import {uploadTransporterDocuments} from "../api/transporterDocumentsApi";
 
 export default function TransporterStep3({ onNext, onBack }) {
-  const { data, updateStepData, update } = useTransporter();
-  const initial = data.step3 || { files: {} };
 
-  const [local, setLocal] = useState({
-    gstCertificate: initial.files?.gstCertificate || null,
-    panCard: initial.files?.panCard || null,
-    dl: initial.files?.dl || null,
-    aadhaarId: initial.files?.aadhaarId || null,
-    panId: initial.files?.panId || null,
-    licencePhoto: initial.files?.licencePhoto || null,
-    transporterPhoto: initial.files?.transporterPhoto || null,
-    liveHomePhoto: initial.files?.liveHomePhoto || null,
-    passbookPhoto: initial.files?.passbookPhoto || null,
-    driverSignature: initial.files?.driverSignature || null,
-    paymentProof: initial.files?.paymentProof || null,
+  // ✅ Fetch transporter_registration_id from Redux (same pattern as step 2)
+  const transporterRegistrationId = useSelector(
+    (state) => state.transporterRegistration.registrationId
+  );
+
+  const [formData, setFormData] = useState({
+    aadharOriginal: null,
+    panOriginal: null,
+    licenceOriginal: null,
+    gstCertificate: null,
+    liveHomeOfficePhoto: null,
+    stampLetterAgreement: null,
+    transporterAccountPassbook: null,
+    transporterAutoSignature: null,
+    transporterSelfieLiveLocation: null,
   });
 
-  const handleFile = (e) => {
-    const key = e.target.name;
-    const file = e.target.files[0] || null;
-    setLocal(prev => ({ ...prev, [key]: file }));
+  /* ================= HANDLE FILE CHANGE ================= */
+  const handleChange = (e) => {
+    const { name, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files[0],
+    }));
   };
 
-  const handleNext = () => {
-    // Save files to context (we'll send FormData at final submit)
-    updateStepData("step3", { files: local });
-    update({ step: 4 });
-    onNext?.();
+  /* ================= VALIDATION ================= */
+  const validate = () => {
+    if (!transporterRegistrationId) {
+      return "Transporter Registration ID missing.";
+    }
+
+    for (const key in formData) {
+      if (!formData[key]) {
+        return `${key} is required`;
+      }
+    }
+
+    return null;
   };
 
+  /* ================= SUBMIT ================= */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const error = validate();
+    if (error) {
+      alert(error);
+      return;
+    }
+
+    const fd = new FormData();
+
+    Object.keys(formData).forEach((key) => {
+      fd.append(key, formData[key]);
+    });
+
+    try {
+      await uploadTransporterDocuments(
+        transporterRegistrationId,
+        fd
+      );
+
+      alert("Transporter documents uploaded successfully!");
+      onNext?.();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload transporter documents.");
+    }
+  };
+
+  /* ================= UI ================= */
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-4">Step 3 — Upload Documents & Payment Proof</h3>
+    <div className="w-full p-4 md:p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
+        TRANSPORTER DOCUMENTS UPLOAD
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <label className="block">
-          GST Certificate / RC
-          <input type="file" name="gstCertificate" onChange={handleFile} className="mt-1" />
-        </label>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-        <label>
-          PAN Card (image/pdf)
-          <input type="file" name="panCard" onChange={handleFile} className="mt-1" />
-        </label>
+          <FileInput label="Aadhar Original Photo" name="aadharOriginal" onChange={handleChange} />
+          <FileInput label="PAN Original Photo" name="panOriginal" onChange={handleChange} />
+          <FileInput label="Licence Original Photo" name="licenceOriginal" onChange={handleChange} />
+          <FileInput label="GST Certificate" name="gstCertificate" onChange={handleChange} />
+          <FileInput label="Live Home / Office Photo" name="liveHomeOfficePhoto" onChange={handleChange} />
+          <FileInput label="Stamp Letter Agreement" name="stampLetterAgreement" onChange={handleChange} />
+          <FileInput label="Account Passbook" name="transporterAccountPassbook" onChange={handleChange} />
+          <FileInput label="Auto Signature" name="transporterAutoSignature" onChange={handleChange} />
+          <FileInput label="Live Location Selfie" name="transporterSelfieLiveLocation" onChange={handleChange} />
 
-        <label>
-          DL
-          <input type="file" name="dl" onChange={handleFile} className="mt-1" />
-        </label>
+        </div>
 
-        <label>
-          Aadhaar ID (original photo)
-          <input type="file" name="aadhaarId" onChange={handleFile} className="mt-1" />
-        </label>
+        <div className="flex justify-between mt-6">
+          <button
+            type="button"
+            onClick={onBack}
+            className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+          >
+            ← Back
+          </button>
 
-        <label>
-          PAN ID (original photo)
-          <input type="file" name="panId" onChange={handleFile} className="mt-1" />
-        </label>
-
-        <label>
-          Licence Photo
-          <input type="file" name="licencePhoto" onChange={handleFile} className="mt-1" />
-        </label>
-
-        <label>
-          Transporter Selfie (live)
-          <input type="file" name="transporterPhoto" onChange={handleFile} className="mt-1" />
-        </label>
-
-        <label>
-          Live Home / Office Photo
-          <input type="file" name="liveHomePhoto" onChange={handleFile} className="mt-1" />
-        </label>
-
-        <label>
-          Passbook Photo (Account Details)
-          <input type="file" name="passbookPhoto" onChange={handleFile} className="mt-1" />
-        </label>
-
-        <label>
-          Driver Auto Signature
-          <input type="file" name="driverSignature" onChange={handleFile} className="mt-1" />
-        </label>
-
-        <label>
-          Payment UPI Proof (₹1875)
-          <input type="file" name="paymentProof" onChange={handleFile} className="mt-1" />
-        </label>
-      </div>
-
-      <div className="mt-6 flex justify-between">
-        <button onClick={() => { update({ step: 2 }); onBack?.(); }} className="btn">← Back</button>
-        <button onClick={handleNext} className="btn-primary">Next →</button>
-      </div>
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+          >
+            Save & Next →
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
+
+/* ================= REUSABLE FILE INPUT ================= */
+const FileInput = ({ label, name, onChange }) => (
+  <label className="flex flex-col text-sm font-semibold text-gray-700">
+    {label} *
+    <input
+      type="file"
+      name={name}
+      required
+      onChange={onChange}
+      className="border rounded px-3 py-2 mt-1"
+    />
+  </label>
+);
