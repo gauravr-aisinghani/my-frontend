@@ -27,9 +27,11 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     payment30thDate: "",
   });
 
+  /* ================= HANDLE CHANGE ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Mobile number validation
     if (name === "mobileNumber") {
       if (!/^\d*$/.test(value) || value.length > 10) return;
     }
@@ -37,6 +39,7 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     setLocal((prev) => ({ ...prev, [name]: value }));
   };
 
+  /* ================= HANDLE NEXT ================= */
   const handleNext = async () => {
     const {
       totalGaadi,
@@ -60,13 +63,14 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     if (!paymentTerms.trim()) return alert("Payment Terms required.");
     if (!payment30thDate.trim()) return alert("Payment 30th Date required.");
 
+    // ---------------- YEAR VALIDATION ----------------
     const yearRegex = /^\d{4}$/;
     let fromYear = null;
     let toYear = null;
 
     if (gaadiModelFrom.trim()) {
       if (!yearRegex.test(gaadiModelFrom.trim())) {
-        return alert("Gaadi Model From must be 4-digit year.");
+        return alert("Gaadi Model From must be a 4-digit year.");
       }
       fromYear = Number(gaadiModelFrom.trim());
     } else {
@@ -75,27 +79,28 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
 
     if (gaadiModelTo.trim()) {
       if (!yearRegex.test(gaadiModelTo.trim())) {
-        return alert("Gaadi Model To must be 4-digit year.");
+        return alert("Gaadi Model To must be a 4-digit year.");
       }
       toYear = Number(gaadiModelTo.trim());
     }
 
     try {
+      // ---------------- PAYLOAD (snake_case) ----------------
       const payload = {
-        transporterRegistrationId,
-        totalGaadi: Number(totalGaadi),
+        transporter_registration_id: transporterRegistrationId,
+        total_gaadi: Number(totalGaadi),
         make: make.trim(),
-        gaadiModelFrom: fromYear,
-        gaadiModelTo: toYear || null,
-        gaadiNumber: gaadiNumber.trim(),
-        postOfVehicle,
-        gaadiRouteFrom: local.gaadiRouteFrom?.trim() || null,
-        gaadiRouteTo: local.gaadiRouteTo?.trim() || null,
-        otherKnownTransporterInWtl: local.otherKnownTransporterInWtl?.trim() || null,
-        mobileNumber: local.mobileNumber?.trim() || null,
-        hirePayment,
-        paymentTerms: paymentTerms?.trim(),
-        payment30thDate: payment30thDate?.trim(),
+        gaadi_model_from: fromYear,
+        gaadi_model_to: toYear || null,
+        gaadi_number: gaadiNumber.trim(),
+        post_of_vehicle: postOfVehicle,
+        gaadi_route_from: local.gaadiRouteFrom?.trim() || null,
+        gaadi_route_to: local.gaadiRouteTo?.trim() || null,
+        other_known_transporter_in_wtl: local.otherKnownTransporterInWtl?.trim() || null,
+        mobile_number: local.mobileNumber?.trim() || null,
+        hire_payment: hirePayment,
+        payment_terms: paymentTerms.trim(),
+        payment_30th_date: payment30thDate.trim(),
       };
 
       console.log("Payload sent to API:", payload);
@@ -110,11 +115,13 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     }
   };
 
+  /* ================= HANDLE BACK ================= */
   const handleBack = () => {
     dispatch(setTransporterStep(1));
     onBack?.();
   };
 
+  /* ================= UI ================= */
   return (
     <div>
       <h3 className="text-xl font-semibold mb-4">Step 2 — Vehicle Details</h3>
