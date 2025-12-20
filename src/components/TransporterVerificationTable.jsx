@@ -25,7 +25,7 @@ export default function TransporterVerificationTable() {
   async function loadPendingTransporters() {
     try {
       setLoading(true);
-      const list = await transporterVerificationApi.getPendingTransporters();
+      const list = await transporterVerification.getPendingTransporters();
       setTransporters(list || []);
     } catch (err) {
       console.error("Failed to fetch pending transporters", err);
@@ -37,7 +37,7 @@ export default function TransporterVerificationTable() {
 
   async function openTransporterDocuments(transporter) {
     try {
-      const docs = await transporterVerificationApi.getTransporterDocuments(
+      const docs = await transporterVerification.getTransporterDocuments(
         transporter.transporter_registration_id
       );
       setSelectedTransporter({ ...transporter, documents: docs || {} });
@@ -66,7 +66,7 @@ export default function TransporterVerificationTable() {
         remarks: remarks || "Approved",
         approvedBy: "ADMIN",
       };
-      await transporterVerificationApi.approveTransporter(payload);
+      await transporterVerification.approveTransporter(payload);
       alert("Transporter approved.");
       setTransporters(prev =>
         prev.filter(t => t.transporter_registration_id !== selectedTransporter.transporter_registration_id)
@@ -91,7 +91,7 @@ export default function TransporterVerificationTable() {
         transporterRegistrationId: selectedTransporter.transporter_registration_id,
         remarks: remarks || "Rejected",
       };
-      await transporterVerificationApi.rejectTransporter(payload);
+      await transporterVerification.rejectTransporter(payload);
       alert("Transporter rejected.");
       setTransporters(prev =>
         prev.filter(t => t.transporter_registration_id !== selectedTransporter.transporter_registration_id)
