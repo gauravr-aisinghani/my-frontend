@@ -32,6 +32,7 @@ import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
 import GlobalLoader from "./components/GlobalLoader";
 import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
 import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
+import TransporterVerificationPage from "./pages/TransporterVerificationPage.jsx";
 
 function App() {
   return (
@@ -78,6 +79,8 @@ function App() {
             <Route path="curd" element={<CrudUI />} />
             <Route path="daily-visitor-table" element={<DailyVisitorTable />} />
             <Route path="driver-verification" element={<DriverVerificationPage />} />
+                        <Route path="transporter-verification" element={<TransporterVerificationPage />} />
+
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
             <Route path="payments" element={<Payments />} />
             <Route path="payment-confirmation" element={<PaymentConfirmation />} />

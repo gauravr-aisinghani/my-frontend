@@ -35,7 +35,8 @@ const pageTitles = {
   "reports/transporters": "Transporter Reports",
   "reports/payments": "Payments Reports",
   "visitor-transporters-list":"Visitor Transporters List",
-  "selected-transporters-list":"Selected Transporters List"
+  "selected-transporters-list":"Selected Transporters List",
+  "transporter-verification":"Transporter Verification "
 };
 
 const sidebarSections = [
@@ -61,6 +62,7 @@ const sidebarSections = [
     items: [
       { label: "Visitors Transporter", path: "transport-visitor", icon: <Truck className="w-5 h-5" /> },
       { label: "Visitors Transporters List", path: "visitor-transporters-list", icon: <Truck className="w-5 h-5" /> },
+      { label: "Pending Transporters Verification", path: "transporter-verification", icon: <CheckSquare className="w-5 h-5" /> },
 
       { label: "Final Transporter", path: "selected-transporters-list", icon: <CheckSquare className="w-5 h-5" /> },
       { label: "Transporter Signup", path: "transporter-registration", icon: <FilePlus2 className="w-5 h-5" /> },
