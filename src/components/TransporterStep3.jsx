@@ -1,11 +1,10 @@
-// src/components/TransporterStep3.jsx
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import {uploadTransporterDocuments} from "../api/transporterDocumentsApi";
+import { uploadTransporterDocuments } from "../api/transporterDocumentsApi";
 
 export default function TransporterStep3({ onNext, onBack }) {
 
-  // ✅ Fetch transporter_registration_id from Redux (same pattern as step 2)
+  // ✅ transporter_registration_id from Redux
   const transporterRegistrationId = useSelector(
     (state) => state.transporterRegistration.registrationId
   );
@@ -21,6 +20,8 @@ export default function TransporterStep3({ onNext, onBack }) {
     transporterAutoSignature: null,
     transporterSelfieLiveLocation: null,
   });
+
+  const [loading, setLoading] = useState(false);
 
   /* ================= HANDLE FILE CHANGE ================= */
   const handleChange = (e) => {
@@ -48,7 +49,8 @@ export default function TransporterStep3({ onNext, onBack }) {
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
+    e?.stopPropagation();
 
     const error = validate();
     if (error) {
@@ -57,22 +59,26 @@ export default function TransporterStep3({ onNext, onBack }) {
     }
 
     const fd = new FormData();
-
     Object.keys(formData).forEach((key) => {
       fd.append(key, formData[key]);
     });
 
     try {
+      setLoading(true);
+      console.log("Uploading transporter documents...");
+
       await uploadTransporterDocuments(
         transporterRegistrationId,
         fd
       );
 
       alert("Transporter documents uploaded successfully!");
-      onNext?.();
+      onNext(); // ✅ move to step 4 ONLY after success
     } catch (err) {
-      console.error(err);
+      console.error("Upload failed:", err);
       alert("Failed to upload transporter documents.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,7 +89,8 @@ export default function TransporterStep3({ onNext, onBack }) {
         TRANSPORTER DOCUMENTS UPLOAD
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* ❌ NO onSubmit here */}
+      <form className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
           <FileInput label="Aadhar Original Photo" name="aadharOriginal" onChange={handleChange} />
@@ -103,15 +110,22 @@ export default function TransporterStep3({ onNext, onBack }) {
             type="button"
             onClick={onBack}
             className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+            disabled={loading}
           >
             ← Back
           </button>
 
           <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            className={`px-4 py-2 rounded-md text-white ${
+              loading
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600"
+            }`}
           >
-            Save & Next →
+            {loading ? "Uploading..." : "Save & Next →"}
           </button>
         </div>
       </form>
