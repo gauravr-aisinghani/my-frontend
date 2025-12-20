@@ -10,3 +10,15 @@ export const saveSelectedTransporter = async (data) => {
   });
   return res.data;
 };
+
+export const getAllSelectedTransporters = async () => {
+  try {
+    const res = await axios.get(BASE_URL, {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching selected transporters", err);
+    throw err;
+  }
+};
