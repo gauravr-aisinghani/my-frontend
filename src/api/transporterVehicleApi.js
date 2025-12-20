@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://my-backend-1-qxc9.onrender.com/api/transporter-vehicles",
+  baseURL: "https://my-backend-1-qxc9.onrender.com/api/transporter-vehicle",
   withCredentials: true,
 });
 
