@@ -1,145 +1,208 @@
 // src/components/TransporterStep1.jsx
 import React, { useState } from "react";
-import { useTransporter } from "../context/TransporterContext";
+import { useDispatch } from "react-redux";
+import {
+  updateStep1,
+  setRegistrationId,
+  setStep,
+} from "../store/driverRegistrationSlice";
+import { saveTransporterDetails } from "../api/transporterDetailsApi";
 
 export default function TransporterStep1({ onNext }) {
-  const { data, updateStepData, update } = useTransporter();
-  const initial = data.step1 || {};
+  const dispatch = useDispatch();
+
   const [local, setLocal] = useState({
-    transportCompanyName: initial.transportCompanyName || "",
-    transportGstNumber: initial.transportGstNumber || "",
-    address: initial.address || "",
-    ownerName: initial.ownerName || "",
-    mobileNumber: initial.mobileNumber || "",
-    contactManagerName: initial.contactManagerName || "",
-    contactManagerMobile: initial.contactManagerMobile || "",
-    email: initial.email || "",
+    transportCompanyName: "",
+    gstNumber: "",
+    address: "",
+    ownerName: "",
+    ownerMobileNumber: "",
+    contactManagerName: "",
+    contactManagerMobileNumber: "",
+    emailId: "",
     mobileOtp: "",
   });
 
   const [otpSent, setOtpSent] = useState(false);
   const [mockOtp, setMockOtp] = useState(null);
-  const [otpVerified, setOtpVerified] = useState(data.verification?.otpValidated || false);
+  const [otpVerified, setOtpVerified] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // limit mobile fields to 10 digits
-    if (["mobileNumber", "contactManagerMobile"].includes(name)) {
+
+    if (
+      ["ownerMobileNumber", "contactManagerMobileNumber"].includes(name)
+    ) {
       if (!/^\d*$/.test(value) || value.length > 10) return;
     }
-    setLocal(prev => ({ ...prev, [name]: value }));
+
+    setLocal((prev) => ({ ...prev, [name]: value }));
   };
 
   const sendOtp = () => {
-    if (!/^\d{10}$/.test(local.mobileNumber)) {
-      alert("Enter a valid 10-digit mobile number to send OTP.");
+    if (!/^\d{10}$/.test(local.ownerMobileNumber)) {
+      alert("Enter valid 10-digit mobile number");
       return;
     }
+
     const otp = String(100000 + Math.floor(Math.random() * 900000));
     setMockOtp(otp);
     setOtpSent(true);
-    // In mock we show it via alert (in production this is sent by backend/provider).
     alert(`Mock OTP sent: ${otp}`);
   };
 
   const verifyOtp = () => {
     if (local.mobileOtp === mockOtp) {
       setOtpVerified(true);
-      update({ verification: { ...(data.verification || {}), otpValidated: true } });
-      alert("OTP verified (mock).");
+      alert("OTP verified");
     } else {
-      alert("Invalid OTP (mock).");
+      alert("Invalid OTP");
     }
   };
 
-  const handleNext = () => {
-    // basic validation
-    if (!local.transportCompanyName || !local.ownerName || !/^\d{10}$/.test(local.mobileNumber)) {
-      alert("Please fill Company Name, Owner Name and valid Mobile Number.");
+  const handleNext = async () => {
+    if (
+      !local.transportCompanyName ||
+      !local.ownerName ||
+      !/^\d{10}$/.test(local.ownerMobileNumber)
+    ) {
+      alert("Fill required fields");
       return;
     }
-    // save to context
-    updateStepData("step1", local);
-    update({ step: 2 });
-    onNext?.();
+
+    try {
+      // ✅ BACKEND PAYLOAD — SNAKE_CASE
+      const payload = {
+        transport_company_name: local.transportCompanyName,
+        gst_number: local.gstNumber,
+        address: local.address,
+        owner_name: local.ownerName,
+        owner_mobile_number: local.ownerMobileNumber,
+        contact_manager_name: local.contactManagerName,
+        contact_manager_mobile_number:
+          local.contactManagerMobileNumber,
+        email_id: local.emailId,
+      };
+
+      const res = await saveTransporterDetails(payload);
+
+      // 🔑 SAVE transporter_registration_id
+      dispatch(setRegistrationId(res.transporter_registration_id));
+
+      // store frontend data
+      dispatch(updateStep1(local));
+
+      dispatch(setStep(2));
+      onNext?.();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to save transporter details");
+    }
   };
 
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-4">Step 1 — Basic Transporter Info</h3>
+      <h3 className="text-xl font-semibold mb-4">
+        Step 1 — Transporter Details
+      </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm">Transport Company Name</label>
-          <input name="transportCompanyName" value={local.transportCompanyName} onChange={handleChange} className="input" />
+        <input
+          name="transportCompanyName"
+          placeholder="Transport Company Name"
+          value={local.transportCompanyName}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <input
+          name="gstNumber"
+          placeholder="GST Number"
+          value={local.gstNumber}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <input
+          name="address"
+          placeholder="Address"
+          value={local.address}
+          onChange={handleChange}
+          className="input md:col-span-2"
+        />
+
+        <input
+          name="ownerName"
+          placeholder="Owner Name"
+          value={local.ownerName}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <div className="flex gap-2">
+          <input
+            name="ownerMobileNumber"
+            placeholder="Owner Mobile Number"
+            value={local.ownerMobileNumber}
+            onChange={handleChange}
+            className="input"
+          />
+          <button type="button" onClick={sendOtp} className="btn">
+            Send OTP
+          </button>
         </div>
 
-        <div>
-          <label className="block text-sm">Total Gaadi</label>
-          <input name="totalGaadi" value={local.totalGaadi || ""} onChange={handleChange} className="input" />
-        </div>
+        <input
+          name="contactManagerName"
+          placeholder="Contact Manager Name"
+          value={local.contactManagerName}
+          onChange={handleChange}
+          className="input"
+        />
 
-        <div>
-          <label className="block text-sm">Transport GST Number</label>
-          <input name="transportGstNumber" value={local.transportGstNumber} onChange={handleChange} className="input" />
-        </div>
+        <input
+          name="contactManagerMobileNumber"
+          placeholder="Contact Manager Mobile"
+          value={local.contactManagerMobileNumber}
+          onChange={handleChange}
+          className="input"
+        />
 
-        <div>
-          <label className="block text-sm">Make</label>
-          <input name="make" value={local.make || ""} onChange={handleChange} className="input" />
-        </div>
+        <input
+          name="emailId"
+          placeholder="Email ID"
+          value={local.emailId}
+          onChange={handleChange}
+          className="input"
+        />
 
-        <div className="md:col-span-2">
-          <label className="block text-sm">Address</label>
-          <input name="address" value={local.address} onChange={handleChange} className="input" />
-        </div>
-
-        <div>
-          <label className="block text-sm">Owner Name</label>
-          <input name="ownerName" value={local.ownerName} onChange={handleChange} className="input" />
-        </div>
-
-        <div>
-          <label className="block text-sm">Gaadi Number (example)</label>
-          <input name="gaadiNumber" value={local.gaadiNumber || ""} onChange={handleChange} className="input" />
-        </div>
-
-        <div>
-          <label className="block text-sm">Mobile Number</label>
-          <div className="flex gap-2">
-            <input name="mobileNumber" value={local.mobileNumber} onChange={handleChange} className="input" />
-            <button type="button" onClick={sendOtp} className="btn">Send OTP</button>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm">Contact Manager Name</label>
-          <input name="contactManagerName" value={local.contactManagerName} onChange={handleChange} className="input" />
-        </div>
-
-        <div>
-          <label className="block text-sm">Contact Manager Mobile</label>
-          <input name="contactManagerMobile" value={local.contactManagerMobile} onChange={handleChange} className="input" />
-        </div>
-
-        <div>
-          <label className="block text-sm">Email ID</label>
-          <input name="email" value={local.email} onChange={handleChange} className="input" />
-        </div>
-
-        <div>
-          <label className="block text-sm">Mobile OTP (mock)</label>
-          <div className="flex gap-2">
-            <input name="mobileOtp" value={local.mobileOtp} onChange={handleChange} className="input" />
-            <button type="button" onClick={verifyOtp} className="btn" disabled={!otpSent}>Verify</button>
-          </div>
-          {otpVerified && <p className="text-sm text-green-600 mt-1">OTP verified ✅</p>}
+        <div className="flex gap-2">
+          <input
+            name="mobileOtp"
+            placeholder="OTP"
+            value={local.mobileOtp}
+            onChange={handleChange}
+            className="input"
+          />
+          <button
+            type="button"
+            onClick={verifyOtp}
+            disabled={!otpSent}
+            className="btn"
+          >
+            Verify
+          </button>
         </div>
       </div>
 
-      <div className="mt-6 flex justify-between">
-        <div />
-        <button onClick={handleNext} className="btn-primary">Next →</button>
+      {otpVerified && (
+        <p className="text-green-600 mt-2">OTP Verified ✅</p>
+      )}
+
+      <div className="mt-6 text-right">
+        <button onClick={handleNext} className="btn-primary">
+          Next →
+        </button>
       </div>
     </div>
   );
