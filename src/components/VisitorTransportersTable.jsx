@@ -1,117 +1,177 @@
 import React, { useEffect, useState } from "react";
-import { getAllTransportVisitors } from "../api/transportVisitorApi";
+import {
+  getAllTransportVisitors,
+  deleteTransportVisitor,
+} from "../api/transportVisitorApi";
+import { saveSelectedTransporter } from "../api/selectedTransporterApi";
 
 const VisitorTransportersTable = () => {
-  // Local table loader ONLY
   const [transporters, setTransporters] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Map backend snake_case → frontend camelCase
+  const [showModal, setShowModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  // ONLY missing fields for final table
+  const [finalForm, setFinalForm] = useState({
+    authorisedName: "",
+    authorisedMobileNo: "",
+    qtyFinalDriver: 1,
+    needTiming: "",
+    otherBenefit: "",
+    notes: "",
+    finalApplication: "",
+    finalDate: "",
+  });
+
   const mapTransporter = (t) => ({
     visitorTransporterId: t.visitor_transporter_id,
     companyName: t.company_name,
     ownerName: t.owner_name,
     ownerMobileNo: t.owner_mobile_no,
-    needDriver: t.need_driver,
     gaadiType: t.gaadi_type,
     loadingPlace: t.loading_place,
     unloadPlace: t.unload_place,
     monthlySalary: t.monthly_salary,
-    status: t.status,
     date: t.created_at?.split("T")[0],
+    status: t.status,
   });
 
+  const loadData = async () => {
+    setLoading(true);
+    const data = await getAllTransportVisitors();
+    setTransporters((data || []).map(mapTransporter));
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchTransporters = async () => {
-      try {
-        setLoading(true);
-
-        const data = await getAllTransportVisitors();
-        console.log("Raw transporter data:", data);
-
-        const mapped = (data || []).map(mapTransporter);
-        setTransporters(mapped);
-      } catch (err) {
-        console.error("Error fetching transporters:", err);
-        alert("Failed to load transporters");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransporters();
+    loadData();
   }, []);
 
+  const openFinalModal = (row) => {
+    setSelectedRow(row);
+    setShowModal(true);
+  };
+
+  const handleFinalSubmit = async () => {
+    const payload = {
+      visitorTransporterId: selectedRow.visitorTransporterId,
+      companyName: selectedRow.companyName,
+      ownerName: selectedRow.ownerName,
+      ownerMobileNo: selectedRow.ownerMobileNo,
+      gaadiType: selectedRow.gaadiType,
+      loadingPlace: selectedRow.loadingPlace,
+      unloadPlace: selectedRow.unloadPlace,
+      monthlySalary: selectedRow.monthlySalary,
+
+      authorisedName: finalForm.authorisedName,
+      authorisedMobileNo: finalForm.authorisedMobileNo,
+      qtyFinalDriver: finalForm.qtyFinalDriver,
+      needTiming: finalForm.needTiming,
+      otherBenefit: finalForm.otherBenefit,
+      notes: finalForm.notes,
+      finalApplication: finalForm.finalApplication,
+      finalDate: finalForm.finalDate,
+      approvalStatus: "PENDING",
+    };
+
+    await saveSelectedTransporter(payload);
+    await deleteTransportVisitor(selectedRow.visitorTransporterId);
+
+    setShowModal(false);
+    loadData();
+  };
+
   return (
-    <div className="bg-white p-8 rounded-2xl shadow mt-10 border border-gray-200">
+    <div className="bg-white p-8 rounded-xl shadow">
       <h3 className="text-2xl font-semibold text-blue-700 mb-5">
         Transport Company Visitors
       </h3>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead className="bg-blue-50 text-blue-700 font-semibold">
-            <tr>
-              <th className="p-3 border">Date</th>
-              <th className="p-3 border">Company</th>
-              <th className="p-3 border">Owner</th>
-              <th className="p-3 border">Mobile</th>
-              <th className="p-3 border">Need Driver</th>
-              <th className="p-3 border">Gaadi</th>
-              <th className="p-3 border">Route</th>
-              <th className="p-3 border">Salary</th>
-              <th className="p-3 border">Status</th>
-            </tr>
-          </thead>
+      <table className="w-full border">
+        <thead className="bg-blue-50">
+          <tr>
+            <th className="p-2 border">Date</th>
+            <th className="p-2 border">Company</th>
+            <th className="p-2 border">Owner</th>
+            <th className="p-2 border">Mobile</th>
+            <th className="p-2 border">Gaadi</th>
+            <th className="p-2 border">Route</th>
+            <th className="p-2 border">Salary</th>
+            <th className="p-2 border">Action</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="9" className="text-center p-5">
-                  Loading transporters...
+        <tbody>
+          {loading ? (
+            <tr>
+              <td colSpan="8" className="p-5 text-center">
+                Loading...
+              </td>
+            </tr>
+          ) : (
+            transporters.map((t) => (
+              <tr key={t.visitorTransporterId}>
+                <td className="p-2 border">{t.date}</td>
+                <td className="p-2 border">{t.companyName}</td>
+                <td className="p-2 border">{t.ownerName}</td>
+                <td className="p-2 border">{t.ownerMobileNo}</td>
+                <td className="p-2 border">{t.gaadiType}</td>
+                <td className="p-2 border">
+                  {t.loadingPlace} → {t.unloadPlace}
+                </td>
+                <td className="p-2 border">₹{t.monthlySalary}</td>
+                <td className="p-2 border text-center">
+                  <button
+                    onClick={() => openFinalModal(t)}
+                    className="bg-green-600 text-white px-3 py-1 rounded"
+                  >
+                    Add to Final
+                  </button>
                 </td>
               </tr>
-            ) : transporters.length === 0 ? (
-              <tr>
-                <td colSpan="9" className="text-center text-gray-500 p-5">
-                  No transporter visitors found.
-                </td>
-              </tr>
-            ) : (
-              transporters.map((t) => (
-                <tr
-                  key={t.visitorTransporterId}
-                  className="hover:bg-blue-50 transition-all"
-                >
-                  <td className="p-3 border">{t.date}</td>
-                  <td className="p-3 border font-medium">{t.companyName}</td>
-                  <td className="p-3 border">{t.ownerName}</td>
-                  <td className="p-3 border">{t.ownerMobileNo}</td>
-                  <td className="p-3 border text-center">{t.needDriver}</td>
-                  <td className="p-3 border">{t.gaadiType}</td>
-                  <td className="p-3 border">
-                    {t.loadingPlace} → {t.unloadPlace}
-                  </td>
-                  <td className="p-3 border">
-                    {t.monthlySalary ? `₹${t.monthlySalary}` : "-"}
-                  </td>
-                  <td className="p-3 border">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        t.status === "ACTIVE"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {t.status}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-xl w-[500px]">
+            <h4 className="text-xl font-semibold mb-4">
+              Final Transporter Details
+            </h4>
+
+            {Object.keys(finalForm).map((field) => (
+              <input
+                key={field}
+                placeholder={field}
+                className="w-full border p-2 mb-2"
+                value={finalForm[field]}
+                onChange={(e) =>
+                  setFinalForm({ ...finalForm, [field]: e.target.value })
+                }
+              />
+            ))}
+
+            <div className="flex justify-end gap-2 mt-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-1 border rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFinalSubmit}
+                className="px-4 py-1 bg-blue-600 text-white rounded"
+              >
+                Save Final
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
