@@ -27,13 +27,14 @@ export default function TransporterStep1({ onNext }) {
   });
 
   const [otpSent, setOtpSent] = useState(false);
-  const [mockOtp, setMockOtp] = useState(null);
+  const [mockOtp, setMockOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
 
+  /* ===================== HANDLE CHANGE ===================== */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // mobile number validation
+    // Mobile number validation
     if (
       ["ownerMobileNumber", "contactManagerMobileNumber"].includes(name)
     ) {
@@ -45,7 +46,7 @@ export default function TransporterStep1({ onNext }) {
       if (!/^\d*$/.test(value) || value.length > 12) return;
     }
 
-    // PAN validation (uppercase only)
+    // PAN → force uppercase
     if (name === "panCardNumber") {
       setLocal((prev) => ({
         ...prev,
@@ -57,6 +58,7 @@ export default function TransporterStep1({ onNext }) {
     setLocal((prev) => ({ ...prev, [name]: value }));
   };
 
+  /* ===================== OTP MOCK ===================== */
   const sendOtp = () => {
     if (!/^\d{10}$/.test(local.ownerMobileNumber)) {
       alert("Enter valid 10-digit mobile number");
@@ -78,40 +80,73 @@ export default function TransporterStep1({ onNext }) {
     }
   };
 
+  /* ===================== SUBMIT ===================== */
   const handleNext = async () => {
-    if (
-      !local.transportCompanyName ||
-      !local.ownerName ||
-      !/^\d{10}$/.test(local.ownerMobileNumber) ||
-      !/^\d{12}$/.test(local.aadharNumber) ||
-      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(local.panCardNumber)
-    ) {
-      alert("Please fill all required fields correctly");
+    // 🔥 NORMALIZE VALUES (THIS FIXES YOUR ISSUE)
+    const normalizedAadhar = local.aadharNumber.replace(/\s/g, "");
+    const normalizedPan = local.panCardNumber.toUpperCase().trim();
+
+    // 🔍 DEBUG (keep during testing)
+    console.log("VALIDATION DATA", {
+      transportCompanyName: local.transportCompanyName,
+      ownerName: local.ownerName,
+      ownerMobileNumber: local.ownerMobileNumber,
+      normalizedAadhar,
+      normalizedPan,
+      dlNumber: local.dlNumber,
+    });
+
+    // ✅ STEP-BY-STEP VALIDATION
+    if (!local.transportCompanyName.trim()) {
+      alert("Transport company name required");
+      return;
+    }
+
+    if (!local.ownerName.trim()) {
+      alert("Owner name required");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(local.ownerMobileNumber)) {
+      alert("Valid owner mobile number required");
+      return;
+    }
+
+    if (!/^\d{12}$/.test(normalizedAadhar)) {
+      alert("Aadhaar must be exactly 12 digits");
+      return;
+    }
+
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(normalizedPan)) {
+      alert("Invalid PAN format (ABCDE1234F)");
+      return;
+    }
+
+    if (!local.dlNumber.trim()) {
+      alert("Driving Licence number required");
       return;
     }
 
     try {
       // ✅ BACKEND PAYLOAD (snake_case)
       const payload = {
-        transport_company_name: local.transportCompanyName,
-        gst_number: local.gstNumber,
-        address: local.address,
-        owner_name: local.ownerName,
+        transport_company_name: local.transportCompanyName.trim(),
+        gst_number: local.gstNumber.trim(),
+        address: local.address.trim(),
+        owner_name: local.ownerName.trim(),
         owner_mobile_number: local.ownerMobileNumber,
-        contact_manager_name: local.contactManagerName,
+        contact_manager_name: local.contactManagerName.trim(),
         contact_manager_mobile_number:
           local.contactManagerMobileNumber,
-        email_id: local.emailId,
-        aadhar_number: local.aadharNumber,
-        pan_card_number: local.panCardNumber,
-        dl_number: local.dlNumber,
+        email_id: local.emailId.trim(),
+        aadhar_number: normalizedAadhar,
+        pan_card_number: normalizedPan,
+        dl_number: local.dlNumber.trim(),
       };
 
       const res = await saveTransporterDetails(payload);
 
-      // 🔑 SAVE registration id
       dispatch(setRegistrationId(res.transporter_registration_id));
-
       dispatch(updateStep1(local));
       dispatch(setStep(2));
       onNext?.();
@@ -121,6 +156,7 @@ export default function TransporterStep1({ onNext }) {
     }
   };
 
+  /* ===================== UI ===================== */
   return (
     <div>
       <h3 className="text-xl font-semibold mb-4">
