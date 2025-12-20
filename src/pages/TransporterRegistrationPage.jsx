@@ -2,7 +2,7 @@
 import React from "react";
 import { TransporterProvider, useTransporter } from "../context/TransporterContext";
 import TransporterStep1 from "../components/TransporterStep1";
-import TransporterStep2 from "../components/TransporterStep2";
+import TransporterStep2Vehicle from "../components/TransporterStep2Vehicle";
 import TransporterStep3 from "../components/TransporterStep3";
 import TransporterStep4 from "../components/TransporterStep4";
 import TransporterSummary from "../components/TransporterSummary";
@@ -69,7 +69,7 @@ const Inner = () => {
                 exit="exit"
                 transition={{ duration: 0.4 }}
               >
-                <TransporterStep2 onNext={() => goTo(3)} onBack={() => goTo(1)} />
+                <TransporterStep2Vehicle onNext={() => goTo(3)} onBack={() => goTo(1)} />
               </motion.div>
             )}
 
