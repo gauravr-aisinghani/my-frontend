@@ -39,6 +39,11 @@ export default function TransporterStep2Vehicle({ onNext }) {
     setLocal((prev) => ({ ...prev, [name]: value }));
   };
 
+  /* ===================== BACK ===================== */
+  const handleBack = () => {
+    dispatch(setTransporterStep(1));
+  };
+
   /* ===================== SUBMIT ===================== */
   const handleNext = async () => {
     const {
@@ -49,17 +54,6 @@ export default function TransporterStep2Vehicle({ onNext }) {
       hirePayment,
     } = local;
 
-    // 🔍 DEBUG (REMOVE LATER)
-    console.log("STEP-2 VALIDATION", {
-      transporterRegistrationId,
-      totalGaadi,
-      make,
-      gaadiNumber,
-      postOfVehicle,
-      hirePayment,
-    });
-
-    // ✅ VALIDATIONS (NO FALSE POSITIVES)
     if (!transporterRegistrationId) {
       alert("Transporter registration missing. Please complete Step 1.");
       return;
@@ -103,13 +97,13 @@ export default function TransporterStep2Vehicle({ onNext }) {
           ? Number(local.gaadiModelTo)
           : null,
         gaadi_number: gaadiNumber.trim(),
-        post_of_vehicle: postOfVehicle, // ENUM STRING
+        post_of_vehicle: postOfVehicle,
         gaadi_route_from: local.gaadiRouteFrom?.trim() || null,
         gaadi_route_to: local.gaadiRouteTo?.trim() || null,
         other_known_transporter_in_wtl:
           local.otherKnownTransporterInWtl?.trim() || null,
         mobile_number: local.mobileNumber || null,
-        hire_payment: hirePayment, // ENUM STRING
+        hire_payment: hirePayment,
         payment_terms: local.paymentTerms?.trim() || null,
         payment_30th_date: local.payment30thDate?.trim() || null,
       };
@@ -132,52 +126,13 @@ export default function TransporterStep2Vehicle({ onNext }) {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          name="totalGaadi"
-          placeholder="Total Gaadi"
-          value={local.totalGaadi}
-          onChange={handleChange}
-          className="input"
-        />
+        <input name="totalGaadi" placeholder="Total Gaadi" value={local.totalGaadi} onChange={handleChange} className="input" />
+        <input name="make" placeholder="Make" value={local.make} onChange={handleChange} className="input" />
+        <input name="gaadiModelFrom" placeholder="Gaadi Model From (YYYY)" value={local.gaadiModelFrom} onChange={handleChange} className="input" />
+        <input name="gaadiModelTo" placeholder="Gaadi Model To (YYYY)" value={local.gaadiModelTo} onChange={handleChange} className="input" />
+        <input name="gaadiNumber" placeholder="Gaadi Number" value={local.gaadiNumber} onChange={handleChange} className="input" />
 
-        <input
-          name="make"
-          placeholder="Make"
-          value={local.make}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <input
-          name="gaadiModelFrom"
-          placeholder="Gaadi Model From (YYYY)"
-          value={local.gaadiModelFrom}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <input
-          name="gaadiModelTo"
-          placeholder="Gaadi Model To (YYYY)"
-          value={local.gaadiModelTo}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <input
-          name="gaadiNumber"
-          placeholder="Gaadi Number"
-          value={local.gaadiNumber}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <select
-          name="postOfVehicle"
-          value={local.postOfVehicle}
-          onChange={handleChange}
-          className="input"
-        >
+        <select name="postOfVehicle" value={local.postOfVehicle} onChange={handleChange} className="input">
           <option value="">Select Vehicle Type</option>
           <option value="HCV">HCV</option>
           <option value="LCV">LCV</option>
@@ -186,69 +141,27 @@ export default function TransporterStep2Vehicle({ onNext }) {
           <option value="BIKE">BIKE</option>
         </select>
 
-        <input
-          name="gaadiRouteFrom"
-          placeholder="Route From"
-          value={local.gaadiRouteFrom}
-          onChange={handleChange}
-          className="input"
-        />
+        <input name="gaadiRouteFrom" placeholder="Route From" value={local.gaadiRouteFrom} onChange={handleChange} className="input" />
+        <input name="gaadiRouteTo" placeholder="Route To" value={local.gaadiRouteTo} onChange={handleChange} className="input" />
+        <input name="otherKnownTransporterInWtl" placeholder="Other Known Transporter in WTL" value={local.otherKnownTransporterInWtl} onChange={handleChange} className="input" />
+        <input name="mobileNumber" placeholder="Mobile Number" value={local.mobileNumber} onChange={handleChange} className="input" />
 
-        <input
-          name="gaadiRouteTo"
-          placeholder="Route To"
-          value={local.gaadiRouteTo}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <input
-          name="otherKnownTransporterInWtl"
-          placeholder="Other Known Transporter in WTL"
-          value={local.otherKnownTransporterInWtl}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <input
-          name="mobileNumber"
-          placeholder="Mobile Number"
-          value={local.mobileNumber}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <select
-          name="hirePayment"
-          value={local.hirePayment}
-          onChange={handleChange}
-          className="input"
-        >
+        <select name="hirePayment" value={local.hirePayment} onChange={handleChange} className="input">
           <option value="">Hire Payment</option>
-          <option value="TRANSPORT_ACCOUNT">
-            Transport Account
-          </option>
+          <option value="TRANSPORT_ACCOUNT">Transport Account</option>
           <option value="DRIVER">Driver</option>
         </select>
 
-        <input
-          name="paymentTerms"
-          placeholder="Payment Terms"
-          value={local.paymentTerms}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <input
-          name="payment30thDate"
-          placeholder="Payment 30th Date"
-          value={local.payment30thDate}
-          onChange={handleChange}
-          className="input"
-        />
+        <input name="paymentTerms" placeholder="Payment Terms" value={local.paymentTerms} onChange={handleChange} className="input" />
+        <input name="payment30thDate" placeholder="Payment 30th Date" value={local.payment30thDate} onChange={handleChange} className="input" />
       </div>
 
-      <div className="mt-6 text-right">
+      {/* 🔁 BACK + NEXT */}
+      <div className="mt-6 flex justify-between">
+        <button onClick={handleBack} className="btn-secondary">
+          ← Back
+        </button>
+
         <button onClick={handleNext} className="btn-primary">
           Next →
         </button>
