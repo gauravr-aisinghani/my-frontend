@@ -1,6 +1,6 @@
 // src/components/TransporterVerificationTable.jsx
 import React, { useEffect, useState } from "react";
-import transporterVerificationApi from "../api/transporterVerificationApi";
+import transporterVerification from "../api/transporterVerification";
 
 const DOC_LABELS = {
   company_logo: "Company Logo",
