@@ -1,3 +1,4 @@
+// src/components/TransporterStep2Vehicle.jsx
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setTransporterStep } from "../store/transporterRegistrationSlice";
@@ -6,6 +7,7 @@ import { saveTransporterVehicle } from "../api/transporterVehicleApi";
 export default function TransporterStep2Vehicle({ onNext, onBack }) {
   const dispatch = useDispatch();
 
+  // Transporter registration id from Redux store
   const transporterRegistrationId = useSelector(
     (state) => state.transporterRegistration.registrationId
   );
@@ -26,14 +28,19 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     payment30thDate: "",
   });
 
+  /* ===================== HANDLE CHANGE ===================== */
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Mobile validation
     if (name === "mobileNumber") {
       if (!/^\d*$/.test(value) || value.length > 10) return;
     }
+
     setLocal((prev) => ({ ...prev, [name]: value }));
   };
 
+  /* ===================== HANDLE NEXT ===================== */
   const handleNext = async () => {
     const {
       totalGaadi,
@@ -45,6 +52,7 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
       gaadiModelTo,
     } = local;
 
+    // ✅ Basic validations
     if (!transporterRegistrationId) {
       alert("Transporter registration missing. Please complete Step 1.");
       return;
@@ -70,25 +78,47 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
       return;
     }
 
+    // ✅ Year validation for MySQL YEAR type
+    const yearRegex = /^\d{4}$/;
+    let fromYear = null;
+    let toYear = null;
+
+    if (gaadiModelFrom.trim()) {
+      if (!yearRegex.test(gaadiModelFrom.trim())) {
+        alert("Gaadi Model From must be a 4-digit year (YYYY)");
+        return;
+      }
+      fromYear = gaadiModelFrom.trim();
+    }
+
+    if (gaadiModelTo.trim()) {
+      if (!yearRegex.test(gaadiModelTo.trim())) {
+        alert("Gaadi Model To must be a 4-digit year (YYYY)");
+        return;
+      }
+      toYear = gaadiModelTo.trim();
+    }
+
     try {
       const payload = {
         transporter_registration_id: transporterRegistrationId,
         total_gaadi: Number(totalGaadi),
         make: make.trim(),
-        gaadi_model_from: gaadiModelFrom.trim() ? Number(gaadiModelFrom.trim()) : null,
-        gaadi_model_to: gaadiModelTo.trim() ? Number(gaadiModelTo.trim()) : null,
+        gaadi_model_from: fromYear,
+        gaadi_model_to: toYear,
         gaadi_number: gaadiNumber.trim(),
         post_of_vehicle: postOfVehicle,
         gaadi_route_from: local.gaadiRouteFrom?.trim() || null,
         gaadi_route_to: local.gaadiRouteTo?.trim() || null,
-        other_known_transporter_in_wtl: local.otherKnownTransporterInWtl?.trim() || null,
+        other_known_transporter_in_wtl:
+          local.otherKnownTransporterInWtl?.trim() || null,
         mobile_number: local.mobileNumber?.trim() || null,
         hire_payment: hirePayment,
         payment_terms: local.paymentTerms?.trim() || null,
         payment_30th_date: local.payment30thDate?.trim() || null,
       };
 
-      console.log("Payload being sent:", payload); // ✅ debug
+      console.log("Payload sent to API:", payload);
 
       await saveTransporterVehicle(payload);
 
@@ -100,11 +130,13 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     }
   };
 
+  /* ===================== HANDLE BACK ===================== */
   const handleBack = () => {
     dispatch(setTransporterStep(1));
     onBack?.();
   };
 
+  /* ===================== UI ===================== */
   return (
     <div>
       <h3 className="text-xl font-semibold mb-4">Step 2 — Vehicle Details</h3>
@@ -145,6 +177,7 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           onChange={handleChange}
           className="input"
         />
+
         <select
           name="postOfVehicle"
           value={local.postOfVehicle}
@@ -158,6 +191,7 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           <option value="CAR">CAR</option>
           <option value="BIKE">BIKE</option>
         </select>
+
         <input
           name="gaadiRouteFrom"
           placeholder="Route From"
@@ -186,6 +220,7 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           onChange={handleChange}
           className="input"
         />
+
         <select
           name="hirePayment"
           value={local.hirePayment}
@@ -196,6 +231,7 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           <option value="TRANSPORT_ACCOUNT">Transport Account</option>
           <option value="DRIVER">Driver</option>
         </select>
+
         <input
           name="paymentTerms"
           placeholder="Payment Terms"
