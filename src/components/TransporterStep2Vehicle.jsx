@@ -6,7 +6,6 @@ import { saveTransporterVehicle } from "../api/transporterVehicleApi";
 export default function TransporterStep2Vehicle({ onNext, onBack }) {
   const dispatch = useDispatch();
 
-  // Transporter registration id from Redux store
   const transporterRegistrationId = useSelector(
     (state) => state.transporterRegistration.registrationId
   );
@@ -27,18 +26,14 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     payment30thDate: "",
   });
 
-  /* HANDLE CHANGE */
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "mobileNumber") {
       if (!/^\d*$/.test(value) || value.length > 10) return;
     }
-
     setLocal((prev) => ({ ...prev, [name]: value }));
   };
 
-  /* HANDLE NEXT */
   const handleNext = async () => {
     const {
       totalGaadi,
@@ -46,9 +41,10 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
       gaadiNumber,
       postOfVehicle,
       hirePayment,
+      gaadiModelFrom,
+      gaadiModelTo,
     } = local;
 
-    // VALIDATIONS
     if (!transporterRegistrationId) {
       alert("Transporter registration missing. Please complete Step 1.");
       return;
@@ -75,30 +71,27 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     }
 
     try {
-      // SNAKE_CASE PAYLOAD
       const payload = {
         transporter_registration_id: transporterRegistrationId,
         total_gaadi: Number(totalGaadi),
         make: make.trim(),
-        gaadi_model_from: local.gaadiModelFrom
-          ? Number(local.gaadiModelFrom)
-          : null,
-        gaadi_model_to: local.gaadiModelTo ? Number(local.gaadiModelTo) : null,
+        gaadi_model_from: gaadiModelFrom.trim() ? Number(gaadiModelFrom.trim()) : null,
+        gaadi_model_to: gaadiModelTo.trim() ? Number(gaadiModelTo.trim()) : null,
         gaadi_number: gaadiNumber.trim(),
         post_of_vehicle: postOfVehicle,
         gaadi_route_from: local.gaadiRouteFrom?.trim() || null,
         gaadi_route_to: local.gaadiRouteTo?.trim() || null,
-        other_known_transporter_in_wtl:
-          local.otherKnownTransporterInWtl?.trim() || null,
-        mobile_number: local.mobileNumber || null,
+        other_known_transporter_in_wtl: local.otherKnownTransporterInWtl?.trim() || null,
+        mobile_number: local.mobileNumber?.trim() || null,
         hire_payment: hirePayment,
         payment_terms: local.paymentTerms?.trim() || null,
         payment_30th_date: local.payment30thDate?.trim() || null,
       };
 
+      console.log("Payload being sent:", payload); // ✅ debug
+
       await saveTransporterVehicle(payload);
 
-      // Update Redux + go to next step in UI
       dispatch(setTransporterStep(3));
       onNext?.();
     } catch (err) {
@@ -107,10 +100,9 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
     }
   };
 
-  /* HANDLE BACK */
   const handleBack = () => {
-    dispatch(setTransporterStep(1)); // keep Redux in sync
-    onBack?.(); // notify parent to show Step 1
+    dispatch(setTransporterStep(1));
+    onBack?.();
   };
 
   return (
@@ -153,7 +145,6 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           onChange={handleChange}
           className="input"
         />
-
         <select
           name="postOfVehicle"
           value={local.postOfVehicle}
@@ -167,7 +158,6 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           <option value="CAR">CAR</option>
           <option value="BIKE">BIKE</option>
         </select>
-
         <input
           name="gaadiRouteFrom"
           placeholder="Route From"
@@ -196,7 +186,6 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           onChange={handleChange}
           className="input"
         />
-
         <select
           name="hirePayment"
           value={local.hirePayment}
@@ -207,7 +196,6 @@ export default function TransporterStep2Vehicle({ onNext, onBack }) {
           <option value="TRANSPORT_ACCOUNT">Transport Account</option>
           <option value="DRIVER">Driver</option>
         </select>
-
         <input
           name="paymentTerms"
           placeholder="Payment Terms"
