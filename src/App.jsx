@@ -31,6 +31,7 @@ import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
 // 🔥 Add this
 import GlobalLoader from "./components/GlobalLoader";
 import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
+import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
             <Route path="payments" element={<Payments />} />
             <Route path="payment-confirmation" element={<PaymentConfirmation />} />
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
+             <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
 
             
 
