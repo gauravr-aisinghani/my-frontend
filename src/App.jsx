@@ -33,6 +33,7 @@ import GlobalLoader from "./components/GlobalLoader";
 import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
 import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
 import TransporterVerificationPage from "./pages/TransporterVerificationPage.jsx";
+import DriverReports from "./pages/DriverReports.jsx";
 
 function App() {
   return (
@@ -86,6 +87,8 @@ function App() {
             <Route path="payment-confirmation" element={<PaymentConfirmation />} />
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
              <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
+              <Route path="drivers-reports" element={<DriverReports />} />
+
 
             
 
