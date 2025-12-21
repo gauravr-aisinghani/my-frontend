@@ -9,8 +9,8 @@ const api = axios.create({
 
 
 
-export const fetchDriverReports = (params) => {
-  return axios.get(API_URL, { params });
+export const fetchDriverReports = () => {
+  return axios.get(API_URL);
 };
 
 
