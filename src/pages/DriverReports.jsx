@@ -1,57 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { fetchDriverReports } from "../api/driverReportApi";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
-// ======= STYLES =======
-const summaryCardGrid = {
+// ================= STYLES =================
+const pageStyle = { padding: "20px" };
+
+const cardGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: "16px",
   marginBottom: "20px",
 };
 
-const cardStyle = {
-  padding: "10px",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
+const card = {
+  padding: "16px",
+  borderRadius: "12px",
+  background: "#fff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
   textAlign: "center",
-  background: "#f9f9f9",
 };
 
-const filterBox = {
-  display: "flex",
-  gap: "10px",
+const sectionGrid = {
+  display: "grid",
+  gridTemplateColumns: "2fr 1fr",
+  gap: "20px",
   marginBottom: "20px",
 };
 
 const tableStyle = {
   width: "100%",
   borderCollapse: "collapse",
-  textAlign: "left",
-  marginBottom: "20px",
 };
 
-// ======= SUMMARY CARD COMPONENT =======
-const SummaryCard = ({ title, value }) => {
-  return (
-    <div style={cardStyle}>
-      <h4>{title}</h4>
-      <p style={{ fontSize: "18px", fontWeight: "bold" }}>
-        {value ?? 0}
-      </p>
-    </div>
-  );
+const filterBox = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "16px",
 };
 
-// ======= MAIN COMPONENT =======
+// ================= COMPONENT =================
 const DriverReports = () => {
   const [summary, setSummary] = useState({});
   const [drivers, setDrivers] = useState([]);
+  const [filters, setFilters] = useState({ stage: "" });
   const [loading, setLoading] = useState(false);
-
-  const [filters, setFilters] = useState({
-    stage: "",
-    verification: "",
-  });
 
   useEffect(() => {
     loadReports();
@@ -60,57 +54,98 @@ const DriverReports = () => {
   const loadReports = async () => {
     setLoading(true);
     try {
-      // ✅ FIX: res IS the backend response already
       const res = await fetchDriverReports(filters);
-
       setSummary(res.summary || {});
       setDrivers(res.drivers || []);
-    } catch (err) {
-      console.error("Error loading driver reports", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
+  // ================= EXCEL EXPORT =================
+  const downloadExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(drivers);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Driver Reports");
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([excelBuffer]), "driver_reports.xlsx");
   };
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Driver Reports</h2>
+  // ================= CHART DATA =================
+  const barData = [
+    { name: "Visitors", value: summary.visitors || 0 },
+    { name: "Selected", value: summary.selectedVisitors || 0 },
+    { name: "Registered", value: summary.registeredDrivers || 0 },
+    { name: "GDC", value: summary.gdcGenerated || 0 },
+  ];
 
-      {/* ================= SUMMARY ================= */}
-      <div style={summaryCardGrid}>
-        <SummaryCard title="Visitors" value={summary.visitors} />
-        <SummaryCard title="Selected Visitors" value={summary.selected_visitors} />
-        <SummaryCard title="Registered Drivers" value={summary.registered_drivers} />
-        <SummaryCard title="Verification Pending" value={summary.verification_pending} />
-        <SummaryCard title="GDC Generated" value={summary.gdc_generated} />
+  const pieData = [
+    { name: "GDC Generated", value: summary.gdcGenerated || 0 },
+    {
+      name: "Pending",
+      value:
+        (summary.registeredDrivers || 0) - (summary.gdcGenerated || 0),
+    },
+  ];
+
+  const COLORS = ["#16a34a", "#0ea5e9"];
+
+  return (
+    <div style={pageStyle}>
+      <h2>Drivers Reports</h2>
+
+      {/* ================= KPI CARDS ================= */}
+      <div style={cardGrid}>
+        <div style={card}><h4>Visitors</h4><b>{summary.visitors || 0}</b></div>
+        <div style={card}><h4>Selected Visitors</h4><b>{summary.selectedVisitors || 0}</b></div>
+        <div style={card}><h4>Registered Drivers</h4><b>{summary.registeredDrivers || 0}</b></div>
+        <div style={card}><h4>Verification Pending</h4><b>{summary.verificationPending || 0}</b></div>
+        <div style={card}><h4>GDC Generated</h4><b>{summary.gdcGenerated || 0}</b></div>
       </div>
 
-      {/* ================= FILTERS ================= */}
+      {/* ================= CHARTS ================= */}
+      <div style={sectionGrid}>
+        <div style={card}>
+          <h4>Driver Funnel Overview</h4>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={barData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div style={card}>
+          <h4>GDC Overview</h4>
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie data={pieData} dataKey="value" innerRadius={60}>
+                {pieData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ================= FILTER + EXCEL ================= */}
       <div style={filterBox}>
-        <select name="stage" onChange={handleFilterChange} value={filters.stage}>
+        <select
+          name="stage"
+          value={filters.stage}
+          onChange={(e) => setFilters({ stage: e.target.value })}
+        >
           <option value="">All Stages</option>
           <option value="REGISTERED">Registered</option>
-          <option value="DOCUMENTS_UPLOADED">Documents Uploaded</option>
           <option value="VERIFIED">Verified</option>
           <option value="GDC_GENERATED">GDC Generated</option>
         </select>
 
-        <select
-          name="verification"
-          onChange={handleFilterChange}
-          value={filters.verification}
-        >
-          <option value="">All Verification</option>
-          <option value="VERIFIED">Verified</option>
-          <option value="PENDING">Pending</option>
-        </select>
+        <button onClick={downloadExcel}>⬇ Export Excel</button>
       </div>
 
       {/* ================= TABLE ================= */}
@@ -131,11 +166,7 @@ const DriverReports = () => {
           </thead>
           <tbody>
             {drivers.length === 0 ? (
-              <tr>
-                <td colSpan="7" style={{ textAlign: "center" }}>
-                  No data found
-                </td>
-              </tr>
+              <tr><td colSpan="7" align="center">No data found</td></tr>
             ) : (
               drivers.map((d) => (
                 <tr key={d.driverId}>
@@ -146,15 +177,7 @@ const DriverReports = () => {
                   <td>{d.verificationStatus || "PENDING"}</td>
                   <td>{d.gdcNumber ? "Generated" : "Not Generated"}</td>
                   <td>
-                    <button onClick={() => alert(`View ${d.driverId}`)}>
-                      View
-                    </button>
-
-                    {d.stage === "VERIFIED" && !d.gdcNumber && (
-                      <button style={{ marginLeft: "6px" }}>
-                        Generate GDC
-                      </button>
-                    )}
+                    <button>View</button>
                   </td>
                 </tr>
               ))
