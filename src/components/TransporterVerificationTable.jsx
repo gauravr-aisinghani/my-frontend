@@ -10,6 +10,14 @@ const DOC_LABELS = {
   id_proof_url: "ID Proof",
   bank_account_proof_url: "Bank Account Details",
   address_proof_url: "Address Proof",
+  transporter_selfie_live_location_url: "Selfie with Live Location",
+  live_home_office_photo_url: "Home/Office Photo",
+  transporter_account_passbook_url: "Account Passbook",
+  aadhar_original_photo_url: "Aadhar Card",
+  pan_original_photo_url: "PAN Card",
+  licence_original_photo_url: "Driving Licence",
+  stamp_letter_agreement_url: "Stamp/Agreement Letter",
+  transporter_auto_signature_url: "Transporter Signature",
 };
 
 export default function TransporterVerificationTable() {
