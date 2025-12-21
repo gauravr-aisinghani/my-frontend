@@ -5,11 +5,11 @@ import transporterVerification from "../api/transporterVerification";
  * 🔥 MUST MATCH BACKEND RESPONSE KEYS EXACTLY
  */
 const DOC_LABELS = {
-  company_logo_url: "Company Logo",
+  
   gst_certificate_url: "GST Certificate",
-  id_proof_url: "ID Proof",
-  bank_account_proof_url: "Bank Account Details",
-  address_proof_url: "Address Proof",
+  
+  
+  
   transporter_selfie_live_location_url: "Selfie with Live Location",
   live_home_office_photo_url: "Home/Office Photo",
   transporter_account_passbook_url: "Account Passbook",
