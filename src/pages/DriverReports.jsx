@@ -1,5 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { fetchDriverReports } from "../api/driverReportApi";
+import SummaryCard from "./SummaryCard"; // Make sure you have this component
+
+// ======= STYLES =======
+const cardGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: "16px",
+  marginBottom: "20px",
+};
+
+const filterBox = {
+  display: "flex",
+  gap: "10px",
+  marginBottom: "20px",
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  textAlign: "left",
+  marginBottom: "20px",
+};
 
 const DriverReports = () => {
   const [summary, setSummary] = useState({});
@@ -51,7 +73,7 @@ const DriverReports = () => {
 
       {/* ================= FILTERS ================= */}
       <div style={filterBox}>
-        <select name="stage" onChange={handleFilterChange}>
+        <select name="stage" onChange={handleFilterChange} value={filters.stage}>
           <option value="">All Stages</option>
           <option value="REGISTERED">Registered</option>
           <option value="DOCUMENTS_UPLOADED">Documents Uploaded</option>
@@ -59,7 +81,7 @@ const DriverReports = () => {
           <option value="GDC_GENERATED">GDC Generated</option>
         </select>
 
-        <select name="verification" onChange={handleFilterChange}>
+        <select name="verification" onChange={handleFilterChange} value={filters.verification}>
           <option value="">All Verification</option>
           <option value="VERIFIED">Verified</option>
           <option value="PENDING">Pending</option>
