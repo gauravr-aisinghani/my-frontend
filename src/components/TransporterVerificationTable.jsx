@@ -1,13 +1,15 @@
-// src/components/TransporterVerificationTable.jsx
 import React, { useEffect, useState } from "react";
 import transporterVerification from "../api/transporterVerification";
 
+/**
+ * 🔥 MUST MATCH BACKEND RESPONSE KEYS EXACTLY
+ */
 const DOC_LABELS = {
-  company_logo: "Company Logo",
-  gst_certificate: "GST Certificate",
-  id_proof: "ID Proof",
-  bank_account_details: "Bank Account Details",
-  address_proof: "Address Proof",
+  company_logo_url: "Company Logo",
+  gst_certificate_url: "GST Certificate",
+  id_proof_url: "ID Proof",
+  bank_account_proof_url: "Bank Account Details",
+  address_proof_url: "Address Proof",
 };
 
 export default function TransporterVerificationTable() {
@@ -40,7 +42,12 @@ export default function TransporterVerificationTable() {
       const docs = await transporterVerification.getTransporterDocuments(
         transporter.transporter_registration_id
       );
-      setSelectedTransporter({ ...transporter, documents: docs || {} });
+
+      setSelectedTransporter({
+        ...transporter,
+        documents: docs || {},
+      });
+
       setRemarks("");
     } catch (err) {
       console.error("Failed to fetch transporter documents", err);
@@ -54,23 +61,31 @@ export default function TransporterVerificationTable() {
     setRemarks("");
   }
 
-  // Approve
+  // ✅ APPROVE
   async function handleApprove() {
     if (!selectedTransporter) return;
     if (!confirm("Approve this transporter?")) return;
 
     try {
       setActionLoading(true);
-      const payload = {
-        transporterRegistrationId: selectedTransporter.transporter_registration_id,
+
+      await transporterVerification.approveTransporter({
+        transporterRegistrationId:
+          selectedTransporter.transporter_registration_id,
         remarks: remarks || "Approved",
         approvedBy: "ADMIN",
-      };
-      await transporterVerification.approveTransporter(payload);
-      alert("Transporter approved.");
+      });
+
+      alert("Transporter approved");
+
       setTransporters(prev =>
-        prev.filter(t => t.transporter_registration_id !== selectedTransporter.transporter_registration_id)
+        prev.filter(
+          t =>
+            t.transporter_registration_id !==
+            selectedTransporter.transporter_registration_id
+        )
       );
+
       closeModal();
     } catch (err) {
       console.error("Approve failed", err);
@@ -80,22 +95,30 @@ export default function TransporterVerificationTable() {
     }
   }
 
-  // Reject
+  // ❌ REJECT
   async function handleReject() {
     if (!selectedTransporter) return;
     if (!confirm("Reject this transporter?")) return;
 
     try {
       setActionLoading(true);
-      const payload = {
-        transporterRegistrationId: selectedTransporter.transporter_registration_id,
+
+      await transporterVerification.rejectTransporter({
+        transporterRegistrationId:
+          selectedTransporter.transporter_registration_id,
         remarks: remarks || "Rejected",
-      };
-      await transporterVerification.rejectTransporter(payload);
-      alert("Transporter rejected.");
+      });
+
+      alert("Transporter rejected");
+
       setTransporters(prev =>
-        prev.filter(t => t.transporter_registration_id !== selectedTransporter.transporter_registration_id)
+        prev.filter(
+          t =>
+            t.transporter_registration_id !==
+            selectedTransporter.transporter_registration_id
+        )
       );
+
       closeModal();
     } catch (err) {
       console.error("Reject failed", err);
@@ -122,24 +145,32 @@ export default function TransporterVerificationTable() {
               <th className="p-3 border text-center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="5" className="p-5 text-center">Loading...</td>
+                <td colSpan="5" className="p-5 text-center">
+                  Loading...
+                </td>
               </tr>
             ) : transporters.length === 0 ? (
               <tr>
                 <td colSpan="5" className="p-5 text-center text-gray-500">
-                  No transporters pending verification.
+                  No transporters pending verification
                 </td>
               </tr>
             ) : (
               transporters.map(t => (
-                <tr key={t.transporter_registration_id} className="hover:bg-green-50 transition">
-                  <td className="p-3 border">{t.transporter_registration_id}</td>
+                <tr
+                  key={t.transporter_registration_id}
+                  className="hover:bg-green-50 transition"
+                >
+                  <td className="p-3 border">
+                    {t.transporter_registration_id}
+                  </td>
                   <td className="p-3 border">{t.company_name || "-"}</td>
                   <td className="p-3 border">{t.contact_number || "-"}</td>
-                  <td className="p-3 border">{t.total_docs}</td>
+                  <td className="p-3 border">{t.total_docs || 0}</td>
                   <td className="p-3 border text-center">
                     <button
                       onClick={() => openTransporterDocuments(t)}
@@ -155,9 +186,13 @@ export default function TransporterVerificationTable() {
         </table>
       </div>
 
+      {/* 📄 DOCUMENT MODAL */}
       {selectedTransporter && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4">
-          <div className="absolute inset-0 bg-black/40" onClick={closeModal}></div>
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={closeModal}
+          ></div>
 
           <div className="relative bg-white rounded-2xl w-full max-w-6xl shadow-lg p-6 z-10 overflow-auto max-h-[85vh]">
             <div className="flex items-start justify-between">
@@ -166,22 +201,32 @@ export default function TransporterVerificationTable() {
                   Documents — {selectedTransporter.company_name}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Reg ID: {selectedTransporter.transporter_registration_id} • Contact: {selectedTransporter.contact_number}
+                  Reg ID: {selectedTransporter.transporter_registration_id}
                 </p>
               </div>
-              <button onClick={closeModal} className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">Close</button>
+              <button
+                onClick={closeModal}
+                className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200"
+              >
+                Close
+              </button>
             </div>
 
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.keys(DOC_LABELS).map(key => {
-                const url = (selectedTransporter.documents && selectedTransporter.documents[key]) || null;
+              {Object.entries(DOC_LABELS).map(([key, label]) => {
+                const url = selectedTransporter.documents?.[key];
+
                 return (
-                  <div key={key} className="border p-3 rounded-lg bg-gray-50">
-                    <div className="text-sm font-medium mb-2">{DOC_LABELS[key]}</div>
+                  <div
+                    key={key}
+                    className="border p-3 rounded-lg bg-gray-50"
+                  >
+                    <div className="text-sm font-medium mb-2">{label}</div>
+
                     {url ? (
                       <img
                         src={url}
-                        alt={DOC_LABELS[key]}
+                        alt={label}
                         className="w-full h-28 object-cover rounded-md border cursor-pointer"
                         onClick={() => setLightboxUrl(url)}
                       />
@@ -198,7 +243,7 @@ export default function TransporterVerificationTable() {
             <textarea
               placeholder="Remarks (optional)"
               value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
+              onChange={e => setRemarks(e.target.value)}
               className="w-full mt-6 p-3 border rounded-lg"
             />
 
@@ -228,12 +273,25 @@ export default function TransporterVerificationTable() {
             </div>
           </div>
 
+          {/* 🔍 IMAGE PREVIEW */}
           {lightboxUrl && (
             <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-black/70" onClick={() => setLightboxUrl(null)}></div>
+              <div
+                className="absolute inset-0 bg-black/70"
+                onClick={() => setLightboxUrl(null)}
+              ></div>
               <div className="relative z-10 max-w-4xl max-h-[90vh]">
-                <img src={lightboxUrl} alt="preview" className="max-h-[90vh] w-auto rounded-lg" />
-                <button onClick={() => setLightboxUrl(null)} className="absolute top-2 right-2 bg-white/80 px-3 py-1 rounded">Close</button>
+                <img
+                  src={lightboxUrl}
+                  alt="preview"
+                  className="max-h-[90vh] w-auto rounded-lg"
+                />
+                <button
+                  onClick={() => setLightboxUrl(null)}
+                  className="absolute top-2 right-2 bg-white/80 px-3 py-1 rounded"
+                >
+                  Close
+                </button>
               </div>
             </div>
           )}
