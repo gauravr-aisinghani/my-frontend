@@ -32,7 +32,7 @@ export default function PaymentsContent() {
       // 1️⃣ Call backend to create order
       const orderResponse = await createPaymentOrder({
         amount: PAYMENT_AMOUNT,
-        payment_type:paymentType,
+        type:paymentType,
         gdc_number:gdcNumber
       });
 
