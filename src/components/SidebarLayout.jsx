@@ -29,14 +29,13 @@ const pageTitles = {
   "transporter-registration": "Transporter Signup",
   "payments": "Payments",
   "vehicles": "Vehicles List",
-  "add-vehicle": "Add Vehicle",  
-  "reports/drivers": "Driver Reports",
+  "add-vehicle": "Add Vehicle", 
   "reports/transporters": "Transporter Reports",
   "reports/payments": "Payments Reports",
   "visitor-transporters-list":"Visitor Transporters List",
   "selected-transporters-list":"Selected Transporters List",
   "transporter-verification":"Transporter Verification ",
-  "drivers-reports":"Drivers Report"
+  "drivers-reports":"Drivers Reports"
 };
 
 const sidebarSections = [
