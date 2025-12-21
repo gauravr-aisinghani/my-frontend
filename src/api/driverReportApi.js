@@ -6,13 +6,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Fetch all driver reports
-export const fetchDriverReports = async () => {
+// Fetch driver reports with stage filter
+export const fetchDriverReports = async (filters = {}) => {
   try {
-    const res = await api.get(""); // No extra URL since baseURL already points to endpoint
-    console.log("Backend FULL Response:", res.data);
+    const res = await api.get("", {
+      params: {
+        stage: filters.stage || null, // 🔑 THIS IS THE FIX
+      },
+    });
 
-    // Return full backend object (list of driver reports)
+    console.log("Backend FULL Response:", res.data);
     return res.data;
   } catch (error) {
     console.error("Error fetching driver reports:", error);

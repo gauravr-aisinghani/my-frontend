@@ -1,48 +1,247 @@
-// src/pages/admin/ReportsPage.jsx
-import React from "react";
-import SidebarLayout from "../components/SidebarLayout";
-import dashboardApi from "../api/dashboardApi";
+import React, { useEffect, useState } from "react";
+import { fetchDriverReports } from "../api/driverReportApi";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import * as XLSX from "xlsx";
 
-export default function ReportsPage() {
-  // this UI provides quick export buttons and links to filtered report views
-  const handleExportAll = async () => {
-    const s = await dashboardApi.fetchSummary();
-    // prepare a simple csv export (you can replace with XLSX)
-    dashboardApi.exportCsv([
-      { metric: "driverVisitors", value: s.driverVisitors },
-      { metric: "transporterVisitors", value: s.transporterVisitors },
-      { metric: "driverPaid", value: s.driverPaid },
-      { metric: "transporterPaid", value: s.transporterPaid },
-    ], "reports-summary.csv");
+// ================= COLORS (MATCH DASHBOARD) =================
+const COLORS = {
+  visitors: "#16a34a",     // green
+  selected: "#0ea5e9",     // blue
+  registered: "#f59e0b",   // orange
+  gdc: "#ef4444",          // red
+  pending: "#0ea5e9",
+};
+
+// ================= STYLES =================
+const pageStyle = { padding: "20px" };
+
+const cardGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: "16px",
+  marginBottom: "20px",
+};
+
+const card = (color) => ({
+  padding: "16px",
+  borderRadius: "12px",
+  background: "#fff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+  textAlign: "center",
+  borderTop: `4px solid ${color}`,
+});
+
+const sectionGrid = {
+  display: "grid",
+  gridTemplateColumns: "2fr 1fr",
+  gap: "20px",
+  marginBottom: "20px",
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+};
+
+const filterBox = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "16px",
+};
+
+// ================= COMPONENT =================
+const DriverReports = () => {
+  const [summary, setSummary] = useState({});
+  const [drivers, setDrivers] = useState([]);
+  const [filters, setFilters] = useState({ stage: "" });
+  const [loading, setLoading] = useState(false);
+
+  // Load on filter change
+  useEffect(() => {
+    loadReports();
+  }, [filters]);
+
+  const loadReports = async () => {
+    setLoading(true);
+    try {
+      const res = await fetchDriverReports(filters);
+      setSummary(res.summary || {});
+      setDrivers(res.drivers || []);
+    } catch (err) {
+      console.error("Error loading driver reports", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <SidebarLayout>
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow p-6 mb-6 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-blue-700">Reports</h2>
-            <p className="text-sm text-gray-500 mt-1">Export driver, transporter, visitor and payment reports.</p>
-          </div>
+  // ================= EXCEL EXPORT =================
+  const downloadExcel = () => {
+    if (drivers.length === 0) return;
 
-          <div className="flex gap-3">
-            <button onClick={handleExportAll} className="bg-cyan-600 text-white px-4 py-2 rounded-lg">Export Summary</button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">Open Advanced Reports</button>
-          </div>
+    const ws = XLSX.utils.json_to_sheet(drivers);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Driver Reports");
+    XLSX.writeFile(wb, "driver_reports.xlsx");
+  };
+
+  // ================= CHART DATA =================
+  const barData = [
+    { name: "Visitors", value: summary.visitors || 0, color: COLORS.visitors },
+    { name: "Selected", value: summary.selected_visitors || 0, color: COLORS.selected },
+    { name: "Registered", value: summary.registered_drivers || 0, color: COLORS.registered },
+    { name: "GDC", value: summary.gdc_generated || 0, color: COLORS.gdc },
+  ];
+
+  const pieData = [
+    { name: "GDC Generated", value: summary.gdc_generated || 0, color: COLORS.gdc },
+    {
+      name: "Pending",
+      value:
+        (summary.registered_drivers || 0) -
+        (summary.gdc_generated || 0),
+      color: COLORS.pending,
+    },
+  ];
+
+  return (
+    <div style={pageStyle}>
+      <h2>Drivers Reports</h2>
+
+      {/* ================= KPI CARDS ================= */}
+      <div style={cardGrid}>
+        <div style={card(COLORS.visitors)}>
+          <h4>Visitors</h4>
+          <b>{summary.visitors || 0}</b>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow">
-            <h3 className="font-semibold mb-3">Driver Reports</h3>
-            <p className="text-sm text-gray-500">Download full driver lists, filter by date, vehicle and status.</p>
-          </div>
+        <div style={card(COLORS.selected)}>
+          <h4>Selected Visitors</h4>
+          <b>{summary.selected_visitors || 0}</b>
+        </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow">
-            <h3 className="font-semibold mb-3">Payments</h3>
-            <p className="text-sm text-gray-500">Payment history, pending payments and reconciliation exports.</p>
-          </div>
+        <div style={card(COLORS.registered)}>
+          <h4>Registered Drivers</h4>
+          <b>{summary.registered_drivers || 0}</b>
+        </div>
+
+        <div style={card(COLORS.selected)}>
+          <h4>Verification Pending</h4>
+          <b>{summary.verification_pending || 0}</b>
+        </div>
+
+        <div style={card(COLORS.gdc)}>
+          <h4>GDC Generated</h4>
+          <b>{summary.gdc_generated || 0}</b>
         </div>
       </div>
-    </SidebarLayout>
+
+      {/* ================= CHARTS ================= */}
+      <div style={sectionGrid}>
+        <div style={card("#e5e7eb")}>
+          <h4>Driver Funnel Overview</h4>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={barData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value">
+                {barData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div style={card("#e5e7eb")}>
+          <h4>GDC Overview</h4>
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie data={pieData} dataKey="value" innerRadius={60}>
+                {pieData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ================= FILTER + EXCEL ================= */}
+      <div style={filterBox}>
+        <select
+          value={filters.stage}
+          onChange={(e) => setFilters({ stage: e.target.value })}
+        >
+          <option value="">Select Stage to View Records</option>
+          <option value="REGISTERED">Registered</option>
+          <option value="VERIFIED">Verified</option>
+          <option value="GDC_GENERATED">GDC Generated</option>
+        </select>
+
+        <button
+          onClick={downloadExcel}
+          disabled={drivers.length === 0}
+        >
+          ⬇ Export Excel
+        </button>
+      </div>
+
+      {/* ================= TABLE ================= */}
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <table style={tableStyle} border="1">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Stage</th>
+              <th>Verification</th>
+              <th>GDC</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {drivers.length === 0 ? (
+              <tr>
+                <td colSpan="7" align="center">
+                  Select a stage to view records
+                </td>
+              </tr>
+            ) : (
+              drivers.map((d) => (
+                <tr key={d.driverId}>
+                  <td>{d.driverId}</td>
+                  <td>{d.name}</td>
+                  <td>{d.mobile}</td>
+                  <td>{d.stage}</td>
+                  <td>{d.verificationStatus || "PENDING"}</td>
+                  <td>{d.gdcNumber ? "Generated" : "Not Generated"}</td>
+                  <td>
+                    <button>View</button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
-}
+};
+
+export default DriverReports;
