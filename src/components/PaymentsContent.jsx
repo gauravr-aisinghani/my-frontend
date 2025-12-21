@@ -24,46 +24,29 @@ export default function PaymentsContent() {
     setStep(2);
   };
 
-  // ✅ Correct Razorpay flow
   const openRazorpay = async () => {
     try {
       setLoading(true);
 
-      // 1️⃣ Call backend to create order
       const orderResponse = await createPaymentOrder({
         amount: PAYMENT_AMOUNT,
-        type:paymentType,
-        gdc_number:gdcNumber
+        type: paymentType,
+        gdc_number: gdcNumber,
       });
 
       const options = {
-        key: orderResponse.keyId, // from backend
+        key: orderResponse.keyId,
         amount: orderResponse.amount,
         currency: orderResponse.currency,
         order_id: orderResponse.orderId,
-
         name: "WTL Payments",
         description: `${paymentType} GDC Activation`,
-
-        handler: function (response) {
-          console.log("Payment Success:", response);
-
-          /*
-            response = {
-              razorpay_payment_id,
-              razorpay_order_id,
-              razorpay_signature
-            }
-          */
-
+        handler: function () {
           alert("Payment successful!");
-          // 👉 next step: call backend /verify-payment
         },
-
         prefill: {
           name: "WTL User",
         },
-
         theme: {
           color: "#2563eb",
         },
@@ -71,7 +54,6 @@ export default function PaymentsContent() {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-
     } catch (err) {
       console.error(err);
       alert("Failed to initiate payment");
@@ -81,60 +63,76 @@ export default function PaymentsContent() {
   };
 
   return (
-    <div style={{ padding: "24px", maxWidth: "600px" }}>
-      <h2>Payments</h2>
+    <div className="form-container">
+      <h2 className="form-title">Payments</h2>
 
       {step === 0 && (
-        <>
-          <div onClick={() => selectType("DRIVER")} style={{ cursor: "pointer", marginBottom: "16px" }}>
+        <div className="space-y-4">
+          <div
+            onClick={() => selectType("DRIVER")}
+            className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+          >
             🚚 <b>Driver Payment</b>
-            <div>Pay & activate Driver GDC</div>
+            <p className="text-sm text-gray-600">
+              Pay & activate Driver GDC
+            </p>
           </div>
 
-          <div onClick={() => selectType("TRANSPORTER")} style={{ cursor: "pointer" }}>
+          <div
+            onClick={() => selectType("TRANSPORTER")}
+            className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+          >
             🏢 <b>Transporter Payment</b>
-            <div>Pay & activate Transporter GDC</div>
+            <p className="text-sm text-gray-600">
+              Pay & activate Transporter GDC
+            </p>
           </div>
-        </>
+        </div>
       )}
 
       {step === 1 && (
-        <>
-          <button onClick={() => setStep(0)}>← Back</button>
+        <div className="mt-6 space-y-4">
+          <button className="btn-secondary" onClick={() => setStep(0)}>
+            ← Back
+          </button>
 
-          <h4 style={{ marginTop: "16px" }}>
-            Enter {paymentType} GDC Number
-          </h4>
+          <h4>Enter {paymentType} GDC Number</h4>
 
           <input
             type="text"
+            className={`input ${error ? "input-error" : ""}`}
             value={gdcNumber}
             onChange={(e) => setGdcNumber(e.target.value)}
             placeholder="Enter GDC Number"
-            style={{ width: "100%", padding: "10px", marginTop: "8px" }}
           />
 
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-          <button onClick={proceedToPay} style={{ marginTop: "12px" }}>
+          <button className="btn-primary" onClick={proceedToPay}>
             Proceed to Pay
           </button>
-        </>
+        </div>
       )}
 
       {step === 2 && (
-        <>
-          <button onClick={() => setStep(1)}>← Back</button>
+        <div className="mt-6 space-y-3">
+          <button className="btn-secondary" onClick={() => setStep(1)}>
+            ← Back
+          </button>
 
           <h4>Payment Summary</h4>
           <p><b>Type:</b> {paymentType}</p>
           <p><b>GDC Number:</b> {gdcNumber}</p>
           <p><b>Amount:</b> ₹{PAYMENT_AMOUNT}</p>
 
-          <button onClick={openRazorpay} disabled={loading}>
+          <button
+            className="btn-primary"
+            onClick={openRazorpay}
+            disabled={loading}
+          >
             {loading ? "Processing..." : "Pay Now"}
           </button>
-        </>
+        </div>
       )}
     </div>
   );
