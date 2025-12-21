@@ -86,11 +86,10 @@ const DriverReports = () => {
       {/* ================= SUMMARY ================= */}
       <div style={summaryCardGrid}>
         <SummaryCard title="Visitors" value={summary.visitors} />
-        <SummaryCard title="Selected Visitors" value={summary.selectedVisitors} />
-        <SummaryCard title="Registered Drivers" value={summary.registeredDrivers} />
-        <SummaryCard title="Documents Uploaded" value={summary.documentsUploaded} />
-        <SummaryCard title="Verification Pending" value={summary.verificationPending} />
-        <SummaryCard title="GDC Generated" value={summary.gdcGenerated} />
+        <SummaryCard title="Selected Visitors" value={summary.selected_visitors} />
+        <SummaryCard title="Registered Drivers" value={summary.registered_drivers} />
+        <SummaryCard title="Verification Pending" value={summary.verification_pending} />
+        <SummaryCard title="GDC Generated" value={summary.gdc_generated} />
       </div>
 
       {/* ================= FILTERS ================= */}
