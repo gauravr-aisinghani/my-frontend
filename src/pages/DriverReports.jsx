@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { fetchDriverReports } from "../api/driverReportApi";
-import SummaryCard from "./SummaryCard"; // Make sure you have this component
 
 // ======= STYLES =======
 const cardGrid = {
@@ -8,6 +7,14 @@ const cardGrid = {
   gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
   gap: "16px",
   marginBottom: "20px",
+};
+
+const cardStyle = {
+  padding: "10px",
+  border: "1px solid #ccc",
+  borderRadius: "8px",
+  textAlign: "center",
+  background: "#f9f9f9",
 };
 
 const filterBox = {
@@ -23,6 +30,17 @@ const tableStyle = {
   marginBottom: "20px",
 };
 
+// ======= SUMMARY CARD COMPONENT =======
+const SummaryCard = ({ title, value }) => {
+  return (
+    <div style={cardStyle}>
+      <h4>{title}</h4>
+      <p style={{ fontSize: "18px", fontWeight: "bold" }}>{value || 0}</p>
+    </div>
+  );
+};
+
+// ======= MAIN COMPONENT =======
 const DriverReports = () => {
   const [summary, setSummary] = useState({});
   const [drivers, setDrivers] = useState([]);
@@ -30,7 +48,7 @@ const DriverReports = () => {
 
   const [filters, setFilters] = useState({
     stage: "",
-    verification: ""
+    verification: "",
   });
 
   useEffect(() => {
@@ -53,7 +71,7 @@ const DriverReports = () => {
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -81,7 +99,11 @@ const DriverReports = () => {
           <option value="GDC_GENERATED">GDC Generated</option>
         </select>
 
-        <select name="verification" onChange={handleFilterChange} value={filters.verification}>
+        <select
+          name="verification"
+          onChange={handleFilterChange}
+          value={filters.verification}
+        >
           <option value="">All Verification</option>
           <option value="VERIFIED">Verified</option>
           <option value="PENDING">Pending</option>
@@ -121,14 +143,9 @@ const DriverReports = () => {
                   <td>{d.verificationStatus || "PENDING"}</td>
                   <td>{d.gdcNumber ? "Generated" : "Not Generated"}</td>
                   <td>
-                    <button onClick={() => alert(`View ${d.driverId}`)}>
-                      View
-                    </button>
-
+                    <button onClick={() => alert(`View ${d.driverId}`)}>View</button>
                     {d.stage === "VERIFIED" && !d.gdcNumber && (
-                      <button style={{ marginLeft: "6px" }}>
-                        Generate GDC
-                      </button>
+                      <button style={{ marginLeft: "6px" }}>Generate GDC</button>
                     )}
                   </td>
                 </tr>
