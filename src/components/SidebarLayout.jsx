@@ -76,7 +76,6 @@ const sidebarSections = [
   {
     title: "Reports",
     items: [
-      { label: "Reports", path: "reports", icon: <FilePlus2 className="w-5 h-5" /> },
       { label: "Driver Reports", path: "reports/drivers", icon: <Users className="w-5 h-5" /> },
       { label: "Transporter Reports", path: "reports/transporters", icon: <Truck className="w-5 h-5" /> },
       { label: "Payments Reports", path: "reports/payments", icon: <DollarSign className="w-5 h-5" /> },
