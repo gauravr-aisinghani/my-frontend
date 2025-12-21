@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchDriverReports } from "../api/driverReportApi";
 
 // ======= STYLES =======
-const cardGrid = {
+const summaryCardGrid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
   gap: "16px",
@@ -59,8 +59,8 @@ const DriverReports = () => {
     setLoading(true);
     try {
       const res = await fetchDriverReports(filters);
-      setSummary(res.data.summary);
-      setDrivers(res.data.drivers);
+      setSummary(res.data.summary || {});
+      setDrivers(res.data.drivers || []);
     } catch (err) {
       console.error("Error loading driver reports", err);
     } finally {
@@ -80,7 +80,7 @@ const DriverReports = () => {
       <h2>Driver Reports</h2>
 
       {/* ================= SUMMARY ================= */}
-      <div style={cardGrid}>
+      <div style={summaryCardGrid}>
         <SummaryCard title="Visitors" value={summary.visitors} />
         <SummaryCard title="Selected Visitors" value={summary.selectedVisitors} />
         <SummaryCard title="Registered Drivers" value={summary.registeredDrivers} />
