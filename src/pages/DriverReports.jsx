@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchDriverReports } from "../services/driverReportApi";
+import { fetchDriverReports } from "../api/driverReportApi";
 
 const DriverReports = () => {
   const [summary, setSummary] = useState({});
