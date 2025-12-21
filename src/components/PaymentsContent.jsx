@@ -1,98 +1,125 @@
 import React, { useState } from "react";
-import { getDriverPaymentStatus } from "../api/paymentsApi";
-import PaymentConfirmation from "./PaymentConfirmation";
 
 export default function PaymentsContent() {
-  const [step, setStep] = useState(1);
-  const [type, setType] = useState("");
-  const [gdc, setGdc] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);
+  const [paymentType, setPaymentType] = useState(""); // DRIVER | TRANSPORTER
+  const [gdcNumber, setGdcNumber] = useState("");
   const [error, setError] = useState("");
-  const [paymentInfo, setPaymentInfo] = useState(null);
 
-  const selectType = (selectedType) => {
-    setType(selectedType);
+  const PAYMENT_AMOUNT = 500; // example amount
+
+  // Step 1: Select payment type
+  const selectType = (type) => {
+    setPaymentType(type);
+    setStep(1);
+    setError("");
+  };
+
+  // Step 2: Proceed after entering GDC
+  const proceedToPay = () => {
+    if (!gdcNumber.trim()) {
+      setError("Please enter GDC number");
+      return;
+    }
+
+    // 🔹 Backend check will be added later
     setStep(2);
   };
 
-  // 🔹 ONLY fetch details, NO payment creation
-  const proceedPayment = async () => {
-    setError("");
-    setLoading(true);
+  // Step 3: Razorpay handler (frontend only for now)
+  const openRazorpay = () => {
+    const options = {
+      key: "RAZORPAY_KEY_ID", // backend later
+      amount: PAYMENT_AMOUNT * 100,
+      currency: "INR",
+      name: "WTL Payments",
+      description: `${paymentType} GDC Activation`,
+      handler: function (response) {
+        console.log("Payment Success:", response);
+        alert("Payment successful!");
+      },
+      prefill: {
+        name: "WTL User",
+      },
+      theme: {
+        color: "#2563eb",
+      },
+    };
 
-    try {
-      const response = await getDriverPaymentStatus(gdc);
-
-      if (response && response.status === "PAID") {
-        setError("Payment already completed for this GDC");
-        return;
-      }
-
-      // Save fetched details and move to confirmation screen
-      setPaymentInfo({
-        gdcNumber: gdc,
-        paymentType: type.toUpperCase(),
-        driverName: response.driverName,
-        amount: response.amount,
-      });
-
-      setStep(3);
-    } catch (err) {
-      setError("Invalid GDC number or server error");
-    } finally {
-      setLoading(false);
-    }
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      {step === 1 && (
-        <div className="payment-tiles-wrapper">
-          <div className="payment-tile" onClick={() => selectType("driver")}>
-            <div className="tile-icon">🚚</div>
-            <h2>Driver Payment</h2>
-            <p>Pay & activate Driver GDC</p>
+    <div style={{ padding: "24px", maxWidth: "600px" }}>
+      <h2>Payments</h2>
+
+      {/* STEP 0: Select Type */}
+      {step === 0 && (
+        <>
+          <div
+            style={{ cursor: "pointer", marginBottom: "16px" }}
+            onClick={() => selectType("DRIVER")}
+          >
+            🚚 <b>Driver Payment</b>
+            <div>Pay & activate Driver GDC</div>
           </div>
 
           <div
-            className="payment-tile"
-            onClick={() => selectType("transporter")}
+            style={{ cursor: "pointer" }}
+            onClick={() => selectType("TRANSPORTER")}
           >
-            <div className="tile-icon">🏢</div>
-            <h2>Transporter Payment</h2>
-            <p>Pay & activate Transporter GDC</p>
+            🏢 <b>Transporter Payment</b>
+            <div>Pay & activate Transporter GDC</div>
           </div>
-        </div>
+        </>
       )}
 
-      {step === 2 && (
-        <div className="payment-form">
-          <button className="back-btn" onClick={() => setStep(1)}>
-            ← Back
-          </button>
+      {/* STEP 1: Enter GDC */}
+      {step === 1 && (
+        <>
+          <button onClick={() => setStep(0)}>← Back</button>
 
-          <h3>Enter {type} GDC Number</h3>
+          <h4 style={{ marginTop: "16px" }}>
+            Enter {paymentType === "DRIVER" ? "Driver" : "Transporter"} GDC Number
+          </h4>
 
           <input
             type="text"
             placeholder="Enter GDC Number"
-            value={gdc}
-            onChange={(e) => setGdc(e.target.value)}
+            value={gdcNumber}
+            onChange={(e) => setGdcNumber(e.target.value)}
+            style={{ width: "100%", padding: "10px", marginTop: "8px" }}
           />
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          <button disabled={!gdc || loading} onClick={proceedPayment}>
-            {loading ? "Checking..." : "Proceed to Pay"}
+          <button
+            onClick={proceedToPay}
+            style={{ marginTop: "12px" }}
+          >
+            Proceed to Pay
           </button>
-        </div>
+        </>
       )}
 
-      {step === 3 && paymentInfo && (
-        <PaymentConfirmation
-          paymentInfo={paymentInfo}
-          onBack={() => setStep(2)}
-        />
+      {/* STEP 2: Payment Summary */}
+      {step === 2 && (
+        <>
+          <button onClick={() => setStep(1)}>← Back</button>
+
+          <h4>Payment Summary</h4>
+          <p><b>Type:</b> {paymentType}</p>
+          <p><b>GDC Number:</b> {gdcNumber}</p>
+          <p><b>Amount:</b> ₹{PAYMENT_AMOUNT}</p>
+
+          <button
+            onClick={openRazorpay}
+            style={{ marginTop: "12px" }}
+          >
+            Pay Now
+          </button>
+        </>
       )}
     </div>
   );
