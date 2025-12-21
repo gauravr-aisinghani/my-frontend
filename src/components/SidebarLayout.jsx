@@ -73,14 +73,7 @@ const sidebarSections = [
     items: [
       { label: "Payments", path: "payments", icon: <DollarSign className="w-5 h-5" /> },
     ],
-  },
-  {
-    title: "Vehicles",
-    items: [
-      { label: "Vehicles List", path: "vehicles", icon: <Truck className="w-5 h-5" /> },
-      { label: "Add Vehicle", path: "add-vehicle", icon: <FilePlus2 className="w-5 h-5" /> },
-    ],
-  },
+  }, 
   {
     title: "Reports",
     items: [
