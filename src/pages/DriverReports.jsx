@@ -1,8 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { fetchDriverReports } from "../api/driverReportApi";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+
+// ================= COLORS (MATCH DASHBOARD) =================
+const COLORS = {
+  visitors: "#16a34a",        // green
+  selected: "#0ea5e9",        // blue
+  registered: "#f59e0b",      // orange
+  gdc: "#ef4444",             // red
+};
 
 // ================= STYLES =================
 const pageStyle = { padding: "20px" };
@@ -14,13 +31,14 @@ const cardGrid = {
   marginBottom: "20px",
 };
 
-const card = {
+const card = (color) => ({
   padding: "16px",
   borderRadius: "12px",
   background: "#fff",
   boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
   textAlign: "center",
-};
+  borderTop: `4px solid ${color}`,
+});
 
 const sectionGrid = {
   display: "grid",
@@ -67,28 +85,26 @@ const DriverReports = () => {
     const ws = XLSX.utils.json_to_sheet(drivers);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Driver Reports");
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([excelBuffer]), "driver_reports.xlsx");
+    XLSX.writeFile(wb, "driver_reports.xlsx");
   };
 
-  // ================= CHART DATA =================
+  // ================= CHART DATA (SNAKE_CASE FIXED) =================
   const barData = [
-    { name: "Visitors", value: summary.visitors || 0 },
-    { name: "Selected", value: summary.selectedVisitors || 0 },
-    { name: "Registered", value: summary.registeredDrivers || 0 },
-    { name: "GDC", value: summary.gdcGenerated || 0 },
+    { name: "Visitors", value: summary.visitors || 0, color: COLORS.visitors },
+    { name: "Selected", value: summary.selected_visitors || 0, color: COLORS.selected },
+    { name: "Registered", value: summary.registered_drivers || 0, color: COLORS.registered },
+    { name: "GDC", value: summary.gdc_generated || 0, color: COLORS.gdc },
   ];
 
   const pieData = [
-    { name: "GDC Generated", value: summary.gdcGenerated || 0 },
+    { name: "GDC Generated", value: summary.gdc_generated || 0, color: COLORS.gdc },
     {
       name: "Pending",
       value:
-        (summary.registeredDrivers || 0) - (summary.gdcGenerated || 0),
+        (summary.registered_drivers || 0) - (summary.gdc_generated || 0),
+      color: COLORS.selected,
     },
   ];
-
-  const COLORS = ["#16a34a", "#0ea5e9"];
 
   return (
     <div style={pageStyle}>
@@ -96,34 +112,57 @@ const DriverReports = () => {
 
       {/* ================= KPI CARDS ================= */}
       <div style={cardGrid}>
-        <div style={card}><h4>Visitors</h4><b>{summary.visitors || 0}</b></div>
-        <div style={card}><h4>Selected Visitors</h4><b>{summary.selectedVisitors || 0}</b></div>
-        <div style={card}><h4>Registered Drivers</h4><b>{summary.registeredDrivers || 0}</b></div>
-        <div style={card}><h4>Verification Pending</h4><b>{summary.verificationPending || 0}</b></div>
-        <div style={card}><h4>GDC Generated</h4><b>{summary.gdcGenerated || 0}</b></div>
+        <div style={card(COLORS.visitors)}>
+          <h4>Visitors</h4>
+          <b>{summary.visitors || 0}</b>
+        </div>
+
+        <div style={card(COLORS.selected)}>
+          <h4>Selected Visitors</h4>
+          <b>{summary.selected_visitors || 0}</b>
+        </div>
+
+        <div style={card(COLORS.registered)}>
+          <h4>Registered Drivers</h4>
+          <b>{summary.registered_drivers || 0}</b>
+        </div>
+
+        <div style={card(COLORS.selected)}>
+          <h4>Verification Pending</h4>
+          <b>{summary.verification_pending || 0}</b>
+        </div>
+
+        <div style={card(COLORS.gdc)}>
+          <h4>GDC Generated</h4>
+          <b>{summary.gdc_generated || 0}</b>
+        </div>
       </div>
 
       {/* ================= CHARTS ================= */}
       <div style={sectionGrid}>
-        <div style={card}>
+        <div style={card("#e5e7eb")}>
           <h4>Driver Funnel Overview</h4>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={barData}>
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="value" />
+              <Bar dataKey="value">
+                {barData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={card}>
+        <div style={card("#e5e7eb")}>
           <h4>GDC Overview</h4>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={pieData} dataKey="value" innerRadius={60}>
-                {pieData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i]} />
+                {pieData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip />
@@ -166,7 +205,11 @@ const DriverReports = () => {
           </thead>
           <tbody>
             {drivers.length === 0 ? (
-              <tr><td colSpan="7" align="center">No data found</td></tr>
+              <tr>
+                <td colSpan="7" align="center">
+                  No data found
+                </td>
+              </tr>
             ) : (
               drivers.map((d) => (
                 <tr key={d.driverId}>
