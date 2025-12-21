@@ -6,11 +6,9 @@ const DriverReports = () => {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // filters
   const [filters, setFilters] = useState({
-    status: "",
-    verification: "",
-    payment: ""
+    stage: "",
+    verification: ""
   });
 
   useEffect(() => {
@@ -41,80 +39,72 @@ const DriverReports = () => {
     <div style={{ padding: "20px" }}>
       <h2>Driver Reports</h2>
 
-      {/* ================= SUMMARY CARDS ================= */}
+      {/* ================= SUMMARY ================= */}
       <div style={cardGrid}>
-        <SummaryCard title="Visitor Drivers" value={summary.visitor} />
-        <SummaryCard title="Registered Drivers" value={summary.registered} />
-        <SummaryCard title="Approved Drivers" value={summary.approved} />
+        <SummaryCard title="Visitors" value={summary.visitors} />
+        <SummaryCard title="Selected Visitors" value={summary.selectedVisitors} />
+        <SummaryCard title="Registered Drivers" value={summary.registeredDrivers} />
+        <SummaryCard title="Documents Uploaded" value={summary.documentsUploaded} />
         <SummaryCard title="Verification Pending" value={summary.verificationPending} />
-        <SummaryCard title="GDC Not Generated" value={summary.gdcNotGenerated} />
-        <SummaryCard title="Payment Pending" value={summary.paymentPending} />
+        <SummaryCard title="GDC Generated" value={summary.gdcGenerated} />
       </div>
 
       {/* ================= FILTERS ================= */}
       <div style={filterBox}>
-        <select name="status" onChange={handleFilterChange}>
-          <option value="">All Status</option>
-          <option value="VISITOR">Visitor</option>
+        <select name="stage" onChange={handleFilterChange}>
+          <option value="">All Stages</option>
           <option value="REGISTERED">Registered</option>
-          <option value="APPROVED">Approved</option>
+          <option value="DOCUMENTS_UPLOADED">Documents Uploaded</option>
+          <option value="VERIFIED">Verified</option>
+          <option value="GDC_GENERATED">GDC Generated</option>
         </select>
 
         <select name="verification" onChange={handleFilterChange}>
           <option value="">All Verification</option>
-          <option value="PENDING">Pending</option>
-          <option value="DONE">Done</option>
-        </select>
-
-        <select name="payment" onChange={handleFilterChange}>
-          <option value="">All Payment</option>
-          <option value="PAID">Paid</option>
+          <option value="VERIFIED">Verified</option>
           <option value="PENDING">Pending</option>
         </select>
       </div>
 
-      {/* ================= DRIVER TABLE ================= */}
+      {/* ================= TABLE ================= */}
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <table style={tableStyle}>
+        <table style={tableStyle} border="1">
           <thead>
             <tr>
-              <th>Driver ID</th>
+              <th>ID</th>
               <th>Name</th>
               <th>Mobile</th>
-              <th>Status</th>
+              <th>Stage</th>
               <th>Verification</th>
               <th>GDC</th>
-              <th>Payment</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {drivers.length === 0 ? (
               <tr>
-                <td colSpan="8" style={{ textAlign: "center" }}>
+                <td colSpan="7" style={{ textAlign: "center" }}>
                   No data found
                 </td>
               </tr>
             ) : (
               drivers.map((d) => (
-                <tr key={d.id}>
-                  <td>{d.id}</td>
+                <tr key={d.driverId}>
+                  <td>{d.driverId}</td>
                   <td>{d.name}</td>
                   <td>{d.mobile}</td>
-                  <td>{d.status}</td>
-                  <td>{d.verificationStatus}</td>
-                  <td>{d.gdcGenerated ? "Generated" : "Not Generated"}</td>
-                  <td>{d.paymentStatus}</td>
+                  <td>{d.stage}</td>
+                  <td>{d.verificationStatus || "PENDING"}</td>
+                  <td>{d.gdcNumber ? "Generated" : "Not Generated"}</td>
                   <td>
-                    <button onClick={() => alert(`View ${d.id}`)}>
+                    <button onClick={() => alert(`View ${d.driverId}`)}>
                       View
                     </button>
 
-                    {/* Conditional control */}
-                    {!d.gdcGenerated && d.status === "APPROVED" && d.paymentStatus === "PAID" && (
-                      <button style={{ marginLeft: "5px" }}>
+                    {d.stage === "VERIFIED" && !d.gdcNumber && (
+                      <button style={{ marginLeft: "6px" }}>
                         Generate GDC
                       </button>
                     )}
@@ -130,39 +120,3 @@ const DriverReports = () => {
 };
 
 export default DriverReports;
-
-/* ================= STYLES ================= */
-
-const cardGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-  gap: "15px",
-  marginBottom: "20px"
-};
-
-const filterBox = {
-  display: "flex",
-  gap: "10px",
-  marginBottom: "15px"
-};
-
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse"
-};
-
-/* ================= COMPONENT ================= */
-
-const SummaryCard = ({ title, value }) => (
-  <div style={cardStyle}>
-    <h4>{title}</h4>
-    <h2>{value || 0}</h2>
-  </div>
-);
-
-const cardStyle = {
-  background: "#f5f5f5",
-  padding: "15px",
-  borderRadius: "8px",
-  textAlign: "center"
-};
