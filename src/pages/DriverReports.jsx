@@ -35,7 +35,9 @@ const SummaryCard = ({ title, value }) => {
   return (
     <div style={cardStyle}>
       <h4>{title}</h4>
-      <p style={{ fontSize: "18px", fontWeight: "bold" }}>{value || 0}</p>
+      <p style={{ fontSize: "18px", fontWeight: "bold" }}>
+        {value ?? 0}
+      </p>
     </div>
   );
 };
@@ -58,9 +60,11 @@ const DriverReports = () => {
   const loadReports = async () => {
     setLoading(true);
     try {
+      // ✅ FIX: res IS the backend response already
       const res = await fetchDriverReports(filters);
-      setSummary(res.data.summary || {});
-      setDrivers(res.data.drivers || []);
+
+      setSummary(res.summary || {});
+      setDrivers(res.drivers || []);
     } catch (err) {
       console.error("Error loading driver reports", err);
     } finally {
@@ -143,9 +147,14 @@ const DriverReports = () => {
                   <td>{d.verificationStatus || "PENDING"}</td>
                   <td>{d.gdcNumber ? "Generated" : "Not Generated"}</td>
                   <td>
-                    <button onClick={() => alert(`View ${d.driverId}`)}>View</button>
+                    <button onClick={() => alert(`View ${d.driverId}`)}>
+                      View
+                    </button>
+
                     {d.stage === "VERIFIED" && !d.gdcNumber && (
-                      <button style={{ marginLeft: "6px" }}>Generate GDC</button>
+                      <button style={{ marginLeft: "6px" }}>
+                        Generate GDC
+                      </button>
                     )}
                   </td>
                 </tr>
