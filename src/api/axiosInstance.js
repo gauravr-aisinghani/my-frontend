@@ -1,6 +1,6 @@
 import axios from "axios";
 import store from "../store/store";
-import { showLoader, hideLoader } from "../store/loadingSlice";
+import { startLoading, stopLoading } from "../store/loadingSlice";
 
 const axiosInstance = axios.create({
   baseURL: "https://my-backend-1-qxc9.onrender.com", // your backend
@@ -9,11 +9,11 @@ const axiosInstance = axios.create({
 // 🔥 REQUEST INTERCEPTOR
 axiosInstance.interceptors.request.use(
   (config) => {
-    store.dispatch(showLoader());
+    store.dispatch(startLoading());
     return config;
   },
   (error) => {
-    store.dispatch(hideLoader());
+    store.dispatch(stopLoading());
     return Promise.reject(error);
   }
 );
@@ -21,11 +21,11 @@ axiosInstance.interceptors.request.use(
 // 🔥 RESPONSE INTERCEPTOR
 axiosInstance.interceptors.response.use(
   (response) => {
-    store.dispatch(hideLoader());
+    store.dispatch(stopLoading());
     return response;
   },
   (error) => {
-    store.dispatch(hideLoader());
+    store.dispatch(stopLoading());
     return Promise.reject(error);
   }
 );
