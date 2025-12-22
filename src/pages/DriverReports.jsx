@@ -212,13 +212,13 @@ const DriverReports = () => {
               </tr>
             ) : (
               drivers.map((d) => (
-                <tr key={d.driverId}>
+                <tr key={d.driver_id}>
                   <td>{d.driverId}</td>
                   <td>{d.name}</td>
                   <td>{d.mobile}</td>
                   <td>{d.stage}</td>
-                  <td>{d.verificationStatus || "PENDING"}</td>
-                  <td>{d.gdcNumber ? "Generated" : "Not Generated"}</td>
+                  <td>{d.verification_status || "PENDING"}</td>
+                  <td>{d.gdc_number ? "Generated" : "Not Generated"}</td>
                   <td>
                     <button>View</button>
                   </td>
