@@ -13,12 +13,12 @@ import {
 } from "recharts";
 import * as XLSX from "xlsx";
 
-// ================= COLORS (MATCH DASHBOARD) =================
+// ================= COLORS =================
 const COLORS = {
-  visitors: "#16a34a",        // green
-  selected: "#0ea5e9",        // blue
-  registered: "#f59e0b",      // orange
-  gdc: "#ef4444",             // red
+  visitors: "#16a34a",
+  selected: "#0ea5e9",
+  registered: "#f59e0b",
+  gdc: "#ef4444",
 };
 
 // ================= STYLES =================
@@ -73,8 +73,8 @@ const DriverReports = () => {
     setLoading(true);
     try {
       const res = await fetchDriverReports(filters);
-      setSummary(res.summary || {});
-      setDrivers(res.drivers || []);
+      setSummary(res?.summary || {});
+      setDrivers(res?.drivers || []);
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ const DriverReports = () => {
     XLSX.writeFile(wb, "driver_reports.xlsx");
   };
 
-  // ================= CHART DATA (SNAKE_CASE FIXED) =================
+  // ================= CHART DATA (SNAKE_CASE) =================
   const barData = [
     { name: "Visitors", value: summary.visitors || 0, color: COLORS.visitors },
     { name: "Selected", value: summary.selected_visitors || 0, color: COLORS.selected },
@@ -100,15 +100,14 @@ const DriverReports = () => {
     { name: "GDC Generated", value: summary.gdc_generated || 0, color: COLORS.gdc },
     {
       name: "Pending",
-      value:
-        (summary.registered_drivers || 0) - (summary.gdc_generated || 0),
+      value: (summary.registered_drivers || 0) - (summary.gdc_generated || 0),
       color: COLORS.selected,
     },
   ];
 
   return (
     <div style={pageStyle}>
-      <h2>Drivers Reports</h2>
+      <h2>Driver Reports</h2>
 
       {/* ================= KPI CARDS ================= */}
       <div style={cardGrid}>
@@ -174,7 +173,6 @@ const DriverReports = () => {
       {/* ================= FILTER + EXCEL ================= */}
       <div style={filterBox}>
         <select
-          name="stage"
           value={filters.stage}
           onChange={(e) => setFilters({ stage: e.target.value })}
         >
