@@ -10,7 +10,6 @@ export default function GenerateGdcTransporterPage() {
 
   const [form, setForm] = useState({
     transporterRegistrationId: "",
-    verificationId: "",
     remarks: "",
   });
 
@@ -29,7 +28,7 @@ export default function GenerateGdcTransporterPage() {
       );
       if (res.data?.role) setAdminName(res.data.role);
     } catch (err) {
-      console.error("Session fetch error", err);
+      console.error(err);
     }
   };
 
@@ -38,7 +37,6 @@ export default function GenerateGdcTransporterPage() {
       const data = await generateGdcTransporterApi.getApprovedTransporters();
       setApprovedTransporters(data);
     } catch (err) {
-      console.error(err);
       alert("Failed to fetch approved transporters");
     } finally {
       setLoading(false);
@@ -48,7 +46,6 @@ export default function GenerateGdcTransporterPage() {
   const openModal = (t) => {
     setForm({
       transporterRegistrationId: t.transporterRegistrationId,
-      verificationId: t.verificationId,
       remarks: "",
     });
     setModalOpen(true);
@@ -62,10 +59,9 @@ export default function GenerateGdcTransporterPage() {
     e.preventDefault();
 
     try {
-      // ✅ snake_case payload for backend
+      // ✅ backend expects snake_case
       const payload = {
         transporter_registration_id: form.transporterRegistrationId,
-        verification_id: form.verificationId,
         final_approved_by: adminName,
         remarks: form.remarks,
       };
@@ -77,7 +73,6 @@ export default function GenerateGdcTransporterPage() {
       setModalOpen(false);
       loadApprovedTransporters();
     } catch (err) {
-      console.error(err);
       alert("Failed to generate Transporter GDC");
     }
   };
@@ -95,8 +90,8 @@ export default function GenerateGdcTransporterPage() {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 border">Company Name</th>
+              <th className="p-3 border">Owner Name</th>
               <th className="p-3 border">Owner Mobile</th>
-              <th className="p-3 border">GST Number</th>
               <th className="p-3 border">Verified At</th>
               <th className="p-3 border">Action</th>
             </tr>
@@ -104,11 +99,13 @@ export default function GenerateGdcTransporterPage() {
 
           <tbody>
             {approvedTransporters.map((t) => (
-              <tr key={t.verificationId}>
+              <tr key={t.transporterRegistrationId}>
                 <td className="p-3 border">{t.companyName}</td>
-                <td className="p-3 border">{t.ownerMobileNumber}</td>
-                <td className="p-3 border">{t.gstNumber}</td>
-                <td className="p-3 border">{t.verifiedAt}</td>
+                <td className="p-3 border">{t.ownerName}</td>
+                <td className="p-3 border">{t.ownerMobile}</td>
+                <td className="p-3 border">
+                  {new Date(t.verifiedAt).toLocaleString()}
+                </td>
                 <td className="p-3 border">
                   <button
                     onClick={() => openModal(t)}
@@ -132,12 +129,6 @@ export default function GenerateGdcTransporterPage() {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              <input
-                disabled
-                value={form.verificationId}
-                className="w-full p-2 border rounded bg-gray-200"
-              />
-
               <input
                 disabled
                 value={form.transporterRegistrationId}
@@ -167,16 +158,9 @@ export default function GenerateGdcTransporterPage() {
       {result && (
         <div className="mt-6 p-4 border rounded bg-gray-100">
           <h3 className="font-bold mb-2">Generated GDC Details</h3>
-
-          <p>
-            <strong>GDC Number:</strong> {result.gdc_registration_number}
-          </p>
-          <p>
-            <strong>ID Card URL:</strong> {result.id_card_url}
-          </p>
-          <p>
-            <strong>Message:</strong> {result.message}
-          </p>
+          <p><strong>GDC Number:</strong> {result.gdc_registration_number}</p>
+          <p><strong>ID Card URL:</strong> {result.id_card_url}</p>
+          <p><strong>Message:</strong> {result.message}</p>
         </div>
       )}
     </div>
