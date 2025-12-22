@@ -42,14 +42,19 @@ function App() {
 
       <Router>
         <Routes>
-          {/* ✅ PUBLIC ENTRY PAGE */}
+
+          {/* ✅ PUBLIC ENTRY */}
           <Route path="/" element={<EntrySelection />} />
 
-          {/* ✅ PUBLIC DRIVER / TRANSPORTER REGISTRATION */}
+          {/* ✅ PUBLIC REGISTRATION */}
           <Route path="/driver/signup" element={<DriverRegistrationPage />} />
           <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
 
-          {/* ✅ ADMIN AUTH */}
+          {/* ✅ PUBLIC PAYMENTS (DRIVER + TRANSPORTER) */}
+          <Route path="/payment" element={<Payments />} />
+          <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+
+          {/* ✅ AUTH */}
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
@@ -59,7 +64,7 @@ function App() {
           <Route path="/super-admin" element={<SuperAdminLogin />} />
           <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
 
-          {/* 🔒 ADMIN DASHBOARD (PROTECTED) */}
+          {/* 🔒 ADMIN DASHBOARD */}
           <Route
             path="/dashboard/*"
             element={
@@ -88,8 +93,10 @@ function App() {
             <Route path="driver-verification" element={<DriverVerificationPage />} />
             <Route path="transporter-verification" element={<TransporterVerificationPage />} />
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
+
+            {/* 🔒 ADMIN PAYMENTS */}
             <Route path="payments" element={<Payments />} />
-            <Route path="payment-confirmation" element={<PaymentConfirmation />} />
+
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
             <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
             <Route path="drivers-reports" element={<DriverReports />} />
@@ -98,6 +105,7 @@ function App() {
 
           {/* FALLBACK */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </Router>
     </>
