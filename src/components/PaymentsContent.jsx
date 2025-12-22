@@ -7,8 +7,7 @@ export default function PaymentsContent() {
   const [gdcNumber, setGdcNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const PAYMENT_AMOUNT = 500;
+  const [orderData, setOrderData] = useState(null);
 
   const selectType = (type) => {
     setPaymentType(type);
@@ -28,35 +27,53 @@ export default function PaymentsContent() {
     try {
       setLoading(true);
 
-      const orderResponse = await createPaymentOrder({
-        amount: PAYMENT_AMOUNT,
+      // 🔹 Call backend (NO amount, NO gdc_number)
+      const response = await createPaymentOrder({
+        gdcNumber: gdcNumber,
         type: paymentType,
-        gdc_number: gdcNumber,
       });
 
+      console.log("Create order response:", response);
+      setOrderData(response);
+
+      if (!window.Razorpay) {
+        alert("Razorpay SDK not loaded");
+        return;
+      }
+
       const options = {
-        key: orderResponse.keyId,
-        amount: orderResponse.amount,
-        currency: orderResponse.currency,
-        order_id: orderResponse.orderId,
-        name: "WTL Payments",
+        key: response.key,            // ✅ correct
+        order_id: response.orderId,   // ✅ correct
+        amount: response.amount,      // paise
+        currency: response.currency,
+        name: "WTL",
         description: `${paymentType} GDC Activation`,
-        handler: function () {
+
+        handler: function (res) {
+          console.log("Payment success:", res);
           alert("Payment successful!");
+          // next step: call verify-payment API
         },
-        prefill: {
-          name: "WTL User",
-        },
-        theme: {
-          color: "#2563eb",
+
+        modal: {
+          ondismiss: function () {
+            console.log("Payment popup closed");
+          },
         },
       };
 
       const rzp = new window.Razorpay(options);
+
+      rzp.on("payment.failed", function (response) {
+        console.error("Payment failed:", response.error);
+        alert(response.error.description);
+      });
+
       rzp.open();
+
     } catch (err) {
       console.error(err);
-      alert("Failed to initiate payment");
+      alert(err?.response?.data?.message || "Failed to initiate payment");
     } finally {
       setLoading(false);
     }
@@ -64,57 +81,50 @@ export default function PaymentsContent() {
 
   return (
     <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl mt-10">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Payments</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+        Payments
+      </h2>
 
       {step === 0 && (
         <div className="grid gap-6 md:grid-cols-2">
           <div
             onClick={() => selectType("DRIVER")}
-            className="p-6 border border-gray-200 rounded-xl cursor-pointer hover:shadow-lg transition duration-200 flex flex-col items-start gap-2"
+            className="p-6 border rounded-xl cursor-pointer hover:shadow-lg"
           >
-            <span className="text-3xl">🚚</span>
-            <h3 className="font-semibold text-lg text-gray-800">Driver Payment</h3>
-            <p className="text-gray-500 text-sm">Pay & activate Driver GDC</p>
+            🚚 <h3 className="font-semibold">Driver Payment</h3>
+            <p className="text-sm text-gray-500">Pay & activate Driver GDC</p>
           </div>
 
           <div
             onClick={() => selectType("TRANSPORTER")}
-            className="p-6 border border-gray-200 rounded-xl cursor-pointer hover:shadow-lg transition duration-200 flex flex-col items-start gap-2"
+            className="p-6 border rounded-xl cursor-pointer hover:shadow-lg"
           >
-            <span className="text-3xl">🏢</span>
-            <h3 className="font-semibold text-lg text-gray-800">Transporter Payment</h3>
-            <p className="text-gray-500 text-sm">Pay & activate Transporter GDC</p>
+            🏢 <h3 className="font-semibold">Transporter Payment</h3>
+            <p className="text-sm text-gray-500">
+              Pay & activate Transporter GDC
+            </p>
           </div>
         </div>
       )}
 
       {step === 1 && (
         <div className="mt-6 space-y-4">
-          <button
-            onClick={() => setStep(0)}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-          >
-            ← Back
-          </button>
+          <button onClick={() => setStep(0)}>← Back</button>
 
-          <h4 className="text-lg font-semibold">Enter {paymentType} GDC Number</h4>
+          <h4 className="font-semibold">
+            Enter {paymentType} GDC Number
+          </h4>
 
           <input
-            type="text"
-            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              error ? "border-red-500" : "border-gray-300"
-            }`}
             value={gdcNumber}
             onChange={(e) => setGdcNumber(e.target.value)}
+            className="w-full p-3 border rounded"
             placeholder="Enter GDC Number"
           />
 
-          {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
+          {error && <p className="text-red-600">{error}</p>}
 
-          <button
-            onClick={proceedToPay}
-            className="w-full mt-4 px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-          >
+          <button onClick={proceedToPay} className="btn-primary">
             Proceed to Pay
           </button>
         </div>
@@ -122,26 +132,21 @@ export default function PaymentsContent() {
 
       {step === 2 && (
         <div className="mt-6 space-y-3">
-          <button
-            onClick={() => setStep(1)}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-          >
-            ← Back
-          </button>
+          <button onClick={() => setStep(1)}>← Back</button>
 
-          <h4 className="text-lg font-semibold">Payment Summary</h4>
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-            <p><span className="font-semibold">Type:</span> {paymentType}</p>
-            <p><span className="font-semibold">GDC Number:</span> {gdcNumber}</p>
-            <p><span className="font-semibold">Amount:</span> ₹{PAYMENT_AMOUNT}</p>
-          </div>
+          <h4 className="font-semibold">Payment Summary</h4>
+          <p><b>Type:</b> {paymentType}</p>
+          <p><b>GDC:</b> {gdcNumber}</p>
+          {orderData && (
+            <p>
+              <b>Amount:</b> ₹{orderData.amount / 100}
+            </p>
+          )}
 
           <button
             onClick={openRazorpay}
             disabled={loading}
-            className={`w-full mt-4 px-5 py-2 font-medium rounded-lg text-white ${
-              loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            } transition`}
+            className="btn-primary"
           >
             {loading ? "Processing..." : "Pay Now"}
           </button>
