@@ -8,13 +8,11 @@ export default function PaymentsContent() {
   const [loading, setLoading] = useState(false);
 
   const selectType = (type) => {
-    console.log("👉 Selected type:", type);
     setPaymentType(type);
     setStep(1);
   };
 
   const proceedToPay = () => {
-    console.log("👉 Proceed clicked, GDC:", gdcNumber);
     if (!gdcNumber.trim()) {
       alert("Enter GDC number");
       return;
@@ -22,23 +20,40 @@ export default function PaymentsContent() {
     setStep(2);
   };
 
-  const testBackendCall = async () => {
-    console.log("🔥 Pay Now clicked");
-
+  const openRazorpay = async () => {
     try {
       setLoading(true);
 
-      const res = await createPaymentOrder({
+      const response = await createPaymentOrder({
         gdcNumber,
         type: paymentType,
       });
 
-      console.log("✅ Backend responded:", res);
-      alert("Request reached backend (check Network tab)");
+      if (!window.Razorpay) {
+        alert("Razorpay SDK not loaded");
+        return;
+      }
+
+      const options = {
+        key: response.key,
+        order_id: response.orderId,
+        amount: response.amount,
+        currency: response.currency,
+        name: "WTL",
+        description: `${paymentType} GDC Activation`,
+
+        handler: function (res) {
+          console.log("Payment success:", res);
+          alert("Payment successful!");
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
 
     } catch (err) {
-      console.error("❌ Error:", err);
-      alert("Error occurred — check Network tab & console");
+      console.error(err);
+      alert(err?.response?.data?.message || "Payment failed");
     } finally {
       setLoading(false);
     }
@@ -46,43 +61,32 @@ export default function PaymentsContent() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Payments (DEBUG MODE)</h2>
+      <h2>Payments</h2>
 
       {step === 0 && (
         <>
-          <button onClick={() => selectType("DRIVER")}>
-            🚚 Driver Payment
-          </button>
-          <br /><br />
-          <button onClick={() => selectType("TRANSPORTER")}>
-            🏢 Transporter Payment
-          </button>
+          <button onClick={() => selectType("DRIVER")}>🚚 Driver</button>
+          <button onClick={() => selectType("TRANSPORTER")}>🏢 Transporter</button>
         </>
       )}
 
       {step === 1 && (
         <>
-          <br />
-          <button onClick={() => setStep(0)}>← Back</button>
-          <br /><br />
           <input
             placeholder="Enter GDC Number"
             value={gdcNumber}
             onChange={(e) => setGdcNumber(e.target.value)}
           />
-          <br /><br />
           <button onClick={proceedToPay}>Proceed</button>
         </>
       )}
 
       {step === 2 && (
         <>
-          <br />
-          <p><b>Type:</b> {paymentType}</p>
-          <p><b>GDC:</b> {gdcNumber}</p>
-
-          <button onClick={testBackendCall} disabled={loading}>
-            {loading ? "Testing..." : "Pay Now (TEST)"}
+          <p>Type: {paymentType}</p>
+          <p>GDC: {gdcNumber}</p>
+          <button onClick={openRazorpay} disabled={loading}>
+            {loading ? "Processing..." : "Pay Now"}
           </button>
         </>
       )}
