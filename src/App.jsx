@@ -5,7 +5,6 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import SuperAdminLogin from "./pages/SuperAdminLogin.jsx";
-import SidebarLayout from "./components/SidebarLayout";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
 import DailyVisitorPage2 from "./pages/DailyVisitorsPage2.jsx";
 import SelectedDriversPage from "./pages/SelectedDriversPage.jsx";
@@ -28,7 +27,6 @@ import AdminPage from "./pages/AdminPage.jsx";
 import GenerateGdcPage from "./pages/GenerateGdcPage.jsx";
 import Payments from "./pages/Payments.jsx";
 import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
-// 🔥 Add this
 import GlobalLoader from "./components/GlobalLoader";
 import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
 import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
@@ -40,24 +38,28 @@ import EntrySelection from "./pages/EntrySelection.jsx";
 function App() {
   return (
     <>
-      {/* 🔥 Global Loader works for all API requests */}
       <GlobalLoader />
 
       <Router>
         <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<LoginForm />} />
+          {/* ✅ PUBLIC ENTRY PAGE */}
+          <Route path="/" element={<EntrySelection />} />
+
+          {/* ✅ PUBLIC DRIVER / TRANSPORTER REGISTRATION */}
+          <Route path="/driver/signup" element={<DriverRegistrationPage />} />
+          <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
+
+          {/* ✅ ADMIN AUTH */}
+          <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="entry-selection" element={<EntrySelection />} />
 
-
-          {/* SUPER ADMIN – OUTSIDE dashboard */}
+          {/* SUPER ADMIN */}
           <Route path="/super-admin" element={<SuperAdminLogin />} />
           <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
 
-          {/* Protected dashboard */}
+          {/* 🔒 ADMIN DASHBOARD (PROTECTED) */}
           <Route
             path="/dashboard/*"
             element={
@@ -84,24 +86,17 @@ function App() {
             <Route path="curd" element={<CrudUI />} />
             <Route path="daily-visitor-table" element={<DailyVisitorTable />} />
             <Route path="driver-verification" element={<DriverVerificationPage />} />
-                        <Route path="transporter-verification" element={<TransporterVerificationPage />} />
-
+            <Route path="transporter-verification" element={<TransporterVerificationPage />} />
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
             <Route path="payments" element={<Payments />} />
             <Route path="payment-confirmation" element={<PaymentConfirmation />} />
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
-             <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
-              <Route path="drivers-reports" element={<DriverReports />} />
-              <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
-
-
-
-            
-
-
+            <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
+            <Route path="drivers-reports" element={<DriverReports />} />
+            <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
           </Route>
 
-          {/* Redirect unknown routes */}
+          {/* FALLBACK */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
