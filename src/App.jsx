@@ -1,11 +1,17 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
+
 import SuperAdminLogin from "./pages/SuperAdminLogin.jsx";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard.jsx";
+
+import AdminPage from "./pages/AdminPage.jsx";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
+
 import DailyVisitorPage2 from "./pages/DailyVisitorsPage2.jsx";
 import SelectedDriversPage from "./pages/SelectedDriversPage.jsx";
 import VehiclesPage from "./pages/VehiclesPage.jsx";
@@ -22,18 +28,20 @@ import LastExperiencePage from "./pages/LastExperiencePage";
 import CrudUI from "./pages/CrudUI";
 import DailyVisitorTable from "./components/DailyVisitorsTable.jsx";
 import DriverVerificationPage from "./pages/DriverVerificationPage.jsx";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard.jsx";
-import AdminPage from "./pages/AdminPage.jsx";
-import GenerateGdcPage from "./pages/GenerateGdcPage.jsx";
-import Payments from "./pages/Payments.jsx";
-import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
-import GlobalLoader from "./components/GlobalLoader";
-import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
-import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
 import TransporterVerificationPage from "./pages/TransporterVerificationPage.jsx";
 import DriverReports from "./pages/DriverReports.jsx";
+
+import GenerateGdcPage from "./pages/GenerateGdcPage.jsx";
 import GenerateGdcTransporterPage from "./pages/GenerateGdcTransporterPage.jsx";
+
+import Payments from "./pages/Payments.jsx";
+import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
+
+import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
+import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
+
 import EntrySelection from "./pages/EntrySelection.jsx";
+import GlobalLoader from "./components/GlobalLoader";
 
 function App() {
   return (
@@ -43,28 +51,30 @@ function App() {
       <Router>
         <Routes>
 
-          {/* ✅ PUBLIC ENTRY */}
+          {/* 🌍 PUBLIC ENTRY */}
           <Route path="/" element={<EntrySelection />} />
 
-          {/* ✅ PUBLIC REGISTRATION */}
+          {/* 🌍 PUBLIC REGISTRATION */}
           <Route path="/driver/signup" element={<DriverRegistrationPage />} />
           <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
 
-          {/* ✅ PUBLIC PAYMENTS (DRIVER + TRANSPORTER) */}
+          {/* 🌍 PUBLIC PAYMENT (Driver + Transporter + Anyone) */}
           <Route path="/payment" element={<Payments />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
 
-          {/* ✅ AUTH */}
-          <Route path="/login" element={<LoginForm />} />
+          {/* 🔐 ADMIN LOGIN (SEPARATE ENTRY) */}
+          <Route path="/admin" element={<LoginForm />} />
+
+          {/* OPTIONAL AUTH ROUTES */}
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* SUPER ADMIN */}
+          {/* 👑 SUPER ADMIN */}
           <Route path="/super-admin" element={<SuperAdminLogin />} />
           <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
 
-          {/* 🔒 ADMIN DASHBOARD */}
+          {/* 🔒 ADMIN DASHBOARD (PROTECTED) */}
           <Route
             path="/dashboard/*"
             element={
@@ -87,23 +97,22 @@ function App() {
             <Route path="driver-details" element={<DriverDetails />} />
             <Route path="licence-details" element={<LicenceDetailsPage />} />
             <Route path="last-experience" element={<LastExperiencePage />} />
-            <Route path="daily-visitor" element={<DailyVisitorPage2 />} />
             <Route path="curd" element={<CrudUI />} />
             <Route path="daily-visitor-table" element={<DailyVisitorTable />} />
             <Route path="driver-verification" element={<DriverVerificationPage />} />
             <Route path="transporter-verification" element={<TransporterVerificationPage />} />
+            <Route path="drivers-reports" element={<DriverReports />} />
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
+            <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
 
-            {/* 🔒 ADMIN PAYMENTS */}
+            {/* 🔒 ADMIN PAYMENT (SAME UI) */}
             <Route path="payments" element={<Payments />} />
 
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
             <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
-            <Route path="drivers-reports" element={<DriverReports />} />
-            <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
           </Route>
 
-          {/* FALLBACK */}
+          {/* 🔁 FALLBACK */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
