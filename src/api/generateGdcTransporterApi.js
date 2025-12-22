@@ -5,7 +5,7 @@ const API_BASE = "https://my-backend-1-qxc9.onrender.com/api/transporter-final";
 const generateGdcTransporterApi = {
   async generateGdc(payload) {
     try {
-      const res = await axios.post(`${API_BASE}/generate`, payload, {
+      const res = await axios.post(`${API_BASE}/generate-gdc`, payload, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
