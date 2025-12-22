@@ -2,16 +2,23 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const loadingSlice = createSlice({
   name: "loading",
-  initialState: { isLoading: false },
+  initialState: {
+    pendingRequests: 0,
+  },
   reducers: {
-    showLoader: (state) => {
-      state.isLoading = true;
+    startLoading: (state) => {
+      state.pendingRequests += 1;
     },
-    hideLoader: (state) => {
-      state.isLoading = false;
+    stopLoading: (state) => {
+      state.pendingRequests = Math.max(0, state.pendingRequests - 1);
+    },
+    resetLoading: (state) => {
+      state.pendingRequests = 0;
     },
   },
 });
 
-export const { showLoader, hideLoader } = loadingSlice.actions;
+export const { startLoading, stopLoading, resetLoading } =
+  loadingSlice.actions;
+
 export default loadingSlice.reducer;

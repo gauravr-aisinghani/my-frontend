@@ -2,9 +2,11 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 export default function GlobalLoader() {
-  const isLoading = useSelector((state) => state.loading.isLoading);
+  const pendingRequests = useSelector(
+    (state) => state.loading.pendingRequests
+  );
 
-  if (!isLoading) return null;
+  if (pendingRequests <= 0) return null;
 
   return (
     <div style={styles.overlay}>
@@ -20,18 +22,18 @@ const styles = {
     left: 0,
     width: "100vw",
     height: "100vh",
-    background: "rgba(0,0,0,0.3)",
+    background: "rgba(0,0,0,0.35)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 9999,
-    pointerEvents: "all", // blocks clicks
+    pointerEvents: "all", // ⛔ BLOCK CLICKS
   },
   loader: {
     width: "70px",
     height: "70px",
     border: "8px solid #fff",
-    borderTop: "8px solid #3498db",
+    borderTop: "8px solid #2563eb",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
