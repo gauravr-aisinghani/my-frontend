@@ -50,6 +50,8 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="entry-selection" element={<EntrySelection />} />
+
 
           {/* SUPER ADMIN – OUTSIDE dashboard */}
           <Route path="/super-admin" element={<SuperAdminLogin />} />
@@ -91,7 +93,6 @@ function App() {
              <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
               <Route path="drivers-reports" element={<DriverReports />} />
               <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
-              <Route path="entry-selection" element={<EntrySelection />} />
 
 
 
