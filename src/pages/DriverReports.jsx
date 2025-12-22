@@ -216,7 +216,7 @@ const DriverReports = () => {
                   <td>{d.mobile}</td>
                   <td>{d.stage}</td>
                   <td>{d.verification_status || "PENDING"}</td>
-                  <td>{d.gdc_number ? "Generated" : "Not Generated"}</td>
+                  <td>{d.gdc_number || "Not Generated"}</td>
                   <td>
                     <button>View</button>
                   </td>
