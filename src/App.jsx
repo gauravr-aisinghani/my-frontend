@@ -34,6 +34,7 @@ import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx"
 import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
 import TransporterVerificationPage from "./pages/TransporterVerificationPage.jsx";
 import DriverReports from "./pages/DriverReports.jsx";
+import GenerateGdcTransporterPage from "./pages/GenerateGdcTransporterPage.jsx";
 
 function App() {
   return (
@@ -88,6 +89,8 @@ function App() {
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
              <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
               <Route path="drivers-reports" element={<DriverReports />} />
+              <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
+
 
 
             
