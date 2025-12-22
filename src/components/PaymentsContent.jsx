@@ -5,86 +5,48 @@ export default function PaymentsContent() {
   const [step, setStep] = useState(0);
   const [paymentType, setPaymentType] = useState("");
   const [gdcNumber, setGdcNumber] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const selectType = (type) => {
-    console.log("👉 Payment type selected:", type);
+    console.log("👉 Selected type:", type);
     setPaymentType(type);
     setStep(1);
-    setError("");
   };
 
   const proceedToPay = () => {
-    console.log("👉 Proceed clicked with GDC:", gdcNumber);
-
+    console.log("👉 Proceed clicked, GDC:", gdcNumber);
     if (!gdcNumber.trim()) {
-      setError("Please enter GDC number");
+      alert("Enter GDC number");
       return;
     }
     setStep(2);
   };
 
-  const openRazorpay = async () => {
+  const testBackendCall = async () => {
     console.log("🔥 Pay Now clicked");
 
     try {
       setLoading(true);
 
-      console.log("📡 Calling backend...");
-      const response = await createPaymentOrder({
-        gdcNumber: gdcNumber,
+      const res = await createPaymentOrder({
+        gdcNumber,
         type: paymentType,
       });
 
-      console.log("✅ Order created:", response);
-
-      if (!window.Razorpay) {
-        alert("❌ Razorpay SDK not loaded");
-        return;
-      }
-
-      const options = {
-        key: response.key,
-        order_id: response.orderId,
-        amount: response.amount,
-        currency: response.currency,
-        name: "WTL",
-        description: `${paymentType} GDC Activation`,
-
-        handler: function (res) {
-          console.log("✅ Payment success:", res);
-          alert("Payment successful!");
-        },
-
-        modal: {
-          ondismiss: function () {
-            console.log("⚠️ Payment popup closed");
-          },
-        },
-      };
-
-      console.log("🚀 Opening Razorpay popup");
-      const rzp = new window.Razorpay(options);
-
-      rzp.on("payment.failed", function (response) {
-        console.error("❌ Payment failed:", response.error);
-        alert(response.error.description);
-      });
-
-      rzp.open();
+      console.log("✅ Backend responded:", res);
+      alert("Request reached backend (check Network tab)");
 
     } catch (err) {
       console.error("❌ Error:", err);
-      alert(err?.response?.data?.message || "Failed to initiate payment");
+      alert("Error occurred — check Network tab & console");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
-      <h2 className="text-xl font-bold mb-4">Payments</h2>
+    <div style={{ padding: 20 }}>
+      <h2>Payments (DEBUG MODE)</h2>
 
       {step === 0 && (
         <>
@@ -100,28 +62,27 @@ export default function PaymentsContent() {
 
       {step === 1 && (
         <>
+          <br />
           <button onClick={() => setStep(0)}>← Back</button>
           <br /><br />
           <input
+            placeholder="Enter GDC Number"
             value={gdcNumber}
             onChange={(e) => setGdcNumber(e.target.value)}
-            placeholder="Enter GDC Number"
           />
-          <br />
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          <br />
-          <button onClick={proceedToPay}>Proceed to Pay</button>
+          <br /><br />
+          <button onClick={proceedToPay}>Proceed</button>
         </>
       )}
 
       {step === 2 && (
         <>
-          <button onClick={() => setStep(1)}>← Back</button>
+          <br />
           <p><b>Type:</b> {paymentType}</p>
           <p><b>GDC:</b> {gdcNumber}</p>
 
-          <button onClick={openRazorpay} disabled={loading}>
-            {loading ? "Processing..." : "Pay Now"}
+          <button onClick={testBackendCall} disabled={loading}>
+            {loading ? "Testing..." : "Pay Now (TEST)"}
           </button>
         </>
       )}
