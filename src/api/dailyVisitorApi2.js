@@ -1,14 +1,16 @@
 // src/api/dailyVisitorApi2.js
-import axios from "axios";
+import api from "./axiosInstance";
 
-const API_BASE = "https://my-backend-1-qxc9.onrender.com/api/visitor-driver";
-const SELECTED_API = "https://my-backend-1-qxc9.onrender.com/api/selected-driver";
+const API_BASE = "/api/visitor-driver";
+const SELECTED_API = "/api/selected-driver";
 
 const dailyVisitorsApi2 = {
   // Save new visitor
   async saveVisitor(visitor) {
     try {
-      const res = await axios.post(API_BASE, visitor, { withCredentials: true });
+      const res = await api.post(API_BASE, visitor, {
+        withCredentials: true,
+      });
       return res.data;
     } catch (err) {
       console.error("Error saving visitor", err);
@@ -19,7 +21,9 @@ const dailyVisitorsApi2 = {
   // Get all visitors
   async getVisitors() {
     try {
-      const res = await axios.get(API_BASE, { withCredentials: true });
+      const res = await api.get(API_BASE, {
+        withCredentials: true,
+      });
       return res.data;
     } catch (err) {
       console.error("Error fetching visitors", err);
@@ -30,7 +34,9 @@ const dailyVisitorsApi2 = {
   // Add visitor to selected_driver table
   async addToSelected(visitor) {
     try {
-      const res = await axios.post(SELECTED_API, visitor, { withCredentials: true });
+      const res = await api.post(SELECTED_API, visitor, {
+        withCredentials: true,
+      });
       return res.data;
     } catch (err) {
       console.error("Error adding to selected drivers", err);
@@ -41,7 +47,9 @@ const dailyVisitorsApi2 = {
   // Get all selected drivers
   async getSelectedDrivers() {
     try {
-      const res = await axios.get(SELECTED_API, { withCredentials: true });
+      const res = await api.get(SELECTED_API, {
+        withCredentials: true,
+      });
       return res.data;
     } catch (err) {
       console.error("Error fetching selected drivers", err);
@@ -49,10 +57,12 @@ const dailyVisitorsApi2 = {
     }
   },
 
-  // DELETE visitor
+  // Delete visitor
   async deleteVisitor(id) {
     try {
-      const res = await axios.delete(`${API_BASE}/${id}`, { withCredentials: true });
+      const res = await api.delete(`${API_BASE}/${id}`, {
+        withCredentials: true,
+      });
       return res.data;
     } catch (err) {
       console.error("Error deleting visitor driver", err);
