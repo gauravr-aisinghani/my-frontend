@@ -1,13 +1,14 @@
-import axios from "axios";
+import api from "./axiosInstance";
 
-const api = axios.create({
-  baseURL: "https://my-backend-1-qxc9.onrender.com/api/reports/drivers",
-  withCredentials: true,
-});
+
+// const api = axios.create({
+//   baseURL: "https://my-backend-1-qxc9.onrender.com/api/reports/drivers",
+//   withCredentials: true,
+// });
 
 export const fetchDriverReports = async (filters = {}) => {
   try {
-    const res = await api.get("", {
+    const res = await api.get("/api/reports/drivers", {
       params: {
         stage: filters.stage && filters.stage.length > 0
           ? filters.stage

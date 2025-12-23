@@ -1,6 +1,7 @@
-import axios from "axios";
+import api from "./axiosInstance";
 
-const API_BASE = "https://my-backend-1-qxc9.onrender.com/api/transporter-final";
+
+const API_BASE = `${api}/api/transporter-final`;
 
 const generateGdcTransporterApi = {
   async generateGdc(payload) {

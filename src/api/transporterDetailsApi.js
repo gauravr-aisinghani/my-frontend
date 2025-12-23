@@ -1,7 +1,8 @@
-import axios from "axios";
+import api from "./axiosInstance";
+
 
 const api = axios.create({
-  baseURL: "https://my-backend-1-qxc9.onrender.com/api/transporter",
+  baseURL: `${api}/api/transporter`,
   withCredentials: true,
 });
 

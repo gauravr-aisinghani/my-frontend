@@ -1,7 +1,8 @@
-import axios from "axios";
+import api from "./axiosInstance";
+
 
 const BASE_URL =
-  "https://my-backend-1-qxc9.onrender.com/api/selected-transporter";
+  `${api}api/selected-transporter`;
 
 export const saveSelectedTransporter = async (data) => {
   const res = await axios.post(`${BASE_URL}/save`, data, {

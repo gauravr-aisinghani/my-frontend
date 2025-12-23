@@ -1,8 +1,9 @@
-import axios from "axios";
+import api from "./axiosInstance";
+
 
 // ✅ MUST MATCH BACKEND CONTROLLER
 const BASE_URL =
-  "https://my-backend-1-qxc9.onrender.com/api/visitor-transporter";
+  `${api}/api/visitor-transporter`;
 
 // save visitor (POST)
 export const saveTransportVisitor = async (visitorData) => {

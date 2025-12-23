@@ -1,7 +1,8 @@
 // src/api/driverVerificationApi.js
-import axios from "axios";
+import api from "./axiosInstance";
 
-const API_URL = "https://my-backend-1-qxc9.onrender.com/api/driver-verification";
+
+const API_URL = `${api}api/driver-verification`;
 
 export default {
   getPendingDrivers: async () => {

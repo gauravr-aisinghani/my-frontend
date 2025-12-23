@@ -1,7 +1,8 @@
 // src/api/selectedDriverApi.js
-import axios from "axios";
+import api from "./axiosInstance";
 
-const API_BASE = "https://my-backend-1-qxc9.onrender.com/api/selected-driver";
+
+const API_BASE = `${api}/api/selected-driver`;
 
 const selectedDriverApi = {
   // Add selected driver record

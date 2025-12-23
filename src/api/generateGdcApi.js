@@ -1,7 +1,8 @@
 // src/api/generateGdcApi.js
-import axios from "axios";
+import api from "./axiosInstance";
 
-const API_BASE = "https://my-backend-1-qxc9.onrender.com/api/gdc";
+
+const API_BASE = `${api}/api/gdc`;
 
 const generateGdcApi = {
   async generateGdc(payload) {
