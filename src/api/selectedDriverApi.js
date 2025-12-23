@@ -8,7 +8,7 @@ const selectedDriverApi = {
   // Add selected driver record
   async addDriver(driverData) {
     try {
-      const res = await axios.post(`${API_BASE}`, driverData);
+      const res = await axios.post(`${api}/api/selected-driver/add`, driverData);
       return res.data;
     } catch (err) {
       console.error("Error adding selected driver", err);
@@ -19,7 +19,7 @@ const selectedDriverApi = {
   // Get all selected drivers
   async getAllSelectedDrivers() {
     try {
-      const res = await axios.get(`${API_BASE}`);
+      const res = await axios.get(`${api}/api/selected-driver`);
       return res.data;
     } catch (err) {
       console.error("Error fetching selected drivers", err);
