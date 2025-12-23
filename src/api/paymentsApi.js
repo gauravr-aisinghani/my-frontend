@@ -1,15 +1,14 @@
 import api from "./axiosInstance";
 
 /**
- * STEP 1: Validate GDC number
- * Sends:
- * {
- *   gdcNumber: string,
- *   type: "DRIVER" | "TRANSPORTER"
- * }
+ * CREATE PAYMENT ORDER
+ * Backend will:
+ * - Validate GDC
+ * - Decide amount
+ * - Create Razorpay order
  */
-export const validateGdc = async ({ gdcNumber, type }) => {
-  const res = await api.post("/api/payments/validate", {
+export const createPaymentOrder = async ({ gdcNumber, type }) => {
+  const res = await api.post("/api/payments/create-order", {
     gdcNumber,
     type,
   });
@@ -17,17 +16,17 @@ export const validateGdc = async ({ gdcNumber, type }) => {
 };
 
 /**
- * STEP 2: Create Razorpay order
- * Sends:
- * {
- *   gdcNumber: string,
- *   type: "DRIVER" | "TRANSPORTER"
- * }
+ * VERIFY PAYMENT (after Razorpay success)
  */
-export const createPaymentOrder = async ({ gdcNumber, type }) => {
-  const res = await api.post("/api/payments/create-order", {
-    gdcNumber,
-    type,
+export const verifyPayment = async ({
+  razorpayOrderId,
+  razorpayPaymentId,
+  razorpaySignature,
+}) => {
+  const res = await api.post("/api/payments/verify", {
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature,
   });
   return res.data;
 };
