@@ -1,10 +1,10 @@
 import api from "./axiosInstance";
 
 
-const api = axios.create({
-  baseURL: `${api}/api/transporter-vehicle`,
-  withCredentials: true,
-});
+// const api = axios.create({
+//   baseURL: `${api}/api/transporter-vehicle`,
+//   withCredentials: true,
+// });
 
 export const saveTransporterVehicle = async (data) => {
   try {

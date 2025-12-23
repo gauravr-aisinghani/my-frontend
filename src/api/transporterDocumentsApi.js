@@ -1,10 +1,10 @@
 import api from "./axiosInstance";
 
 
-const api = axios.create({
-  baseURL: `${api}/api/transporter-documents`,
-  withCredentials: true,
-});
+// const api = axios.create({
+//   baseURL: `${api}/api/transporter-documents`,
+//   withCredentials: true,
+// });
 
 /**
  * Upload transporter documents (Step 3)
@@ -17,7 +17,7 @@ export const uploadTransporterDocuments = async (
 ) => {
   try {
     const res = await api.post(
-      `/upload/${transporterRegistrationId}`,
+      `api/transporter-documents/upload/${transporterRegistrationId}`,
       formData,
       {
         headers: {
