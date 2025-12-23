@@ -8,7 +8,7 @@ const selectedDriverApi = {
   // Add selected driver record
   async addDriver(driverData) {
     try {
-      const res = await axios.post(`${API_BASE}/add`, driverData);
+      const res = await axios.post(`${API_BASE}`, driverData);
       return res.data;
     } catch (err) {
       console.error("Error adding selected driver", err);
