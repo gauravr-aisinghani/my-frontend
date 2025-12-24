@@ -26,7 +26,6 @@ const LastExperienceForm = () => {
     postOfDriving: "",
     fromDate: "",
     toDate: "",
-    experienceDocument: null,
   });
 
   const [errors, setErrors] = useState({});
@@ -43,11 +42,7 @@ const LastExperienceForm = () => {
 
   /** HANDLE CHANGE */
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
-      return;
-    }
+    const { name, value } = e.target;
 
     if (
       ["ownerContactNo", "totalWorkOnVehicle", "totalExperienceYears"].includes(
@@ -66,10 +61,10 @@ const LastExperienceForm = () => {
 
     switch (name) {
       case "vehicleMake":
-        if (!value) msg = "Vehicle Make is required";
+        if (!value.trim()) msg = "Vehicle Make is required";
         break;
       case "vehicleModel":
-        if (!value) msg = "Vehicle Model is required";
+        if (!value.trim()) msg = "Vehicle Model is required";
         break;
       case "lastTransportName":
         if (!value.trim()) msg = "Last Transport Name is required";
@@ -173,10 +168,6 @@ const LastExperienceForm = () => {
     }
   };
 
-  /** DROPDOWN OPTIONS */
-  const vehicleMakes = ["Tata", "Ashok Leyland", "Eicher", "Mahindra"];
-  const vehicleModels = ["Model A", "Model B", "Model C", "Model D"];
-
   return (
     <div className="w-full p-4 md:p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
@@ -200,35 +191,28 @@ const LastExperienceForm = () => {
       {!isFresher && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
             <div>
-              <select
+              <input
                 name="vehicleMake"
+                placeholder="Vehicle Make *"
                 value={formData.vehicleMake}
                 onChange={handleChange}
                 onBlur={(e) => validateField("vehicleMake", e.target.value)}
                 className={inputClass("vehicleMake")}
-              >
-                <option value="">Select Vehicle Make *</option>
-                {vehicleMakes.map((v) => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
+              />
               {renderError("vehicleMake")}
             </div>
 
             <div>
-              <select
+              <input
                 name="vehicleModel"
+                placeholder="Vehicle Model *"
                 value={formData.vehicleModel}
                 onChange={handleChange}
                 onBlur={(e) => validateField("vehicleModel", e.target.value)}
                 className={inputClass("vehicleModel")}
-              >
-                <option value="">Select Vehicle Model *</option>
-                {vehicleModels.map((v) => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
+              />
               {renderError("vehicleModel")}
             </div>
 
@@ -377,17 +361,6 @@ const LastExperienceForm = () => {
               {renderError("toDate")}
             </div>
 
-            <div>
-              <label className="flex flex-col text-sm font-semibold text-gray-700">
-                Experience Document
-                <input
-                  type="file"
-                  name="experienceDocument"
-                  onChange={handleChange}
-                  className="border rounded px-3 py-2 w-full mt-1"
-                />
-              </label>
-            </div>
           </div>
 
           <div className="flex justify-end mt-6">
