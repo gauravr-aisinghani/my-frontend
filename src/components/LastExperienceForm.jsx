@@ -31,292 +31,374 @@ const LastExperienceForm = () => {
 
   const [errors, setErrors] = useState({});
 
-  /* ---------- SAME INPUT DESIGN ---------- */
+  /** INPUT CLASSES */
   const inputClass = (name) =>
     `border rounded px-2 py-1 text-sm w-full ${
       errors[name] ? "border-red-500" : ""
     }`;
-
   const renderError = (name) =>
     errors[name] ? (
       <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
     ) : null;
 
-  /* ---------- HANDLE CHANGE ---------- */
+  /** HANDLE CHANGE */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-
     if (files) {
-      setFormData((p) => ({ ...p, [name]: files[0] }));
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
       return;
     }
 
-    if (name === "ownerContactNo") {
+    if (
+      ["ownerContactNo", "totalWorkOnVehicle", "totalExperienceYears"].includes(
+        name
+      )
+    ) {
       if (!/^\d*$/.test(value)) return;
-      if (value.length > 10) return;
     }
 
-    setFormData((p) => ({ ...p, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /* ---------- FIELD VALIDATION (ON BLUR) ---------- */
+  /** VALIDATE FIELDS */
   const validateField = (name, value) => {
     let msg = "";
-
-    if (isFresher) {
-      setErrors({});
-      return true;
-    }
 
     switch (name) {
       case "vehicleMake":
         if (!value) msg = "Vehicle Make is required";
         break;
-
       case "vehicleModel":
         if (!value) msg = "Vehicle Model is required";
         break;
-
       case "lastTransportName":
-        if (!value) msg = "Last Transporter Name is required";
+        if (!value.trim()) msg = "Last Transport Name is required";
         break;
-
-      case "transportAddress":
-        if (!value) msg = "Transport Address is required";
-        break;
-
       case "ownerName":
-        if (!value) msg = "Owner Name is required";
+        if (!value.trim()) msg = "Owner Name is required";
         break;
-
-      case "ownerContactNo":
-        if (!value) msg = "Owner Mobile is required";
-        else if (!/^\d{10}$/.test(value))
-          msg = "Mobile must be exactly 10 digits";
-        break;
-
       case "gaadiNumber":
-        if (
-          value &&
-          !/^[A-Z]{2}\d{1,2}[A-Z]{1,2}\d{4}$/i.test(value)
-        )
-          msg = "Invalid vehicle number";
+        if (!value.trim()) msg = "Gaadi Number is required";
+        else if (!/^[A-Z0-9-]{3,15}$/i.test(value))
+          msg = "Invalid Gaadi Number";
         break;
-
+      case "transportAddress":
+        if (!value.trim()) msg = "Transport Address is required";
+        break;
+      case "ownerContactNo":
+        if (!value.trim()) msg = "Owner Contact No. is required";
+        else if (!/^\d{10}$/.test(value))
+          msg = "Owner Contact No must be 10 digits";
+        break;
+      case "totalWorkOnVehicle":
+        if (!value.trim()) msg = "Total Work on Vehicle is required";
+        else if (Number(value) <= 0) msg = "Must be greater than 0";
+        break;
+      case "totalExperienceYears":
+        if (!value.trim()) msg = "Total Experience Years is required";
+        else if (Number(value) < 0) msg = "Cannot be negative";
+        break;
       case "postOfDriving":
-        if (!value) msg = "Post of Driving is required";
+        if (!value.trim()) msg = "Post of Driving is required";
         break;
-
       case "fromDate":
         if (!value) msg = "From Date is required";
+        else if (new Date(value) > new Date())
+          msg = "From Date cannot be in future";
         break;
-
       case "toDate":
-        if (
-          value &&
-          formData.fromDate &&
-          new Date(value) < new Date(formData.fromDate)
-        )
+        if (!value) break;
+        else if (formData.fromDate && new Date(value) < new Date(formData.fromDate))
           msg = "To Date cannot be before From Date";
+        else if (new Date(value) > new Date())
+          msg = "To Date cannot be in future";
         break;
-
       default:
         break;
     }
 
-    setErrors((p) => ({ ...p, [name]: msg }));
+    setErrors((prev) => ({ ...prev, [name]: msg }));
     return !msg;
   };
 
-  /* ---------- SUBMIT ---------- */
+  /** SUBMIT */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isFresher) {
-      dispatch(setStep(5));
+    if (!driverId) {
+      alert("Driver Registration ID missing!");
       return;
     }
 
-    const requiredFields = [
+    if (isFresher) {
+      dispatch(setStep(5)); // skip experience step
+      return;
+    }
+
+    const fieldsToValidate = [
       "vehicleMake",
       "vehicleModel",
       "lastTransportName",
-      "transportAddress",
       "ownerName",
+      "gaadiNumber",
+      "transportAddress",
       "ownerContactNo",
+      "totalWorkOnVehicle",
+      "totalExperienceYears",
       "postOfDriving",
       "fromDate",
+      "toDate",
     ];
 
     let hasError = false;
-
-    requiredFields.forEach((f) => {
+    fieldsToValidate.forEach((f) => {
       if (!validateField(f, formData[f])) hasError = true;
     });
-
-    if (formData.gaadiNumber) {
-      if (!validateField("gaadiNumber", formData.gaadiNumber))
-        hasError = true;
-    }
-
-    if (formData.toDate) {
-      if (!validateField("toDate", formData.toDate)) hasError = true;
-    }
 
     if (hasError) return;
 
     const fd = new FormData();
     fd.append("driver_registration_id", driverId);
-    fd.append("vehicle_make", formData.vehicleMake);
-    fd.append("vehicle_model", formData.vehicleModel);
-    fd.append("last_transport_name", formData.lastTransportName);
-    fd.append("owner_name", formData.ownerName);
-    fd.append("gaadi_number", formData.gaadiNumber);
-    fd.append("transport_address", formData.transportAddress);
-    fd.append("owner_contact_no", formData.ownerContactNo);
-    fd.append(
-      "total_work_on_vehicle",
-      formData.totalWorkOnVehicle || ""
-    );
-    fd.append(
-      "total_experience_years",
-      formData.totalExperienceYears || ""
-    );
-    fd.append("leaving_reason", formData.leavingReason);
-    fd.append("post_of_driving", formData.postOfDriving);
-    fd.append("from_date", formData.fromDate);
-    fd.append("to_date", formData.toDate);
-
-    if (formData.experienceDocument) {
-      fd.append("experience_document", formData.experienceDocument);
-    }
+    Object.entries(formData).forEach(([key, val]) => {
+      if (val) fd.append(key, val);
+    });
 
     try {
       await lastExperienceApi.saveLastExperience(driverId, fd);
+      alert("Last Experience Details Saved!");
       dispatch(setStep(5));
-    } catch {
-      alert("Error saving last experience");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving last experience.");
     }
   };
 
+  /** DROPDOWN OPTIONS */
+  const vehicleMakes = ["Tata", "Ashok Leyland", "Eicher", "Mahindra"];
+  const vehicleModels = ["Model A", "Model B", "Model C", "Model D"];
+
   return (
-    <div className="w-full p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold text-center mb-4">
-        Last Experience Details
+    <div className="w-full p-4 md:p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
+        LAST EXPERIENCE DETAILS
       </h2>
 
-      {/* Fresher Toggle */}
+      {/* Fresher Toggle Card */}
       <div
         onClick={() => setIsFresher(!isFresher)}
-        className={`border rounded p-3 mb-4 cursor-pointer text-sm ${
-          isFresher ? "border-green-500 bg-green-50" : ""
-        }`}
+        className={`flex items-center p-4 mb-4 rounded-lg cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl ${
+          isFresher ? "bg-green-100 border-green-500" : "bg-gray-50 border-gray-300"
+        } border`}
       >
-        <input
-          type="checkbox"
-          checked={isFresher}
-          readOnly
-          className="mr-2"
-        />
-        Driver is a Fresher (No Previous Experience)
+        <span className="text-2xl mr-3">{isFresher ? "🎉" : "🛑"}</span>
+        <div>
+          <p className="font-semibold text-sm">Driver is a Fresher</p>
+          <p className="text-[11px] text-gray-600">Click to skip last experience details</p>
+        </div>
       </div>
 
       {!isFresher && (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {[
-              ["vehicleMake", "Vehicle Make *"],
-              ["vehicleModel", "Vehicle Model *"],
-              ["gaadiNumber", "Vehicle Number"],
-              ["lastTransportName", "Last Transporter Name *"],
-              ["transportAddress", "Transport Address *"],
-              ["ownerName", "Owner Name *"],
-              ["ownerContactNo", "Owner Mobile *"],
-            ].map(([name, label]) => (
-              <div key={name}>
-                <input
-                  name={name}
-                  value={formData[name]}
-                  onChange={handleChange}
-                  onBlur={(e) =>
-                    validateField(name, e.target.value)
-                  }
-                  placeholder={label}
-                  className={inputClass(name)}
-                />
-                {renderError(name)}
-              </div>
-            ))}
-
-            <select
-              name="postOfDriving"
-              value={formData.postOfDriving}
-              onChange={handleChange}
-              onBlur={(e) =>
-                validateField("postOfDriving", e.target.value)
-              }
-              className={inputClass("postOfDriving")}
-            >
-              <option value="">Post of Driving *</option>
-              <option value="HCV">HCV</option>
-              <option value="LCV">LCV</option>
-              <option value="CAR">CAR</option>
-              <option value="TAXI">TAXI</option>
-            </select>
-            {renderError("postOfDriving")}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <select
+                name="vehicleMake"
+                value={formData.vehicleMake}
+                onChange={handleChange}
+                onBlur={(e) => validateField("vehicleMake", e.target.value)}
+                className={inputClass("vehicleMake")}
+              >
+                <option value="">Select Vehicle Make *</option>
+                {vehicleMakes.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+              {renderError("vehicleMake")}
+            </div>
 
             <div>
-              <label className="text-[11px] font-medium">
-                From Date *
-              </label>
-              <input
-                type="date"
-                name="fromDate"
-                value={formData.fromDate}
+              <select
+                name="vehicleModel"
+                value={formData.vehicleModel}
                 onChange={handleChange}
-                onBlur={(e) =>
-                  validateField("fromDate", e.target.value)
-                }
-                className={inputClass("fromDate")}
+                onBlur={(e) => validateField("vehicleModel", e.target.value)}
+                className={inputClass("vehicleModel")}
+              >
+                <option value="">Select Vehicle Model *</option>
+                {vehicleModels.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+              {renderError("vehicleModel")}
+            </div>
+
+            <div>
+              <input
+                name="lastTransportName"
+                placeholder="Last Transport Name *"
+                value={formData.lastTransportName}
+                onChange={handleChange}
+                onBlur={(e) => validateField("lastTransportName", e.target.value)}
+                className={inputClass("lastTransportName")}
               />
+              {renderError("lastTransportName")}
+            </div>
+
+            <div>
+              <input
+                name="ownerName"
+                placeholder="Owner Name *"
+                value={formData.ownerName}
+                onChange={handleChange}
+                onBlur={(e) => validateField("ownerName", e.target.value)}
+                className={inputClass("ownerName")}
+              />
+              {renderError("ownerName")}
+            </div>
+
+            <div>
+              <input
+                name="gaadiNumber"
+                placeholder="Gaadi Number *"
+                value={formData.gaadiNumber}
+                onChange={handleChange}
+                onBlur={(e) => validateField("gaadiNumber", e.target.value)}
+                className={inputClass("gaadiNumber")}
+              />
+              {renderError("gaadiNumber")}
+            </div>
+
+            <div>
+              <input
+                name="transportAddress"
+                placeholder="Transport Address *"
+                value={formData.transportAddress}
+                onChange={handleChange}
+                onBlur={(e) => validateField("transportAddress", e.target.value)}
+                className={inputClass("transportAddress")}
+              />
+              {renderError("transportAddress")}
+            </div>
+
+            <div>
+              <input
+                name="ownerContactNo"
+                placeholder="Owner Contact No. *"
+                value={formData.ownerContactNo}
+                onChange={handleChange}
+                onBlur={(e) => validateField("ownerContactNo", e.target.value)}
+                className={inputClass("ownerContactNo")}
+              />
+              {renderError("ownerContactNo")}
+            </div>
+
+            <div>
+              <input
+                type="number"
+                name="totalWorkOnVehicle"
+                placeholder="Total Work on Vehicle *"
+                value={formData.totalWorkOnVehicle}
+                onChange={handleChange}
+                onBlur={(e) => validateField("totalWorkOnVehicle", e.target.value)}
+                className={inputClass("totalWorkOnVehicle")}
+              />
+              {renderError("totalWorkOnVehicle")}
+            </div>
+
+            <div>
+              <input
+                type="number"
+                name="totalExperienceYears"
+                placeholder="Total Experience Years *"
+                value={formData.totalExperienceYears}
+                onChange={handleChange}
+                onBlur={(e) => validateField("totalExperienceYears", e.target.value)}
+                className={inputClass("totalExperienceYears")}
+              />
+              {renderError("totalExperienceYears")}
+            </div>
+
+            <div>
+              <input
+                name="leavingReason"
+                placeholder="Leaving Reason"
+                value={formData.leavingReason}
+                onChange={handleChange}
+                className="border rounded px-2 py-1 w-full text-sm"
+              />
+            </div>
+
+            <div>
+              <select
+                name="postOfDriving"
+                value={formData.postOfDriving}
+                onChange={handleChange}
+                onBlur={(e) => validateField("postOfDriving", e.target.value)}
+                className={inputClass("postOfDriving")}
+              >
+                <option value="">Select Post of Driving *</option>
+                <option value="HCV">HCV</option>
+                <option value="LCV">LCV</option>
+                <option value="LOADING">LOADING</option>
+                <option value="TAXI">TAXI</option>
+                <option value="CAR">CAR</option>
+                <option value="BYKE">BYKE</option>
+              </select>
+              {renderError("postOfDriving")}
+            </div>
+
+            <div>
+              <label className="flex flex-col text-sm font-semibold text-gray-700">
+                From Date *
+                <input
+                  type="date"
+                  name="fromDate"
+                  value={formData.fromDate}
+                  onChange={handleChange}
+                  onBlur={(e) => validateField("fromDate", e.target.value)}
+                  className={inputClass("fromDate")}
+                />
+              </label>
               {renderError("fromDate")}
             </div>
 
             <div>
-              <label className="text-[11px] font-medium">
+              <label className="flex flex-col text-sm font-semibold text-gray-700">
                 To Date
+                <input
+                  type="date"
+                  name="toDate"
+                  value={formData.toDate}
+                  onChange={handleChange}
+                  onBlur={(e) => validateField("toDate", e.target.value)}
+                  className={inputClass("toDate")}
+                />
               </label>
-              <input
-                type="date"
-                name="toDate"
-                value={formData.toDate}
-                onChange={handleChange}
-                onBlur={(e) =>
-                  validateField("toDate", e.target.value)
-                }
-                className={inputClass("toDate")}
-              />
               {renderError("toDate")}
+            </div>
+
+            <div>
+              <label className="flex flex-col text-sm font-semibold text-gray-700">
+                Experience Document
+                <input
+                  type="file"
+                  name="experienceDocument"
+                  onChange={handleChange}
+                  className="border rounded px-3 py-2 w-full mt-1"
+                />
+              </label>
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">
+          <div className="flex justify-end mt-6">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
+            >
               Save & Continue →
             </button>
           </div>
         </form>
-      )}
-
-      {isFresher && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => dispatch(setStep(5))}
-            className="bg-blue-500 text-white px-4 py-2 rounded text-sm"
-          >
-            Continue →
-          </button>
-        </div>
       )}
     </div>
   );
