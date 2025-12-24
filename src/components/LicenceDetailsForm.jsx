@@ -8,20 +8,12 @@ import {
 import { saveLicenceDetails } from "../api/licenceApi";
 
 /* =========================
-   🔹 CONSTANTS & REGEX
+   CONSTANTS
 ========================= */
 
-const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const LICENCE_REGEX = /^[A-Z0-9\-\/]{8,20}$/;
 const EMPLOYEE_CARD_REGEX = /^[A-Z0-9]{5,20}$/;
-
-const LICENCE_AUTHORITIES = [
-  "RTO",
-  "DTO",
-  "ARTO",
-  "Transport Department",
-  "Other",
-];
 
 const LICENCE_GRADES = [
   "LMV",
@@ -32,19 +24,21 @@ const LICENCE_GRADES = [
   "TRAILER",
 ];
 
-
-const inputClass = (name) =>
-  `input ${errors[name] ? "border-red-500" : ""}`;
-
+const LICENCE_AUTHORITIES = [
+  "RTO",
+  "DTO",
+  "ARTO",
+  "Transport Department",
+  "Other",
+];
 
 export default function LicenceDetailsForm() {
   const dispatch = useDispatch();
   const reg = useSelector(selectDriverRegistration);
-
   const driverId = reg?.registrationId;
 
   /* =========================
-     🔹 STATE
+     STATE
   ========================= */
 
   const [formData, setFormData] = useState({
@@ -63,7 +57,14 @@ export default function LicenceDetailsForm() {
   const [loading, setLoading] = useState(false);
 
   /* =========================
-     🔹 CHANGE HANDLER
+     HELPERS
+  ========================= */
+
+  const inputClass = (name) =>
+    `input ${errors[name] ? "border-red-500" : ""}`;
+
+  /* =========================
+     CHANGE HANDLER
   ========================= */
 
   const handleChange = (e) => {
@@ -92,7 +93,7 @@ export default function LicenceDetailsForm() {
   };
 
   /* =========================
-     🔹 FIELD VALIDATION
+     INLINE VALIDATION (ON BLUR)
   ========================= */
 
   const validateField = (name, value) => {
@@ -152,79 +153,73 @@ export default function LicenceDetailsForm() {
     setErrors((p) => ({ ...p, [name]: msg }));
   };
 
- const hasErrors = () => {
-  const requiredFields = [
-    "licenceNumber",
-    "licenceGrade",
-    "issueDate",
-    "validityEndDate",
-    "issuingAuthority",
-    "anyOffence",
-  ];
-
-  let errorFound = false;
-
-  requiredFields.forEach((field) => {
-    validateField(field, formData[field]);
-    if (!formData[field]) errorFound = true;
-  });
-
-  if (formData.anyOffence === "YES" && !formData.offenceRemark.trim()) {
-    validateField("offenceRemark", formData.offenceRemark);
-    errorFound = true;
-  }
-
-  return errorFound;
-};
-
-
   /* =========================
-     🔹 SUBMIT
+     SUBMIT
   ========================= */
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!driverId) {
-    alert("Driver Registration ID missing. Complete Step 1.");
-    return;
-  }
+    if (!driverId) {
+      alert("Driver Registration ID missing. Complete Step 1.");
+      return;
+    }
 
-  if (hasErrors()) {
-    alert("Please fix validation errors");
-    return;
-  }
+    const required = [
+      "licenceNumber",
+      "licenceGrade",
+      "issueDate",
+      "validityEndDate",
+      "issuingAuthority",
+      "anyOffence",
+    ];
 
-  setLoading(true);
+    let hasError = false;
 
-  try {
-    dispatch(updateStep2(formData));
+    required.forEach((f) => {
+      validateField(f, formData[f]);
+      if (!formData[f]) hasError = true;
+    });
 
-    const payload = {
-      employee_card_no: formData.employeeCardNo || null,
-      pan_number: formData.panNumber || null,
-      licence_number: formData.licenceNumber,
-      licence_grade: formData.licenceGrade,
-      issue_date: formData.issueDate,
-      validity_end_date: formData.validityEndDate,
-      issuing_authority: formData.issuingAuthority,
-      any_offence: formData.anyOffence,
-      offence_remark:
-        formData.anyOffence === "YES" ? formData.offenceRemark : null,
-    };
+    if (formData.anyOffence === "YES" && !formData.offenceRemark.trim()) {
+      validateField("offenceRemark", formData.offenceRemark);
+      hasError = true;
+    }
 
-    await saveLicenceDetails(driverId, payload);
-    dispatch(setStep(3));
-  } catch (err) {
-    alert("Failed to save licence details");
-  } finally {
-    setLoading(false);
-  }
-};
+    if (hasError) {
+      alert("Please fix validation errors");
+      return;
+    }
 
+    setLoading(true);
+
+    try {
+      dispatch(updateStep2(formData));
+
+      const payload = {
+        employee_card_no: formData.employeeCardNo || null,
+        pan_number: formData.panNumber || null,
+        licence_number: formData.licenceNumber,
+        licence_grade: formData.licenceGrade,
+        issue_date: formData.issueDate,
+        validity_end_date: formData.validityEndDate,
+        issuing_authority: formData.issuingAuthority,
+        any_offence: formData.anyOffence,
+        offence_remark:
+          formData.anyOffence === "YES" ? formData.offenceRemark : null,
+      };
+
+      await saveLicenceDetails(driverId, payload);
+      dispatch(setStep(3));
+    } catch (err) {
+      alert("Failed to save licence details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* =========================
-     🔹 JSX
+     JSX
   ========================= */
 
   return (
@@ -241,7 +236,7 @@ export default function LicenceDetailsForm() {
             value={formData.employeeCardNo}
             onChange={handleChange}
             onBlur={(e) => validateField("employeeCardNo", e.target.value)}
-            className={`input ${errors.employeeCardNo ? "border-red-500" : ""}`}
+            className={inputClass("employeeCardNo")}
             placeholder="Employee Card No"
           />
 
@@ -250,7 +245,7 @@ export default function LicenceDetailsForm() {
             value={formData.panNumber}
             onChange={handleChange}
             onBlur={(e) => validateField("panNumber", e.target.value)}
-            className={`input ${errors.panNumber ? "border-red-500" : ""}`}
+            className={inputClass("panNumber")}
             placeholder="PAN Number (ABCDE1234F)"
           />
 
@@ -259,7 +254,7 @@ export default function LicenceDetailsForm() {
             value={formData.licenceNumber}
             onChange={handleChange}
             onBlur={(e) => validateField("licenceNumber", e.target.value)}
-            className={`input ${errors.licenceNumber ? "border-red-500" : ""}`}
+            className={inputClass("licenceNumber")}
             placeholder="Licence Number *"
           />
 
@@ -268,7 +263,7 @@ export default function LicenceDetailsForm() {
             value={formData.licenceGrade}
             onChange={handleChange}
             onBlur={(e) => validateField("licenceGrade", e.target.value)}
-            className={`input ${errors.licenceGrade ? "border-red-500" : ""}`}
+            className={inputClass("licenceGrade")}
           >
             <option value="">Select Licence Grade *</option>
             {LICENCE_GRADES.map((g) => (
@@ -276,52 +271,44 @@ export default function LicenceDetailsForm() {
             ))}
           </select>
 
-         <div>
-  <label className="block text-[11px] font-medium mb-0.5">
-    Issue Date *
-  </label>
-  <input
-    type="date"
-    name="issueDate"
-    value={formData.issueDate}
-    onChange={handleChange}
-    onBlur={(e) => validateField("issueDate", e.target.value)}
-    className={inputClass("issueDate")}
-  />
-  {errors.issueDate && (
-    <p className="text-red-500 text-[11px] mt-0.5">
-      {errors.issueDate}
-    </p>
-  )}
-</div>
+          <div>
+            <label className="block text-[11px] font-medium mb-0.5">
+              Issue Date *
+            </label>
+            <input
+              type="date"
+              name="issueDate"
+              value={formData.issueDate}
+              onChange={handleChange}
+              onBlur={(e) => validateField("issueDate", e.target.value)}
+              className={inputClass("issueDate")}
+            />
+          </div>
 
-
-       <div>
-  <label className="block text-[11px] font-medium mb-0.5">
-    Validity End Date *
-  </label>
-  <input
-    type="date"
-    name="validityEndDate"
-    value={formData.validityEndDate}
-    onChange={handleChange}
-    onBlur={(e) => validateField("validityEndDate", e.target.value)}
-    className={inputClass("validityEndDate")}
-  />
-  {errors.validityEndDate && (
-    <p className="text-red-500 text-[11px] mt-0.5">
-      {errors.validityEndDate}
-    </p>
-  )}
-</div>
-
+          <div>
+            <label className="block text-[11px] font-medium mb-0.5">
+              Validity End Date *
+            </label>
+            <input
+              type="date"
+              name="validityEndDate"
+              value={formData.validityEndDate}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("validityEndDate", e.target.value)
+              }
+              className={inputClass("validityEndDate")}
+            />
+          </div>
 
           <select
             name="issuingAuthority"
             value={formData.issuingAuthority}
             onChange={handleChange}
-            onBlur={(e) => validateField("issuingAuthority", e.target.value)}
-            className={`input ${errors.issuingAuthority ? "border-red-500" : ""}`}
+            onBlur={(e) =>
+              validateField("issuingAuthority", e.target.value)
+            }
+            className={inputClass("issuingAuthority")}
           >
             <option value="">Issuing Authority *</option>
             {LICENCE_AUTHORITIES.map((a) => (
@@ -334,7 +321,7 @@ export default function LicenceDetailsForm() {
             value={formData.anyOffence}
             onChange={handleChange}
             onBlur={(e) => validateField("anyOffence", e.target.value)}
-            className={`input ${errors.anyOffence ? "border-red-500" : ""}`}
+            className={inputClass("anyOffence")}
           >
             <option value="">Any Offence? *</option>
             <option value="YES">YES</option>
@@ -346,8 +333,10 @@ export default function LicenceDetailsForm() {
               name="offenceRemark"
               value={formData.offenceRemark}
               onChange={handleChange}
-              onBlur={(e) => validateField("offenceRemark", e.target.value)}
-              className={`input ${errors.offenceRemark ? "border-red-500" : ""}`}
+              onBlur={(e) =>
+                validateField("offenceRemark", e.target.value)
+              }
+              className={inputClass("offenceRemark")}
               placeholder="Offence Remark *"
             />
           )}
