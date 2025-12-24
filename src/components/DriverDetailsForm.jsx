@@ -151,6 +151,32 @@ export default function DriverDetailsForm({ onNext }) {
   const inputClass = (name) =>
     `input ${errors[name] ? "border-red-500" : ""}`;
 
+  /* 🔹 CAMEL → SNAKE CASE PAYLOAD */
+  const toSnakeCasePayload = (data) => ({
+    full_name: data.fullName,
+    father_name: data.fatherName,
+    mother_name: data.motherName,
+    drink: data.drink,
+    gender: data.gender,
+    dob: data.dob,
+    age: data.age,
+    education: data.education,
+    language_known: data.languageKnown,
+    blood_group: data.bloodGroup,
+    aadhar_no: data.aadharNo,
+    bhamashah_no: data.bhamashahNo,
+    category: data.category,
+    address_line: data.addressLine,
+    village: data.village,
+    tehsil: data.tehsil,
+    police_station: data.policeStation,
+    district: data.district,
+    state: data.state,
+    pin_code: data.pinCode,
+    mobile_1: data.mobile1,
+    mobile_2: data.mobile2,
+  });
+
   /* 🔹 SUBMIT HANDLER */
   const next = async () => {
     const hasError = Object.values(errors).some(e => e);
@@ -161,7 +187,9 @@ export default function DriverDetailsForm({ onNext }) {
 
     setLoading(true);
     try {
-      const res = await saveDriverDetails(local);
+      const payload = toSnakeCasePayload(local);
+      const res = await saveDriverDetails(payload);
+
       dispatch(setRegistrationId(res.driver_registration_id));
       dispatch(updateStep1(local));
       dispatch(setStep(2));
@@ -171,7 +199,11 @@ export default function DriverDetailsForm({ onNext }) {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  // ⬇️ return JSX remains exactly as you already have it
+
+
 
 return (
   <div className="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-sm">
