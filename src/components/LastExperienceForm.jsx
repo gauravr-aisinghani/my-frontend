@@ -30,7 +30,6 @@ const LastExperienceForm = () => {
 
   const [errors, setErrors] = useState({});
 
-  /** INPUT CLASSES */
   const inputClass = (name) =>
     `border rounded px-2 py-1 text-sm w-full ${
       errors[name] ? "border-red-500" : "border-gray-300"
@@ -41,7 +40,6 @@ const LastExperienceForm = () => {
       <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
     ) : null;
 
-  /** HANDLE CHANGE */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -56,7 +54,6 @@ const LastExperienceForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /** VALIDATE FIELDS */
   const validateField = (name, value) => {
     let msg = "";
 
@@ -117,7 +114,6 @@ const LastExperienceForm = () => {
     return !msg;
   };
 
-  /** SUBMIT */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -127,7 +123,7 @@ const LastExperienceForm = () => {
     }
 
     if (isFresher) {
-      dispatch(setStep(5)); // skip experience step
+      dispatch(setStep(5));
       return;
     }
 
@@ -175,7 +171,7 @@ const LastExperienceForm = () => {
         LAST EXPERIENCE DETAILS
       </h2>
 
-      {/* Fresher Toggle Card */}
+      {/* Fresher Toggle Card - ALWAYS visible */}
       <div
         onClick={() => setIsFresher(!isFresher)}
         className={`flex items-center p-4 mb-4 rounded-lg cursor-pointer transition-colors duration-300 shadow-md hover:shadow-xl min-h-[60px] ${
@@ -193,6 +189,7 @@ const LastExperienceForm = () => {
       {!isFresher && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
             <div>
               <input
                 name="vehicleMake"
@@ -361,6 +358,7 @@ const LastExperienceForm = () => {
               </label>
               {renderError("toDate")}
             </div>
+
           </div>
 
           <div className="flex justify-end mt-6">
