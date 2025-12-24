@@ -65,9 +65,11 @@ const LicenceDetailsForm = () => {
         break;
 
       case "panNumber":
-        if (value && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value))
-          msg = "Invalid PAN format";
-        break;
+  if (!value) msg = "PAN Number is required";
+  else if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value))
+    msg = "Invalid PAN format";
+  break;
+
 
       case "licenceNumber":
         if (!value) msg = "Licence Number is required";
@@ -127,6 +129,7 @@ const LicenceDetailsForm = () => {
       "licenceGrade",
       "issueDate",
       "validityEndDate",
+        "panNumber",
       "issuingAuthority",
       "anyOffence",
     ];
