@@ -173,13 +173,13 @@ export default function DriverDetailsForm({ onNext }) {
     }
   }
 
-   return (
-  <div className="max-w-6xl mx-auto bg-white p-4 rounded-xl shadow-md">
-    <h2 className="text-xl font-bold mb-4 border-b pb-2">
+return (
+  <div className="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-sm">
+    <h2 className="text-lg font-semibold mb-3 border-b pb-1">
       Personal Details
     </h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 
       {/* Full Name */}
       <div>
@@ -192,7 +192,7 @@ export default function DriverDetailsForm({ onNext }) {
           placeholder="Full Name *"
         />
         {errors.fullName && (
-          <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.fullName}</p>
         )}
       </div>
 
@@ -207,7 +207,7 @@ export default function DriverDetailsForm({ onNext }) {
           placeholder="Father Name *"
         />
         {errors.fatherName && (
-          <p className="text-red-500 text-xs mt-1">{errors.fatherName}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.fatherName}</p>
         )}
       </div>
 
@@ -224,7 +224,7 @@ export default function DriverDetailsForm({ onNext }) {
 
       {/* DOB */}
       <div>
-        <label className="block text-xs font-medium mb-1">
+        <label className="block text-[11px] font-medium mb-0.5">
           Date of Birth *
         </label>
         <input
@@ -236,7 +236,7 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("dob")}
         />
         {errors.dob && (
-          <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.dob}</p>
         )}
       </div>
 
@@ -276,7 +276,7 @@ export default function DriverDetailsForm({ onNext }) {
           placeholder="Aadhar Number *"
         />
         {errors.aadharNo && (
-          <p className="text-red-500 text-xs mt-1">{errors.aadharNo}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.aadharNo}</p>
         )}
       </div>
 
@@ -291,7 +291,7 @@ export default function DriverDetailsForm({ onNext }) {
           placeholder="Bhamashah Card Number"
         />
         {errors.bhamashahNo && (
-          <p className="text-red-500 text-xs mt-1">{errors.bhamashahNo}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.bhamashahNo}</p>
         )}
       </div>
 
@@ -311,7 +311,7 @@ export default function DriverDetailsForm({ onNext }) {
           <option value="ST">ST</option>
         </select>
         {errors.category && (
-          <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.category}</p>
         )}
       </div>
 
@@ -346,11 +346,11 @@ export default function DriverDetailsForm({ onNext }) {
           ))}
         </select>
         {errors.state && (
-          <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.state}</p>
         )}
       </div>
 
-      {/* Pin Code */}
+      {/* Pin */}
       <div>
         <input
           name="pinCode"
@@ -361,7 +361,7 @@ export default function DriverDetailsForm({ onNext }) {
           placeholder="Pin Code"
         />
         {errors.pinCode && (
-          <p className="text-red-500 text-xs mt-1">{errors.pinCode}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.pinCode}</p>
         )}
       </div>
 
@@ -376,7 +376,7 @@ export default function DriverDetailsForm({ onNext }) {
           placeholder="Mobile Number *"
         />
         {errors.mobile1 && (
-          <p className="text-red-500 text-xs mt-1">{errors.mobile1}</p>
+          <p className="text-red-500 text-[11px] mt-0.5">{errors.mobile1}</p>
         )}
       </div>
 
@@ -393,17 +393,18 @@ export default function DriverDetailsForm({ onNext }) {
 
     </div>
 
-    <div className="flex justify-end mt-6">
+    <div className="flex justify-end mt-4">
       <button
         onClick={next}
         disabled={loading}
-        className="btn-primary px-6 py-2 text-sm"
+        className="btn-primary px-4 py-1.5 text-xs"
       >
         {loading ? "Saving..." : "Next →"}
       </button>
     </div>
   </div>
 );
+
 
   
 
