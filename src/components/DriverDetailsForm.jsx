@@ -173,234 +173,220 @@ export default function DriverDetailsForm({ onNext }) {
     }
   }
 
-    return (
-  <div className="max-w-5xl mx-auto bg-white p-6 rounded shadow">
-    <h2 className="text-2xl font-bold mb-4">Personal Details</h2>
+   return (
+  <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <h2 className="text-2xl font-bold mb-6 border-b pb-2">
+      Personal Details
+    </h2>
 
-    {/* Full Name */}
-    <input
-      name="fullName"
-      value={local.fullName}
-      onChange={handleChange}
-      onBlur={(e) => validateField("fullName", e.target.value)}
-      className={inputClass("fullName")}
-      placeholder="Full Name *"
-    />
-    {errors.fullName && (
-      <p className="text-red-500 text-sm">{errors.fullName}</p>
-    )}
+    {/* GRID START */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-    {/* Father Name */}
-    <input
-      name="fatherName"
-      value={local.fatherName}
-      onChange={handleChange}
-      onBlur={(e) => validateField("fatherName", e.target.value)}
-      className={inputClass("fatherName")}
-      placeholder="Father Name *"
-    />
-    {errors.fatherName && (
-      <p className="text-red-500 text-sm">{errors.fatherName}</p>
-    )}
+      {/* Full Name */}
+      <div>
+        <input
+          name="fullName"
+          value={local.fullName}
+          onChange={handleChange}
+          onBlur={(e) => validateField("fullName", e.target.value)}
+          className={inputClass("fullName")}
+          placeholder="Full Name *"
+        />
+        {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
+      </div>
 
-    {/* Mother Name */}
-    <input
-      name="motherName"
-      value={local.motherName}
-      onChange={handleChange}
-      className="input"
-      placeholder="Mother Name"
-    />
+      {/* Father Name */}
+      <div>
+        <input
+          name="fatherName"
+          value={local.fatherName}
+          onChange={handleChange}
+          onBlur={(e) => validateField("fatherName", e.target.value)}
+          className={inputClass("fatherName")}
+          placeholder="Father Name *"
+        />
+        {errors.fatherName && <p className="text-red-500 text-sm">{errors.fatherName}</p>}
+      </div>
 
-    {/* DOB */}
-    <label className="block mt-3 font-medium">Date of Birth *</label>
-    <input
-      type="date"
-      name="dob"
-      value={local.dob}
-      onChange={handleChange}
-      onBlur={(e) => validateField("dob", e.target.value)}
-      className={inputClass("dob")}
-    />
-    {errors.dob && (
-      <p className="text-red-500 text-sm">{errors.dob}</p>
-    )}
+      {/* Mother Name */}
+      <div>
+        <input
+          name="motherName"
+          value={local.motherName}
+          onChange={handleChange}
+          className="input"
+          placeholder="Mother Name"
+        />
+      </div>
 
-    {/* Age (auto calculated) */}
-    <input
-      value={local.age}
-      disabled
-      className="input bg-gray-100"
-      placeholder="Age"
-    />
+      {/* DOB */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Date of Birth *</label>
+        <input
+          type="date"
+          name="dob"
+          value={local.dob}
+          onChange={handleChange}
+          onBlur={(e) => validateField("dob", e.target.value)}
+          className={inputClass("dob")}
+        />
+        {errors.dob && <p className="text-red-500 text-sm">{errors.dob}</p>}
+      </div>
 
-    {/* Language Known */}
-    <select
-      name="languageKnown"
-      value={local.languageKnown}
-      onChange={handleChange}
-      className="input"
-    >
-      <option value="">Select Language</option>
-      {LANGUAGES.map((l) => (
-        <option key={l} value={l}>{l}</option>
-      ))}
-    </select>
+      {/* Age */}
+      <div>
+        <input
+          value={local.age}
+          disabled
+          className="input bg-gray-100 cursor-not-allowed"
+          placeholder="Age"
+        />
+      </div>
 
-    {/* Aadhar Number */}
-    <input
-      name="aadharNo"
-      value={local.aadharNo}
-      onChange={handleChange}
-      onBlur={(e) => validateField("aadharNo", e.target.value)}
-      className={inputClass("aadharNo")}
-      placeholder="Aadhar Number *"
-    />
-    {errors.aadharNo && (
-      <p className="text-red-500 text-sm">{errors.aadharNo}</p>
-    )}
+      {/* Language */}
+      <div>
+        <select
+          name="languageKnown"
+          value={local.languageKnown}
+          onChange={handleChange}
+          className="input"
+        >
+          <option value="">Select Language</option>
+          {LANGUAGES.map((l) => (
+            <option key={l} value={l}>{l}</option>
+          ))}
+        </select>
+      </div>
 
-    {/* Bhamashah Number */}
-    <input
-      name="bhamashahNo"
-      value={local.bhamashahNo}
-      onChange={handleChange}
-      onBlur={(e) => validateField("bhamashahNo", e.target.value)}
-      className={inputClass("bhamashahNo")}
-      placeholder="Bhamashah Card Number"
-    />
-    {errors.bhamashahNo && (
-      <p className="text-red-500 text-sm">{errors.bhamashahNo}</p>
-    )}
+      {/* Aadhar */}
+      <div>
+        <input
+          name="aadharNo"
+          value={local.aadharNo}
+          onChange={handleChange}
+          onBlur={(e) => validateField("aadharNo", e.target.value)}
+          className={inputClass("aadharNo")}
+          placeholder="Aadhar Number *"
+        />
+        {errors.aadharNo && <p className="text-red-500 text-sm">{errors.aadharNo}</p>}
+      </div>
 
-    {/* Category */}
-    <select
-      name="category"
-      value={local.category}
-      onChange={handleChange}
-      onBlur={(e) => validateField("category", e.target.value)}
-      className={inputClass("category")}
-    >
-      <option value="">Select Category *</option>
-      <option value="GENERAL">GENERAL</option>
-      <option value="OBC">OBC</option>
-      <option value="SC">SC</option>
-      <option value="ST">ST</option>
-    </select>
-    {errors.category && (
-      <p className="text-red-500 text-sm">{errors.category}</p>
-    )}
+      {/* Bhamashah */}
+      <div>
+        <input
+          name="bhamashahNo"
+          value={local.bhamashahNo}
+          onChange={handleChange}
+          onBlur={(e) => validateField("bhamashahNo", e.target.value)}
+          className={inputClass("bhamashahNo")}
+          placeholder="Bhamashah Card Number"
+        />
+        {errors.bhamashahNo && <p className="text-red-500 text-sm">{errors.bhamashahNo}</p>}
+      </div>
 
-    {/* Address Line */}
-    <input
-      name="addressLine"
-      value={local.addressLine}
-      onChange={handleChange}
-      className="input"
-      placeholder="Address Line"
-    />
+      {/* Category */}
+      <div>
+        <select
+          name="category"
+          value={local.category}
+          onChange={handleChange}
+          onBlur={(e) => validateField("category", e.target.value)}
+          className={inputClass("category")}
+        >
+          <option value="">Select Category *</option>
+          <option value="GENERAL">GENERAL</option>
+          <option value="OBC">OBC</option>
+          <option value="SC">SC</option>
+          <option value="ST">ST</option>
+        </select>
+        {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
+      </div>
 
-    {/* Village */}
-    <input
-      name="village"
-      value={local.village}
-      onChange={handleChange}
-      className="input"
-      placeholder="Village"
-    />
+      {/* Address */}
+      <div className="md:col-span-2 lg:col-span-3">
+        <input
+          name="addressLine"
+          value={local.addressLine}
+          onChange={handleChange}
+          className="input"
+          placeholder="Address Line"
+        />
+      </div>
 
-    {/* Tehsil */}
-    <input
-      name="tehsil"
-      value={local.tehsil}
-      onChange={handleChange}
-      className="input"
-      placeholder="Tehsil"
-    />
+      <input name="village" value={local.village} onChange={handleChange} className="input" placeholder="Village" />
+      <input name="tehsil" value={local.tehsil} onChange={handleChange} className="input" placeholder="Tehsil" />
+      <input name="policeStation" value={local.policeStation} onChange={handleChange} className="input" placeholder="Police Station" />
+      <input name="district" value={local.district} onChange={handleChange} className="input" placeholder="District" />
 
-    {/* Police Station */}
-    <input
-      name="policeStation"
-      value={local.policeStation}
-      onChange={handleChange}
-      className="input"
-      placeholder="Police Station"
-    />
+      {/* State */}
+      <div>
+        <select
+          name="state"
+          value={local.state}
+          onChange={handleChange}
+          onBlur={(e) => validateField("state", e.target.value)}
+          className={inputClass("state")}
+        >
+          <option value="">Select State *</option>
+          {STATES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        {errors.state && <p className="text-red-500 text-sm">{errors.state}</p>}
+      </div>
 
-    {/* District */}
-    <input
-      name="district"
-      value={local.district}
-      onChange={handleChange}
-      className="input"
-      placeholder="District"
-    />
+      {/* Pincode */}
+      <div>
+        <input
+          name="pinCode"
+          value={local.pinCode}
+          onChange={handleChange}
+          onBlur={(e) => validateField("pinCode", e.target.value)}
+          className={inputClass("pinCode")}
+          placeholder="Pin Code"
+        />
+        {errors.pinCode && <p className="text-red-500 text-sm">{errors.pinCode}</p>}
+      </div>
 
-    {/* State */}
-    <select
-      name="state"
-      value={local.state}
-      onChange={handleChange}
-      onBlur={(e) => validateField("state", e.target.value)}
-      className={inputClass("state")}
-    >
-      <option value="">Select State *</option>
-      {STATES.map((s) => (
-        <option key={s} value={s}>{s}</option>
-      ))}
-    </select>
-    {errors.state && (
-      <p className="text-red-500 text-sm">{errors.state}</p>
-    )}
+      {/* Mobiles */}
+      <div>
+        <input
+          name="mobile1"
+          value={local.mobile1}
+          onChange={handleChange}
+          onBlur={(e) => validateField("mobile1", e.target.value)}
+          className={inputClass("mobile1")}
+          placeholder="Mobile Number *"
+        />
+        {errors.mobile1 && <p className="text-red-500 text-sm">{errors.mobile1}</p>}
+      </div>
 
-    {/* Pin Code */}
-    <input
-      name="pinCode"
-      value={local.pinCode}
-      onChange={handleChange}
-      onBlur={(e) => validateField("pinCode", e.target.value)}
-      className={inputClass("pinCode")}
-      placeholder="Pin Code"
-    />
-    {errors.pinCode && (
-      <p className="text-red-500 text-sm">{errors.pinCode}</p>
-    )}
+      <div>
+        <input
+          name="mobile2"
+          value={local.mobile2}
+          onChange={handleChange}
+          onBlur={(e) => validateField("mobile2", e.target.value)}
+          className={inputClass("mobile2")}
+          placeholder="Alternate Mobile Number"
+        />
+      </div>
 
-    {/* Mobile 1 */}
-    <input
-      name="mobile1"
-      value={local.mobile1}
-      onChange={handleChange}
-      onBlur={(e) => validateField("mobile1", e.target.value)}
-      className={inputClass("mobile1")}
-      placeholder="Mobile Number *"
-    />
-    {errors.mobile1 && (
-      <p className="text-red-500 text-sm">{errors.mobile1}</p>
-    )}
+    </div>
 
-    {/* Mobile 2 */}
-    <input
-      name="mobile2"
-      value={local.mobile2}
-      onChange={handleChange}
-      onBlur={(e) => validateField("mobile2", e.target.value)}
-      className={inputClass("mobile2")}
-      placeholder="Alternate Mobile Number"
-    />
-
-    {/* Submit */}
-    <button
-      onClick={next}
-      disabled={loading}
-      className="btn-primary mt-6"
-    >
-      {loading ? "Saving..." : "Next →"}
-    </button>
+    {/* BUTTON */}
+    <div className="flex justify-end mt-8">
+      <button
+        onClick={next}
+        disabled={loading}
+        className="btn-primary px-8 py-2 text-lg"
+      >
+        {loading ? "Saving..." : "Next →"}
+      </button>
+    </div>
   </div>
 );
-
-    
+  
 
 }
 
