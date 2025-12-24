@@ -171,6 +171,7 @@ export default function DriverDetailsForm({ onNext }) {
     } finally {
       setLoading(false);
     }
+  }
 
     return (
   <div className="max-w-5xl mx-auto bg-white p-6 rounded shadow">
@@ -400,7 +401,7 @@ export default function DriverDetailsForm({ onNext }) {
 );
 
     
-  };
+
 }
 
 
