@@ -7,7 +7,6 @@ import driverSarpanchApi from "../api/driverSarpanchApi";
 const SarpanchDetailsForm = ({ onNext, onBack }) => {
   const dispatch = useDispatch();
 
-  // read registrationId from store
   const driverId = useSelector(
     (state) => state.driverRegistration.registrationId
   );
@@ -19,24 +18,37 @@ const SarpanchDetailsForm = ({ onNext, onBack }) => {
     familyPerson1Mobile: "",
     familyPerson2Name: "",
     familyPerson2Mobile: "",
-    gdcRegistrationNumber: "",
     referenceDriverName: "",
+    gdcRegistrationNumber: "",
   });
 
+  const [errors, setErrors] = useState({});
+
+  /* ---------- INPUT CLASS ---------- */
+  const inputClass = (name) =>
+    `border rounded px-2 py-1 text-sm w-full ${
+      errors[name] ? "border-red-500" : ""
+    }`;
+
+  const renderError = (name) =>
+    errors[name] ? (
+      <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
+    ) : null;
+
+  /* ---------- HANDLE CHANGE ---------- */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // numeric mobile validation
+    // EXACT 10 DIGIT MOBILE
     if (
       ["sarpanchMobile", "familyPerson1Mobile", "familyPerson2Mobile"].includes(
         name
       )
     ) {
       if (!/^\d*$/.test(value)) return;
-      if (value.length > 15) return;
+      if (value.length > 10) return;
     }
 
-    // text length validation
     if (
       [
         "sarpanchName",
@@ -53,159 +65,215 @@ const SarpanchDetailsForm = ({ onNext, onBack }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validate = () => {
-    if (!driverId) return "Driver Registration ID missing!";
-    if (!formData.sarpanchName.trim()) return "Sarpanch name required.";
-    if (!formData.sarpanchMobile.trim()) return "Sarpanch mobile required.";
+  /* ---------- VALIDATION (ON BLUR) ---------- */
+  const validateField = (name, value) => {
+    let msg = "";
 
-    if (!/^\d{10,15}$/.test(formData.sarpanchMobile))
-      return "Sarpanch mobile must be 10–15 digits.";
+    switch (name) {
+      case "sarpanchName":
+        if (!value.trim()) msg = "Sarpanch name is required";
+        break;
 
-    if (
-      formData.familyPerson1Mobile &&
-      !/^\d{10,15}$/.test(formData.familyPerson1Mobile)
-    )
-      return "Family Person 1 mobile must be 10–15 digits.";
+      case "sarpanchMobile":
+        if (!value) msg = "Sarpanch mobile is required";
+        else if (!/^\d{10}$/.test(value))
+          msg = "Mobile number must be exactly 10 digits";
+        break;
 
-    if (
-      formData.familyPerson2Mobile &&
-      !/^\d{10,15}$/.test(formData.familyPerson2Mobile)
-    )
-      return "Family Person 2 mobile must be 10–15 digits.";
+      case "familyPerson1Mobile":
+      case "familyPerson2Mobile":
+        if (value && !/^\d{10}$/.test(value))
+          msg = "Mobile number must be exactly 10 digits";
+        break;
 
-    return null;
-  };
+      case "gdcRegistrationNumber":
+        if (formData.referenceDriverName && !value)
+          msg = "GDC number is required";
+        break;
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  const err = validate();
-  if (err) {
-    alert(err);
-    return;
-  }
-
-  // Backend expects SNAKE_CASE fields
-  const payload = {
-    driver_registration_id: driverId,
-    sarpanch_name: formData.sarpanchName,
-    sarpanch_mobile: formData.sarpanchMobile,
-
-    family_person1_name: formData.familyPerson1Name || null,
-    family_person1_mobile: formData.familyPerson1Mobile || null,
-
-    family_person2_name: formData.familyPerson2Name || null,
-    family_person2_mobile: formData.familyPerson2Mobile || null,
-
-    gdc_registration_number: formData.gdcRegistrationNumber || null,
-    reference_driver_name: formData.referenceDriverName || null,
-  };
-
-  try {
-    await driverSarpanchApi.createForDriver(driverId, payload);
-
-    alert("Sarpanch Details Saved Successfully!");
-
-    if (typeof onNext === "function") {
-      onNext();
-    } else {
-      dispatch(setStep(4));
+      default:
+        break;
     }
-  } catch (error) {
-    console.error(error);
-    alert("Error saving sarpanch details.");
-  }
-};
 
+    setErrors((prev) => ({ ...prev, [name]: msg }));
+    return !msg;
+  };
+
+  /* ---------- SUBMIT ---------- */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!driverId) {
+      alert("Driver Registration ID missing!");
+      return;
+    }
+
+    let hasError = false;
+
+    ["sarpanchName", "sarpanchMobile"].forEach((f) => {
+      if (!validateField(f, formData[f])) hasError = true;
+    });
+
+    if (formData.referenceDriverName) {
+      if (
+        !validateField(
+          "gdcRegistrationNumber",
+          formData.gdcRegistrationNumber
+        )
+      )
+        hasError = true;
+    }
+
+    if (hasError) return;
+
+    const payload = {
+      driver_registration_id: driverId,
+      sarpanch_name: formData.sarpanchName,
+      sarpanch_mobile: formData.sarpanchMobile,
+
+      family_person1_name: formData.familyPerson1Name || null,
+      family_person1_mobile: formData.familyPerson1Mobile || null,
+
+      family_person2_name: formData.familyPerson2Name || null,
+      family_person2_mobile: formData.familyPerson2Mobile || null,
+
+      reference_driver_name: formData.referenceDriverName || null,
+      gdc_registration_number: formData.referenceDriverName
+        ? formData.gdcRegistrationNumber
+        : null,
+    };
+
+    try {
+      await driverSarpanchApi.createForDriver(driverId, payload);
+
+      if (typeof onNext === "function") onNext();
+      else dispatch(setStep(4));
+    } catch (error) {
+      alert("Error saving sarpanch details.");
+    }
+  };
 
   return (
-    <div className="w-full p-4 md:p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
+    <div className="w-full p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-semibold text-center mb-4">
         Sarpanch & Family Details
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <input
-            name="sarpanchName"
-            placeholder="Sarpanch Name *"
-            value={formData.sarpanchName}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-          />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <input
+              name="sarpanchName"
+              value={formData.sarpanchName}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("sarpanchName", e.target.value)
+              }
+              placeholder="Sarpanch Name *"
+              className={inputClass("sarpanchName")}
+            />
+            {renderError("sarpanchName")}
+          </div>
 
-          <input
-            name="sarpanchMobile"
-            placeholder="Sarpanch Mobile *"
-            value={formData.sarpanchMobile}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-          />
+          <div>
+            <input
+              name="sarpanchMobile"
+              value={formData.sarpanchMobile}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("sarpanchMobile", e.target.value)
+              }
+              placeholder="Sarpanch Mobile *"
+              className={inputClass("sarpanchMobile")}
+            />
+            {renderError("sarpanchMobile")}
+          </div>
 
           <input
             name="familyPerson1Name"
-            placeholder="Family Person 1 Name"
             value={formData.familyPerson1Name}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
+            placeholder="Family Person 1 Name"
+            className={inputClass()}
           />
 
-          <input
-            name="familyPerson1Mobile"
-            placeholder="Family Person 1 Mobile"
-            value={formData.familyPerson1Mobile}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-          />
+          <div>
+            <input
+              name="familyPerson1Mobile"
+              value={formData.familyPerson1Mobile}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("familyPerson1Mobile", e.target.value)
+              }
+              placeholder="Family Person 1 Mobile"
+              className={inputClass("familyPerson1Mobile")}
+            />
+            {renderError("familyPerson1Mobile")}
+          </div>
 
           <input
             name="familyPerson2Name"
-            placeholder="Family Person 2 Name"
             value={formData.familyPerson2Name}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
+            placeholder="Family Person 2 Name"
+            className={inputClass()}
           />
 
-          <input
-            name="familyPerson2Mobile"
-            placeholder="Family Person 2 Mobile"
-            value={formData.familyPerson2Mobile}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-          />
+          <div>
+            <input
+              name="familyPerson2Mobile"
+              value={formData.familyPerson2Mobile}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("familyPerson2Mobile", e.target.value)
+              }
+              placeholder="Family Person 2 Mobile"
+              className={inputClass("familyPerson2Mobile")}
+            />
+            {renderError("familyPerson2Mobile")}
+          </div>
 
-          <input
-            name="gdcRegistrationNumber"
-            placeholder="GDC Registration Number"
-            value={formData.gdcRegistrationNumber}
-            onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
-          />
-
+          {/* Reference Driver FIRST */}
           <input
             name="referenceDriverName"
-            placeholder="Reference Driver Name"
             value={formData.referenceDriverName}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full"
+            placeholder="Reference Driver Name"
+            className={inputClass()}
           />
+
+          {formData.referenceDriverName && (
+            <div>
+              <input
+                name="gdcRegistrationNumber"
+                value={formData.gdcRegistrationNumber}
+                onChange={handleChange}
+                onBlur={(e) =>
+                  validateField(
+                    "gdcRegistrationNumber",
+                    e.target.value
+                  )
+                }
+                placeholder="Reference Driver GDC Number *"
+                className={inputClass("gdcRegistrationNumber")}
+              />
+              {renderError("gdcRegistrationNumber")}
+            </div>
+          )}
         </div>
 
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between">
           {onBack && (
             <button
               type="button"
               onClick={onBack}
-              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+              className="bg-gray-400 text-white px-4 py-2 rounded text-sm"
             >
               ← Back
             </button>
           )}
 
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-          >
+          <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">
             Save & Continue →
           </button>
         </div>
