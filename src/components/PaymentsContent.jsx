@@ -7,7 +7,7 @@ import {
 export default function PaymentsContent() {
   const [step, setStep] = useState(0);
   const [paymentType, setPaymentType] = useState("");
-  const [gdcNumber, setGdcNumber] = useState("");
+  const [gdcRegistrationNumber, setGdcRegistrationNumber] = useState("");
   const [amount, setAmount] = useState(null);
   const [orderData, setOrderData] = useState(null);
   const [error, setError] = useState("");
@@ -15,7 +15,7 @@ export default function PaymentsContent() {
 
   const selectType = (type) => {
     setPaymentType(type);
-    setGdcNumber("");
+    setGdcRegistrationNumber("");
     setAmount(null);
     setOrderData(null);
     setError("");
@@ -26,8 +26,8 @@ export default function PaymentsContent() {
   // STEP 1: CREATE ORDER (VALIDATES GDC IN BACKEND)
   // ==================================================
   const proceedToPay = async () => {
-    if (!gdcNumber.trim()) {
-      setError("Please enter GDC number");
+    if (!gdcRegistrationNumber.trim()) {
+      setError("Please enter GDC registration number");
       return;
     }
 
@@ -36,7 +36,7 @@ export default function PaymentsContent() {
       setError("");
 
       const res = await createPaymentOrder({
-        gdcNumber,
+        gdcNumber: gdcRegistrationNumber.trim(), // ✅ DTO FIELD
         type: paymentType,
       });
 
@@ -45,7 +45,10 @@ export default function PaymentsContent() {
       setStep(2);
 
     } catch (err) {
-      setError(err?.response?.data?.message || "Invalid GDC number");
+      setError(
+        err?.response?.data?.message ||
+        "Invalid or unapproved GDC number"
+      );
     } finally {
       setLoading(false);
     }
@@ -77,7 +80,7 @@ export default function PaymentsContent() {
           });
 
           alert("Payment successful!");
-          setStep(0); // reset flow (optional)
+          setStep(0);
 
         } catch {
           alert("Payment verification failed. Contact support.");
@@ -118,9 +121,9 @@ export default function PaymentsContent() {
       {step === 1 && (
         <div className="space-y-4">
           <input
-            value={gdcNumber}
-            onChange={(e) => setGdcNumber(e.target.value)}
-            placeholder="Enter GDC Number"
+            value={gdcRegistrationNumber}
+            onChange={(e) => setGdcRegistrationNumber(e.target.value)}
+            placeholder="Enter GDC Registration Number"
             className="w-full p-3 border rounded-xl"
           />
 
@@ -140,7 +143,7 @@ export default function PaymentsContent() {
       {step === 2 && (
         <div className="space-y-4">
           <p><b>Type:</b> {paymentType}</p>
-          <p><b>GDC:</b> {gdcNumber}</p>
+          <p><b>GDC:</b> {gdcRegistrationNumber}</p>
           <p className="text-lg font-semibold">
             <b>Amount:</b> ₹{amount}
           </p>
