@@ -33,8 +33,9 @@ const LastExperienceForm = () => {
   /** INPUT CLASSES */
   const inputClass = (name) =>
     `border rounded px-2 py-1 text-sm w-full ${
-      errors[name] ? "border-red-500" : ""
+      errors[name] ? "border-red-500" : "border-gray-300"
     }`;
+
   const renderError = (name) =>
     errors[name] ? (
       <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
@@ -176,22 +177,22 @@ const LastExperienceForm = () => {
 
       {/* Fresher Toggle Card */}
       <div
-  onClick={() => setIsFresher(!isFresher)}
-  className={`flex items-center p-4 mb-4 rounded-lg cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl ${
-    isFresher ? "bg-green-100 border-green-500" : "bg-gray-50 border-gray-300"
-  } border`}
->
-  <span className="text-2xl mr-3">{isFresher ? "🎉" : "🛑"}</span>
-  <div>
-    <p className="font-semibold text-sm">Driver is a Fresher</p>
-    <p className="text-[11px] text-gray-600">Click to skip last experience details</p>
-  </div>
-</div>
+        onClick={() => setIsFresher(!isFresher)}
+        className={`flex items-center p-4 mb-4 rounded-lg cursor-pointer transition-colors duration-300 shadow-md hover:shadow-xl min-h-[60px] ${
+          isFresher ? "bg-green-100 border-green-500" : "bg-gray-50 border-gray-300"
+        } border`}
+      >
+        <span className="text-2xl mr-3">{isFresher ? "🎉" : "🛑"}</span>
+        <div>
+          <p className="font-semibold text-sm">Driver is a Fresher</p>
+          <p className="text-[11px] text-gray-600">Click to skip last experience details</p>
+        </div>
+      </div>
 
+      {/* Experience Form */}
       {!isFresher && (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
             <div>
               <input
                 name="vehicleMake"
@@ -360,17 +361,16 @@ const LastExperienceForm = () => {
               </label>
               {renderError("toDate")}
             </div>
-
           </div>
 
-         <div className="flex justify-end mt-6">
-    <button
-      type="submit"
-      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
-    >
-      Save & Continue →
-    </button>
-  </div>
+          <div className="flex justify-end mt-6">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
+            >
+              Save & Continue →
+            </button>
+          </div>
         </form>
       )}
     </div>
