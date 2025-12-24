@@ -270,18 +270,25 @@ const LicenceDetailsForm = () => {
           </div>
 
           <div>
-            <input
-              name="issuingAuthority"
-              value={formData.issuingAuthority}
-              onChange={handleChange}
-              onBlur={(e) =>
-                validateField("issuingAuthority", e.target.value)
-              }
-              placeholder="Issuing Authority *"
-              className={inputClass("issuingAuthority")}
-            />
-            {renderError("issuingAuthority")}
-          </div>
+  <select
+    name="issuingAuthority"
+    value={formData.issuingAuthority}
+    onChange={handleChange}
+    onBlur={(e) =>
+      validateField("issuingAuthority", e.target.value)
+    }
+    className={inputClass("issuingAuthority")}
+  >
+    <option value="">Issuing Authority *</option>
+    <option value="RTO">RTO</option>
+    <option value="DTO">DTO</option>
+    <option value="ARTO">ARTO</option>
+    <option value="MORTH">MoRTH</option>
+    <option value="STATE_TRANSPORT">State Transport Authority</option>
+  </select>
+  {renderError("issuingAuthority")}
+</div>
+
 
           <div>
             <select
