@@ -2,21 +2,17 @@ import api from "./axiosInstance";
 
 /**
  * CREATE PAYMENT ORDER
- * Backend will:
- * - Validate GDC
- * - Decide amount
- * - Create Razorpay order
  */
-export const createPaymentOrder = async ({ gdcNumber, type }) => {
+export const createPaymentOrder = async ({ gdc_number, type }) => {
   const res = await api.post("/api/payments/create-order", {
-    gdcNumber,
+    gdc_number,   // ✅ snake_case sent to backend
     type,
   });
   return res.data;
 };
 
 /**
- * VERIFY PAYMENT (after Razorpay success)
+ * VERIFY PAYMENT
  */
 export const verifyPayment = async ({
   razorpayOrderId,
