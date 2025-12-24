@@ -32,6 +32,11 @@ const LICENCE_GRADES = [
   "TRAILER",
 ];
 
+
+const inputClass = (name) =>
+  `input ${errors[name] ? "border-red-500" : ""}`;
+
+
 export default function LicenceDetailsForm() {
   const dispatch = useDispatch();
   const reg = useSelector(selectDriverRegistration);
@@ -147,69 +152,76 @@ export default function LicenceDetailsForm() {
     setErrors((p) => ({ ...p, [name]: msg }));
   };
 
-  const validateAll = () => {
-    const fields = [
-      "employeeCardNo",
-      "panNumber",
-      "licenceNumber",
-      "licenceGrade",
-      "issueDate",
-      "validityEndDate",
-      "issuingAuthority",
-      "anyOffence",
-      "offenceRemark",
-    ];
+ const hasErrors = () => {
+  const requiredFields = [
+    "licenceNumber",
+    "licenceGrade",
+    "issueDate",
+    "validityEndDate",
+    "issuingAuthority",
+    "anyOffence",
+  ];
 
-    fields.forEach((f) => validateField(f, formData[f]));
-    return Object.values(errors).some((e) => e);
-  };
+  let errorFound = false;
+
+  requiredFields.forEach((field) => {
+    validateField(field, formData[field]);
+    if (!formData[field]) errorFound = true;
+  });
+
+  if (formData.anyOffence === "YES" && !formData.offenceRemark.trim()) {
+    validateField("offenceRemark", formData.offenceRemark);
+    errorFound = true;
+  }
+
+  return errorFound;
+};
+
 
   /* =========================
      🔹 SUBMIT
   ========================= */
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!driverId) {
-      alert("Driver Registration ID missing. Complete Step 1.");
-      return;
-    }
+  if (!driverId) {
+    alert("Driver Registration ID missing. Complete Step 1.");
+    return;
+  }
 
-    if (validateAll()) {
-      alert("Please fix validation errors");
-      return;
-    }
+  if (hasErrors()) {
+    alert("Please fix validation errors");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      dispatch(updateStep2(formData));
+  try {
+    dispatch(updateStep2(formData));
 
-      const payload = {
-        employee_card_no: formData.employeeCardNo || null,
-        pan_number: formData.panNumber || null,
-        licence_number: formData.licenceNumber,
-        licence_grade: formData.licenceGrade,
-        issue_date: formData.issueDate,
-        validity_end_date: formData.validityEndDate,
-        issuing_authority: formData.issuingAuthority,
-        any_offence: formData.anyOffence,
-        offence_remark:
-          formData.anyOffence === "YES" ? formData.offenceRemark : null,
-      };
+    const payload = {
+      employee_card_no: formData.employeeCardNo || null,
+      pan_number: formData.panNumber || null,
+      licence_number: formData.licenceNumber,
+      licence_grade: formData.licenceGrade,
+      issue_date: formData.issueDate,
+      validity_end_date: formData.validityEndDate,
+      issuing_authority: formData.issuingAuthority,
+      any_offence: formData.anyOffence,
+      offence_remark:
+        formData.anyOffence === "YES" ? formData.offenceRemark : null,
+    };
 
-      await saveLicenceDetails(driverId, payload);
+    await saveLicenceDetails(driverId, payload);
+    dispatch(setStep(3));
+  } catch (err) {
+    alert("Failed to save licence details");
+  } finally {
+    setLoading(false);
+  }
+};
 
-      dispatch(setStep(3));
-      alert("Licence Details Saved Successfully!");
-    } catch (err) {
-      console.error("Licence Save Error:", err);
-      alert("Failed to save licence details");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /* =========================
      🔹 JSX
@@ -264,23 +276,45 @@ export default function LicenceDetailsForm() {
             ))}
           </select>
 
-          <input
-            type="date"
-            name="issueDate"
-            value={formData.issueDate}
-            onChange={handleChange}
-            onBlur={(e) => validateField("issueDate", e.target.value)}
-            className={`input ${errors.issueDate ? "border-red-500" : ""}`}
-          />
+         <div>
+  <label className="block text-[11px] font-medium mb-0.5">
+    Issue Date *
+  </label>
+  <input
+    type="date"
+    name="issueDate"
+    value={formData.issueDate}
+    onChange={handleChange}
+    onBlur={(e) => validateField("issueDate", e.target.value)}
+    className={inputClass("issueDate")}
+  />
+  {errors.issueDate && (
+    <p className="text-red-500 text-[11px] mt-0.5">
+      {errors.issueDate}
+    </p>
+  )}
+</div>
 
-          <input
-            type="date"
-            name="validityEndDate"
-            value={formData.validityEndDate}
-            onChange={handleChange}
-            onBlur={(e) => validateField("validityEndDate", e.target.value)}
-            className={`input ${errors.validityEndDate ? "border-red-500" : ""}`}
-          />
+
+       <div>
+  <label className="block text-[11px] font-medium mb-0.5">
+    Validity End Date *
+  </label>
+  <input
+    type="date"
+    name="validityEndDate"
+    value={formData.validityEndDate}
+    onChange={handleChange}
+    onBlur={(e) => validateField("validityEndDate", e.target.value)}
+    className={inputClass("validityEndDate")}
+  />
+  {errors.validityEndDate && (
+    <p className="text-red-500 text-[11px] mt-0.5">
+      {errors.validityEndDate}
+    </p>
+  )}
+</div>
+
 
           <select
             name="issuingAuthority"
