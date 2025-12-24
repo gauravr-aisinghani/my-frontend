@@ -171,7 +171,7 @@ const LastExperienceForm = () => {
         LAST EXPERIENCE DETAILS
       </h2>
 
-      {/* Fresher Toggle Card - ALWAYS visible */}
+      {/* Fresher Toggle Card */}
       <div
         onClick={() => setIsFresher(!isFresher)}
         className={`flex items-center p-4 mb-4 rounded-lg cursor-pointer transition-colors duration-300 shadow-md hover:shadow-xl min-h-[60px] ${
@@ -187,9 +187,8 @@ const LastExperienceForm = () => {
 
       {/* Experience Form */}
       {!isFresher && (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
             <div>
               <input
                 name="vehicleMake"
@@ -360,17 +359,19 @@ const LastExperienceForm = () => {
             </div>
 
           </div>
-
-          <div className="flex justify-end mt-6">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
-            >
-              Save & Continue →
-            </button>
-          </div>
         </form>
       )}
+
+      {/* Save & Continue button - ALWAYS visible */}
+      <div className="flex justify-end mt-6">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
+        >
+          Save & Continue →
+        </button>
+      </div>
     </div>
   );
 };
