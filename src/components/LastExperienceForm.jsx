@@ -6,7 +6,6 @@ import lastExperienceApi from "../api/lastExperienceApi";
 
 const LastExperienceForm = () => {
   const dispatch = useDispatch();
-
   const driverId = useSelector(
     (state) => state.driverRegistration.registrationId
   );
@@ -30,7 +29,20 @@ const LastExperienceForm = () => {
     experienceDocument: null,
   });
 
-  /* ---------------- HANDLE CHANGE ---------------- */
+  const [errors, setErrors] = useState({});
+
+  /* ---------- SAME INPUT DESIGN ---------- */
+  const inputClass = (name) =>
+    `border rounded px-2 py-1 text-sm w-full ${
+      errors[name] ? "border-red-500" : ""
+    }`;
+
+  const renderError = (name) =>
+    errors[name] ? (
+      <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
+    ) : null;
+
+  /* ---------- HANDLE CHANGE ---------- */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -39,7 +51,6 @@ const LastExperienceForm = () => {
       return;
     }
 
-    // Owner mobile – digits only, max 10
     if (name === "ownerContactNo") {
       if (!/^\d*$/.test(value)) return;
       if (value.length > 10) return;
@@ -48,73 +59,111 @@ const LastExperienceForm = () => {
     setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  /* ---------------- VALIDATION ---------------- */
-  const validate = () => {
-    if (!driverId) return "Driver Registration ID missing.";
+  /* ---------- FIELD VALIDATION (ON BLUR) ---------- */
+  const validateField = (name, value) => {
+    let msg = "";
 
-    if (isFresher) return null;
+    if (isFresher) {
+      setErrors({});
+      return true;
+    }
 
-    if (!formData.vehicleMake) return "Vehicle Make is required.";
-    if (!formData.vehicleModel) return "Vehicle Model is required.";
-    if (!formData.lastTransportName)
-      return "Last Transporter Name is required.";
-    if (!formData.transportAddress)
-      return "Transport Address is required.";
-    if (!formData.ownerName) return "Owner Name is required.";
+    switch (name) {
+      case "vehicleMake":
+        if (!value) msg = "Vehicle Make is required";
+        break;
 
-    if (!formData.ownerContactNo)
-      return "Owner Mobile Number is required.";
-    if (!/^\d{10}$/.test(formData.ownerContactNo))
-      return "Owner Mobile must be exactly 10 digits.";
+      case "vehicleModel":
+        if (!value) msg = "Vehicle Model is required";
+        break;
 
-    if (!formData.postOfDriving)
-      return "Post of Driving is required.";
+      case "lastTransportName":
+        if (!value) msg = "Last Transporter Name is required";
+        break;
 
-    if (!formData.fromDate) return "From Date is required.";
+      case "transportAddress":
+        if (!value) msg = "Transport Address is required";
+        break;
 
-    if (
-      formData.toDate &&
-      new Date(formData.toDate) < new Date(formData.fromDate)
-    )
-      return "To Date cannot be before From Date.";
+      case "ownerName":
+        if (!value) msg = "Owner Name is required";
+        break;
 
-    // Indian vehicle number (simple & safe)
-    if (
-      formData.gaadiNumber &&
-      !/^[A-Z]{2}\d{1,2}[A-Z]{1,2}\d{4}$/i.test(formData.gaadiNumber)
-    )
-      return "Invalid vehicle number format.";
+      case "ownerContactNo":
+        if (!value) msg = "Owner Mobile is required";
+        else if (!/^\d{10}$/.test(value))
+          msg = "Mobile must be exactly 10 digits";
+        break;
 
-    if (
-      formData.totalWorkOnVehicle &&
-      Number(formData.totalWorkOnVehicle) < 0
-    )
-      return "Work on vehicle cannot be negative.";
+      case "gaadiNumber":
+        if (
+          value &&
+          !/^[A-Z]{2}\d{1,2}[A-Z]{1,2}\d{4}$/i.test(value)
+        )
+          msg = "Invalid vehicle number";
+        break;
 
-    if (
-      formData.totalExperienceYears &&
-      Number(formData.totalExperienceYears) < 0
-    )
-      return "Total experience cannot be negative.";
+      case "postOfDriving":
+        if (!value) msg = "Post of Driving is required";
+        break;
 
-    return null;
+      case "fromDate":
+        if (!value) msg = "From Date is required";
+        break;
+
+      case "toDate":
+        if (
+          value &&
+          formData.fromDate &&
+          new Date(value) < new Date(formData.fromDate)
+        )
+          msg = "To Date cannot be before From Date";
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((p) => ({ ...p, [name]: msg }));
+    return !msg;
   };
 
-  /* ---------------- SUBMIT ---------------- */
+  /* ---------- SUBMIT ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Fresher → skip API
     if (isFresher) {
       dispatch(setStep(5));
       return;
     }
 
-    const err = validate();
-    if (err) {
-      alert(err);
-      return;
+    const requiredFields = [
+      "vehicleMake",
+      "vehicleModel",
+      "lastTransportName",
+      "transportAddress",
+      "ownerName",
+      "ownerContactNo",
+      "postOfDriving",
+      "fromDate",
+    ];
+
+    let hasError = false;
+
+    requiredFields.forEach((f) => {
+      if (!validateField(f, formData[f])) hasError = true;
+    });
+
+    if (formData.gaadiNumber) {
+      if (!validateField("gaadiNumber", formData.gaadiNumber))
+        hasError = true;
     }
+
+    if (formData.toDate) {
+      if (!validateField("toDate", formData.toDate)) hasError = true;
+    }
+
+    if (hasError) return;
 
     const fd = new FormData();
     fd.append("driver_registration_id", driverId);
@@ -145,8 +194,8 @@ const LastExperienceForm = () => {
     try {
       await lastExperienceApi.saveLastExperience(driverId, fd);
       dispatch(setStep(5));
-    } catch (err) {
-      alert("Error saving last experience.");
+    } catch {
+      alert("Error saving last experience");
     }
   };
 
@@ -156,98 +205,57 @@ const LastExperienceForm = () => {
         Last Experience Details
       </h2>
 
-      {/* Fresher Option */}
-      <label className="flex items-center gap-2 mb-4 text-sm">
+      {/* Fresher Toggle */}
+      <div
+        onClick={() => setIsFresher(!isFresher)}
+        className={`border rounded p-3 mb-4 cursor-pointer text-sm ${
+          isFresher ? "border-green-500 bg-green-50" : ""
+        }`}
+      >
         <input
           type="checkbox"
           checked={isFresher}
-          onChange={(e) => setIsFresher(e.target.checked)}
+          readOnly
+          className="mr-2"
         />
         Driver is a Fresher (No Previous Experience)
-      </label>
+      </div>
 
       {!isFresher && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input
-              name="vehicleMake"
-              placeholder="Vehicle Make (Tata, Ashok Leyland) *"
-              value={formData.vehicleMake}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              name="vehicleModel"
-              placeholder="Vehicle Model (407, 1613, Bolero Pickup) *"
-              value={formData.vehicleModel}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              name="gaadiNumber"
-              placeholder="Vehicle Number (MH12AB1234)"
-              value={formData.gaadiNumber}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              name="lastTransportName"
-              placeholder="Last Transporter Name *"
-              value={formData.lastTransportName}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              name="transportAddress"
-              placeholder="Transport Address *"
-              value={formData.transportAddress}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              name="ownerName"
-              placeholder="Owner Name *"
-              value={formData.ownerName}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              name="ownerContactNo"
-              placeholder="Owner Mobile (10 digits) *"
-              value={formData.ownerContactNo}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              type="number"
-              name="totalWorkOnVehicle"
-              placeholder="Years Worked on This Vehicle"
-              value={formData.totalWorkOnVehicle}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
-
-            <input
-              type="number"
-              name="totalExperienceYears"
-              placeholder="Total Driving Experience (Years)"
-              value={formData.totalExperienceYears}
-              onChange={handleChange}
-              className="border rounded px-3 py-2"
-            />
+            {[
+              ["vehicleMake", "Vehicle Make *"],
+              ["vehicleModel", "Vehicle Model *"],
+              ["gaadiNumber", "Vehicle Number"],
+              ["lastTransportName", "Last Transporter Name *"],
+              ["transportAddress", "Transport Address *"],
+              ["ownerName", "Owner Name *"],
+              ["ownerContactNo", "Owner Mobile *"],
+            ].map(([name, label]) => (
+              <div key={name}>
+                <input
+                  name={name}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  onBlur={(e) =>
+                    validateField(name, e.target.value)
+                  }
+                  placeholder={label}
+                  className={inputClass(name)}
+                />
+                {renderError(name)}
+              </div>
+            ))}
 
             <select
               name="postOfDriving"
               value={formData.postOfDriving}
               onChange={handleChange}
-              className="border rounded px-3 py-2"
+              onBlur={(e) =>
+                validateField("postOfDriving", e.target.value)
+              }
+              className={inputClass("postOfDriving")}
             >
               <option value="">Post of Driving *</option>
               <option value="HCV">HCV</option>
@@ -255,32 +263,45 @@ const LastExperienceForm = () => {
               <option value="CAR">CAR</option>
               <option value="TAXI">TAXI</option>
             </select>
+            {renderError("postOfDriving")}
 
-            <label className="text-sm">
-              From Date *
+            <div>
+              <label className="text-[11px] font-medium">
+                From Date *
+              </label>
               <input
                 type="date"
                 name="fromDate"
                 value={formData.fromDate}
                 onChange={handleChange}
-                className="border rounded px-3 py-2 w-full mt-1"
+                onBlur={(e) =>
+                  validateField("fromDate", e.target.value)
+                }
+                className={inputClass("fromDate")}
               />
-            </label>
+              {renderError("fromDate")}
+            </div>
 
-            <label className="text-sm">
-              To Date
+            <div>
+              <label className="text-[11px] font-medium">
+                To Date
+              </label>
               <input
                 type="date"
                 name="toDate"
                 value={formData.toDate}
                 onChange={handleChange}
-                className="border rounded px-3 py-2 w-full mt-1"
+                onBlur={(e) =>
+                  validateField("toDate", e.target.value)
+                }
+                className={inputClass("toDate")}
               />
-            </label>
+              {renderError("toDate")}
+            </div>
           </div>
 
           <div className="flex justify-end">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">
               Save & Continue →
             </button>
           </div>
@@ -291,7 +312,7 @@ const LastExperienceForm = () => {
         <div className="flex justify-end">
           <button
             onClick={() => dispatch(setStep(5))}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="bg-blue-500 text-white px-4 py-2 rounded text-sm"
           >
             Continue →
           </button>
