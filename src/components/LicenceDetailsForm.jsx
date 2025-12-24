@@ -1,3 +1,4 @@
+// src/components/LicenceDetailsForm.jsx
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -7,39 +8,10 @@ import {
 } from "../store/driverRegistrationSlice";
 import { saveLicenceDetails } from "../api/licenceApi";
 
-/* =========================
-   CONSTANTS
-========================= */
-
-const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
-const LICENCE_REGEX = /^[A-Z0-9\-\/]{8,20}$/;
-const EMPLOYEE_CARD_REGEX = /^[A-Z0-9]{5,20}$/;
-
-const LICENCE_GRADES = [
-  "LMV",
-  "HMV",
-  "MCWG",
-  "MCWOG",
-  "TRANS",
-  "TRAILER",
-];
-
-const LICENCE_AUTHORITIES = [
-  "RTO",
-  "DTO",
-  "ARTO",
-  "Transport Department",
-  "Other",
-];
-
-export default function LicenceDetailsForm() {
+const LicenceDetailsForm = () => {
   const dispatch = useDispatch();
   const reg = useSelector(selectDriverRegistration);
   const driverId = reg?.registrationId;
-
-  /* =========================
-     STATE
-  ========================= */
 
   const [formData, setFormData] = useState({
     employeeCardNo: "",
@@ -54,66 +26,53 @@ export default function LicenceDetailsForm() {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
 
-  /* =========================
-     HELPERS
-  ========================= */
-
+  /* ---------- COMMON INPUT CLASS (same as previous file) ---------- */
   const inputClass = (name) =>
-    `input ${errors[name] ? "border-red-500" : ""}`;
+    `border rounded px-2 py-1 text-sm w-full ${
+      errors[name] ? "border-red-500" : ""
+    }`;
 
-  /* =========================
-     CHANGE HANDLER
-  ========================= */
+  const renderError = (name) =>
+    errors[name] ? (
+      <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
+    ) : null;
 
+  /* ---------- HANDLE CHANGE ---------- */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // PAN: uppercase + length limit
     if (name === "panNumber") {
-      const v = value.toUpperCase();
-      if (v.length > 10) return;
-      if (!/^[A-Z0-9]*$/.test(v)) return;
-      setFormData((p) => ({ ...p, panNumber: v }));
-      return;
-    }
-
-    if (name === "employeeCardNo") {
-      if (value.length > 20) return;
+      if (value.length > 10) return;
       if (!/^[A-Z0-9]*$/i.test(value)) return;
     }
 
-    if (name === "licenceNumber") {
-      if (value.length > 20) return;
-      setFormData((p) => ({ ...p, licenceNumber: value.toUpperCase() }));
-      return;
-    }
-
-    setFormData((p) => ({ ...p, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "panNumber" ? value.toUpperCase() : value,
+    }));
   };
 
-  /* =========================
-     INLINE VALIDATION (ON BLUR)
-  ========================= */
-
+  /* ---------- FIELD VALIDATION (ON BLUR) ---------- */
   const validateField = (name, value) => {
     let msg = "";
 
     switch (name) {
       case "employeeCardNo":
-        if (value && !EMPLOYEE_CARD_REGEX.test(value))
-          msg = "Employee Card No must be 5–20 alphanumeric characters";
+        if (value && value.length < 3)
+          msg = "Employee Card No must be at least 3 characters";
         break;
 
       case "panNumber":
-        if (value && !PAN_REGEX.test(value))
-          msg = "Invalid PAN format (ABCDE1234F)";
+        if (value && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value))
+          msg = "Invalid PAN format";
         break;
 
       case "licenceNumber":
         if (!value) msg = "Licence Number is required";
-        else if (!LICENCE_REGEX.test(value))
-          msg = "Licence Number must be 8–20 characters";
+        else if (!/^[A-Z0-9-]{5,20}$/i.test(value))
+          msg = "Invalid Licence Number";
         break;
 
       case "licenceGrade":
@@ -130,7 +89,7 @@ export default function LicenceDetailsForm() {
           formData.issueDate &&
           new Date(value) < new Date(formData.issueDate)
         )
-          msg = "Validity End Date cannot be before Issue Date";
+          msg = "End Date cannot be before Issue Date";
         break;
 
       case "issuingAuthority":
@@ -138,25 +97,23 @@ export default function LicenceDetailsForm() {
         break;
 
       case "anyOffence":
-        if (!value) msg = "Please select offence status";
+        if (!value) msg = "Please select an option";
         break;
 
       case "offenceRemark":
-        if (formData.anyOffence === "YES" && !value.trim())
-          msg = "Offence remark is required";
+        if (formData.anyOffence === "YES" && !value)
+          msg = "Offence Remark is required";
         break;
 
       default:
         break;
     }
 
-    setErrors((p) => ({ ...p, [name]: msg }));
+    setErrors((prev) => ({ ...prev, [name]: msg }));
+    return !msg;
   };
 
-  /* =========================
-     SUBMIT
-  ========================= */
-
+  /* ---------- SUBMIT ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -165,7 +122,7 @@ export default function LicenceDetailsForm() {
       return;
     }
 
-    const required = [
+    const fieldsToValidate = [
       "licenceNumber",
       "licenceGrade",
       "issueDate",
@@ -176,22 +133,16 @@ export default function LicenceDetailsForm() {
 
     let hasError = false;
 
-    required.forEach((f) => {
-      validateField(f, formData[f]);
-      if (!formData[f]) hasError = true;
+    fieldsToValidate.forEach((f) => {
+      if (!validateField(f, formData[f])) hasError = true;
     });
 
-    if (formData.anyOffence === "YES" && !formData.offenceRemark.trim()) {
-      validateField("offenceRemark", formData.offenceRemark);
-      hasError = true;
+    if (formData.anyOffence === "YES") {
+      if (!validateField("offenceRemark", formData.offenceRemark))
+        hasError = true;
     }
 
-    if (hasError) {
-      alert("Please fix validation errors");
-      return;
-    }
-
-    setLoading(true);
+    if (hasError) return;
 
     try {
       dispatch(updateStep2(formData));
@@ -212,81 +163,97 @@ export default function LicenceDetailsForm() {
       await saveLicenceDetails(driverId, payload);
       dispatch(setStep(3));
     } catch (err) {
-      alert("Failed to save licence details");
-    } finally {
-      setLoading(false);
+      alert("Error saving licence details");
     }
   };
 
-  /* =========================
-     JSX
-  ========================= */
-
+  /* ---------- JSX ---------- */
   return (
-    <div className="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-3 border-b pb-1">
+    <div className="w-full p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-semibold text-center mb-4">
         Licence Details
       </h2>
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-
-          <input
-            name="employeeCardNo"
-            value={formData.employeeCardNo}
-            onChange={handleChange}
-            onBlur={(e) => validateField("employeeCardNo", e.target.value)}
-            className={inputClass("employeeCardNo")}
-            placeholder="Employee Card No"
-          />
-
-          <input
-            name="panNumber"
-            value={formData.panNumber}
-            onChange={handleChange}
-            onBlur={(e) => validateField("panNumber", e.target.value)}
-            className={inputClass("panNumber")}
-            placeholder="PAN Number (ABCDE1234F)"
-          />
-
-          <input
-            name="licenceNumber"
-            value={formData.licenceNumber}
-            onChange={handleChange}
-            onBlur={(e) => validateField("licenceNumber", e.target.value)}
-            className={inputClass("licenceNumber")}
-            placeholder="Licence Number *"
-          />
-
-          <select
-            name="licenceGrade"
-            value={formData.licenceGrade}
-            onChange={handleChange}
-            onBlur={(e) => validateField("licenceGrade", e.target.value)}
-            className={inputClass("licenceGrade")}
-          >
-            <option value="">Select Licence Grade *</option>
-            {LICENCE_GRADES.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <input
+              name="employeeCardNo"
+              value={formData.employeeCardNo}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("employeeCardNo", e.target.value)
+              }
+              placeholder="Employee Card No"
+              className={inputClass("employeeCardNo")}
+            />
+            {renderError("employeeCardNo")}
+          </div>
 
           <div>
-            <label className="block text-[11px] font-medium mb-0.5">
-              Issue Date *
-            </label>
+            <input
+              name="panNumber"
+              value={formData.panNumber}
+              onChange={handleChange}
+              onBlur={(e) => validateField("panNumber", e.target.value)}
+              placeholder="PAN Number"
+              className={inputClass("panNumber")}
+            />
+            {renderError("panNumber")}
+          </div>
+
+          <div>
+            <input
+              name="licenceNumber"
+              value={formData.licenceNumber}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("licenceNumber", e.target.value)
+              }
+              placeholder="Licence Number *"
+              className={inputClass("licenceNumber")}
+            />
+            {renderError("licenceNumber")}
+          </div>
+
+          <div>
+            <select
+              name="licenceGrade"
+              value={formData.licenceGrade}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("licenceGrade", e.target.value)
+              }
+              className={inputClass("licenceGrade")}
+            >
+              <option value="">Licence Grade *</option>
+              <option value="LMV">LMV</option>
+              <option value="HMV">HMV</option>
+              <option value="MCWG">MCWG</option>
+              <option value="MCWOG">MCWOG</option>
+              <option value="TRANS">Transport</option>
+              <option value="TRAILER">Trailer</option>
+            </select>
+            {renderError("licenceGrade")}
+          </div>
+
+          <div>
+            <label className="text-[11px] font-medium">Issue Date *</label>
             <input
               type="date"
               name="issueDate"
               value={formData.issueDate}
               onChange={handleChange}
-              onBlur={(e) => validateField("issueDate", e.target.value)}
+              onBlur={(e) =>
+                validateField("issueDate", e.target.value)
+              }
               className={inputClass("issueDate")}
             />
+            {renderError("issueDate")}
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium mb-0.5">
+            <label className="text-[11px] font-medium">
               Validity End Date *
             </label>
             <input
@@ -299,59 +266,65 @@ export default function LicenceDetailsForm() {
               }
               className={inputClass("validityEndDate")}
             />
+            {renderError("validityEndDate")}
           </div>
 
-          <select
-            name="issuingAuthority"
-            value={formData.issuingAuthority}
-            onChange={handleChange}
-            onBlur={(e) =>
-              validateField("issuingAuthority", e.target.value)
-            }
-            className={inputClass("issuingAuthority")}
-          >
-            <option value="">Issuing Authority *</option>
-            {LICENCE_AUTHORITIES.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-
-          <select
-            name="anyOffence"
-            value={formData.anyOffence}
-            onChange={handleChange}
-            onBlur={(e) => validateField("anyOffence", e.target.value)}
-            className={inputClass("anyOffence")}
-          >
-            <option value="">Any Offence? *</option>
-            <option value="YES">YES</option>
-            <option value="NO">NO</option>
-          </select>
-
-          {formData.anyOffence === "YES" && (
+          <div>
             <input
-              name="offenceRemark"
-              value={formData.offenceRemark}
+              name="issuingAuthority"
+              value={formData.issuingAuthority}
               onChange={handleChange}
               onBlur={(e) =>
-                validateField("offenceRemark", e.target.value)
+                validateField("issuingAuthority", e.target.value)
               }
-              className={inputClass("offenceRemark")}
-              placeholder="Offence Remark *"
+              placeholder="Issuing Authority *"
+              className={inputClass("issuingAuthority")}
             />
+            {renderError("issuingAuthority")}
+          </div>
+
+          <div>
+            <select
+              name="anyOffence"
+              value={formData.anyOffence}
+              onChange={handleChange}
+              onBlur={(e) =>
+                validateField("anyOffence", e.target.value)
+              }
+              className={inputClass("anyOffence")}
+            >
+              <option value="">Any Offence? *</option>
+              <option value="YES">Yes</option>
+              <option value="NO">No</option>
+            </select>
+            {renderError("anyOffence")}
+          </div>
+
+          {formData.anyOffence === "YES" && (
+            <div>
+              <input
+                name="offenceRemark"
+                value={formData.offenceRemark}
+                onChange={handleChange}
+                onBlur={(e) =>
+                  validateField("offenceRemark", e.target.value)
+                }
+                placeholder="Offence Remark *"
+                className={inputClass("offenceRemark")}
+              />
+              {renderError("offenceRemark")}
+            </div>
           )}
         </div>
 
-        <div className="flex justify-end mt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary px-4 py-1.5 text-xs"
-          >
-            {loading ? "Saving..." : "Next →"}
+        <div className="flex justify-end">
+          <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">
+            Save & Continue →
           </button>
         </div>
       </form>
     </div>
   );
-}
+};
+
+export default LicenceDetailsForm;
