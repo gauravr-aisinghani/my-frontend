@@ -23,6 +23,17 @@ const LANGUAGES = [
 export default function DriverDetailsForm({ onNext }) {
   const dispatch = useDispatch();
 
+  const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+const EDUCATION_LEVELS = [
+  "Illiterate",
+  "Primary",
+  "Secondary",
+  "Higher Secondary",
+  "Graduate",
+  "Postgraduate"
+];
+
+
   const initial = {
     fullName: "",
     fatherName: "",
@@ -102,6 +113,18 @@ export default function DriverDetailsForm({ onNext }) {
         if (!value.trim()) msg = "Father name is required";
         break;
 
+         case "gender":
+      if (!value) msg = "Gender is required";
+      break;
+
+    case "bloodGroup":
+      if (!value) msg = "Blood group is required";
+      break;
+
+    case "education":
+      if (!value) msg = "Education is required";
+      break;
+
       case "dob":
         if (!value) msg = "Date of birth is required";
         else if (local.age < 18)
@@ -173,8 +196,8 @@ export default function DriverDetailsForm({ onNext }) {
     district: data.district,
     state: data.state,
     pin_code: data.pinCode,
-    mobile_1: data.mobile1,
-    mobile_2: data.mobile2,
+    mobile_number: data.mobile1,
+    mobile_number_alt: data.mobile2,
   });
 
   /* 🔹 SUBMIT HANDLER */
@@ -281,6 +304,63 @@ return (
           placeholder="Age"
         />
       </div>
+
+      <div>
+  <select
+    name="gender"
+    value={local.gender}
+    onChange={handleChange}
+    onBlur={(e) => validateField("gender", e.target.value)}
+    className={inputClass("gender")}
+  >
+    <option value="">Select Gender *</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+    <option value="Other">Other</option>
+  </select>
+  {errors.gender && (
+    <p className="text-red-500 text-[11px] mt-0.5">{errors.gender}</p>
+  )}
+</div>
+
+
+<div>
+  <select
+    name="bloodGroup"
+    value={local.bloodGroup}
+    onChange={handleChange}
+    onBlur={(e) => validateField("bloodGroup", e.target.value)}
+    className={inputClass("bloodGroup")}
+  >
+    <option value="">Select Blood Group *</option>
+    {BLOOD_GROUPS.map(bg => (
+      <option key={bg} value={bg}>{bg}</option>
+    ))}
+  </select>
+  {errors.bloodGroup && (
+    <p className="text-red-500 text-[11px] mt-0.5">{errors.bloodGroup}</p>
+  )}
+</div>
+
+<div>
+  <select
+    name="education"
+    value={local.education}
+    onChange={handleChange}
+    onBlur={(e) => validateField("education", e.target.value)}
+    className={inputClass("education")}
+  >
+    <option value="">Select Education *</option>
+    {EDUCATION_LEVELS.map(ed => (
+      <option key={ed} value={ed}>{ed}</option>
+    ))}
+  </select>
+  {errors.education && (
+    <p className="text-red-500 text-[11px] mt-0.5">{errors.education}</p>
+  )}
+</div>
+
+
 
       {/* Language */}
       <div>
