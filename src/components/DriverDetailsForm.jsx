@@ -117,6 +117,10 @@ const EDUCATION_LEVELS = [
       if (!value) msg = "Gender is required";
       break;
 
+        case "drink":
+      if (!value) msg = "This filed can not be blank";
+      break;
+
     case "bloodGroup":
       if (!value) msg = "Blood group is required";
       break;
@@ -320,6 +324,23 @@ return (
   </select>
   {errors.gender && (
     <p className="text-red-500 text-[11px] mt-0.5">{errors.gender}</p>
+  )}
+</div>
+
+   <div>
+  <select
+    name="Drink"
+    value={local.drink}
+    onChange={handleChange}
+    onBlur={(e) => validateField("drink", e.target.value)}
+    className={inputClass("drink")}
+  >
+    <option value="">Drink *</option>
+    <option value="NO">NO</option>
+    <option value="YES">YES</option>
+=  </select>
+  {errors.gender && (
+    <p className="text-red-500 text-[11px] mt-0.5">{errors.drink}</p>
   )}
 </div>
 
