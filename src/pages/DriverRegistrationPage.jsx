@@ -141,28 +141,35 @@ const Inner = () => {
                 exit="exit"
                 transition={{ duration: 0.4 }}
               >
-                <div className="p-4 bg-white rounded-lg shadow mt-4">
-                  <h2 className="text-xl font-bold mb-4">Registration Completed 🎉</h2>
+                <div className="p-6 md:p-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl shadow-2xl flex flex-col items-center text-center text-white">
+                  <div className="mb-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-16 w-16 mx-auto mb-4 animate-bounce"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <h2 className="text-2xl md:text-3xl font-extrabold mb-2">
+                      Registration Completed! 🎉
+                    </h2>
+                    <p className="text-lg md:text-xl max-w-xl mx-auto">
+                      Your documents are successfully submitted. Your <strong>GDC number</strong> will be sent to you after verification. 
+                      Once verified, you can make payments and start using our services immediately.
+                    </p>
+                  </div>
 
-                  <p className="mb-2">
-                    <strong>Saved:</strong>{" "}
-                    {reg.submitted ? (
-                      <span className="text-green-600 font-bold">Yes ✅</span>
-                    ) : (
-                      <span className="text-red-600 font-bold">No ❌</span>
-                    )}
-                  </p>
-
-                  <p className="mb-6">
-                    <strong>Driver Reg. ID:</strong> {reg.registrationId || "-"}
-                  </p>
-
-                  <button
-                    onClick={() => dispatch(setStep(1))}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md"
-                  >
-                    Go Back to Step 1
-                  </button>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => dispatch(setStep(1))}
+                      className="px-6 py-3 bg-white text-green-600 font-bold rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-1"
+                    >
+                      Back to Start
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
