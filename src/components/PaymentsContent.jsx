@@ -36,7 +36,7 @@ export default function PaymentsContent() {
       setError("");
 
       const res = await createPaymentOrder({
-        gdcNumber: gdcRegistrationNumber.trim(), // ✅ DTO FIELD
+        gdc_number: gdcRegistrationNumber.trim(), // ✅ DTO FIELD
         type: paymentType,
       });
 
