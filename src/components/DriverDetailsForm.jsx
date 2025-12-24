@@ -329,7 +329,7 @@ return (
 
    <div>
   <select
-    name="Drink"
+    name="drink"
     value={local.drink}
     onChange={handleChange}
     onBlur={(e) => validateField("drink", e.target.value)}
@@ -338,8 +338,8 @@ return (
     <option value="">Drink *</option>
     <option value="NO">NO</option>
     <option value="YES">YES</option>
-=  </select>
-  {errors.gender && (
+ </select>
+  {errors.drink && (
     <p className="text-red-500 text-[11px] mt-0.5">{errors.drink}</p>
   )}
 </div>
