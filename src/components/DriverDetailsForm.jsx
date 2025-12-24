@@ -174,13 +174,12 @@ export default function DriverDetailsForm({ onNext }) {
   }
 
    return (
-  <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
-    <h2 className="text-2xl font-bold mb-6 border-b pb-2">
+  <div className="max-w-6xl mx-auto bg-white p-4 rounded-xl shadow-md">
+    <h2 className="text-xl font-bold mb-4 border-b pb-2">
       Personal Details
     </h2>
 
-    {/* GRID START */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
       {/* Full Name */}
       <div>
@@ -192,7 +191,9 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("fullName")}
           placeholder="Full Name *"
         />
-        {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
+        {errors.fullName && (
+          <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+        )}
       </div>
 
       {/* Father Name */}
@@ -205,7 +206,9 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("fatherName")}
           placeholder="Father Name *"
         />
-        {errors.fatherName && <p className="text-red-500 text-sm">{errors.fatherName}</p>}
+        {errors.fatherName && (
+          <p className="text-red-500 text-xs mt-1">{errors.fatherName}</p>
+        )}
       </div>
 
       {/* Mother Name */}
@@ -221,7 +224,9 @@ export default function DriverDetailsForm({ onNext }) {
 
       {/* DOB */}
       <div>
-        <label className="block text-sm font-medium mb-1">Date of Birth *</label>
+        <label className="block text-xs font-medium mb-1">
+          Date of Birth *
+        </label>
         <input
           type="date"
           name="dob"
@@ -230,7 +235,9 @@ export default function DriverDetailsForm({ onNext }) {
           onBlur={(e) => validateField("dob", e.target.value)}
           className={inputClass("dob")}
         />
-        {errors.dob && <p className="text-red-500 text-sm">{errors.dob}</p>}
+        {errors.dob && (
+          <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
+        )}
       </div>
 
       {/* Age */}
@@ -268,7 +275,9 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("aadharNo")}
           placeholder="Aadhar Number *"
         />
-        {errors.aadharNo && <p className="text-red-500 text-sm">{errors.aadharNo}</p>}
+        {errors.aadharNo && (
+          <p className="text-red-500 text-xs mt-1">{errors.aadharNo}</p>
+        )}
       </div>
 
       {/* Bhamashah */}
@@ -281,7 +290,9 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("bhamashahNo")}
           placeholder="Bhamashah Card Number"
         />
-        {errors.bhamashahNo && <p className="text-red-500 text-sm">{errors.bhamashahNo}</p>}
+        {errors.bhamashahNo && (
+          <p className="text-red-500 text-xs mt-1">{errors.bhamashahNo}</p>
+        )}
       </div>
 
       {/* Category */}
@@ -299,7 +310,9 @@ export default function DriverDetailsForm({ onNext }) {
           <option value="SC">SC</option>
           <option value="ST">ST</option>
         </select>
-        {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
+        {errors.category && (
+          <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+        )}
       </div>
 
       {/* Address */}
@@ -332,10 +345,12 @@ export default function DriverDetailsForm({ onNext }) {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        {errors.state && <p className="text-red-500 text-sm">{errors.state}</p>}
+        {errors.state && (
+          <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+        )}
       </div>
 
-      {/* Pincode */}
+      {/* Pin Code */}
       <div>
         <input
           name="pinCode"
@@ -345,10 +360,12 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("pinCode")}
           placeholder="Pin Code"
         />
-        {errors.pinCode && <p className="text-red-500 text-sm">{errors.pinCode}</p>}
+        {errors.pinCode && (
+          <p className="text-red-500 text-xs mt-1">{errors.pinCode}</p>
+        )}
       </div>
 
-      {/* Mobiles */}
+      {/* Mobile */}
       <div>
         <input
           name="mobile1"
@@ -358,7 +375,9 @@ export default function DriverDetailsForm({ onNext }) {
           className={inputClass("mobile1")}
           placeholder="Mobile Number *"
         />
-        {errors.mobile1 && <p className="text-red-500 text-sm">{errors.mobile1}</p>}
+        {errors.mobile1 && (
+          <p className="text-red-500 text-xs mt-1">{errors.mobile1}</p>
+        )}
       </div>
 
       <div>
@@ -374,18 +393,18 @@ export default function DriverDetailsForm({ onNext }) {
 
     </div>
 
-    {/* BUTTON */}
-    <div className="flex justify-end mt-8">
+    <div className="flex justify-end mt-6">
       <button
         onClick={next}
         disabled={loading}
-        className="btn-primary px-8 py-2 text-lg"
+        className="btn-primary px-6 py-2 text-sm"
       >
         {loading ? "Saving..." : "Next →"}
       </button>
     </div>
   </div>
 );
+
   
 
 }
