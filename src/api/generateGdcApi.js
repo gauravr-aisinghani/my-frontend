@@ -1,16 +1,19 @@
 // src/api/generateGdcApi.js
 import api from "./axiosInstance";
 
-
-const API_BASE = `${api}/api/gdc`;
-
 const generateGdcApi = {
+  // Generate GDC
   async generateGdc(payload) {
     try {
-      const res = await axios.post(`${API_BASE}/generate`, payload, {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await api.post(
+        "/api/gdc/generate",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       return res.data;
     } catch (err) {
       console.error("Error generating GDC", err);
@@ -18,12 +21,11 @@ const generateGdcApi = {
     }
   },
 
-  // fetch verified (approved) drivers
+  // Fetch verified (approved) drivers
   async getApprovedDrivers() {
     try {
-      const res = await axios.get(
-        "https://my-backend-1-qxc9.onrender.com/api/driver-verification/approved-drivers",
-        { withCredentials: true }
+      const res = await api.get(
+        "/api/driver-verification/approved-drivers"
       );
       return res.data;
     } catch (err) {
