@@ -12,7 +12,7 @@ const driverDocumentsApi = {
    */
   saveDocuments: async (formData) => {
     try {
-      const res = await axios.post(
+      const res = await api.post(
         `${api}/api/driver-documents/upload`,
         formData,
         {
@@ -33,7 +33,7 @@ const driverDocumentsApi = {
    */
   getByDriverId: async (driverId) => {
     try {
-      const res = await axios.get(`${api}api/driver-documents/driver/${driverId}`);
+      const res = await api.get(`${api}api/driver-documents/driver/${driverId}`);
       return res.data;
     } catch (err) {
       console.error("Error fetching driver documents:", err);
@@ -46,7 +46,7 @@ const driverDocumentsApi = {
    */
   deleteDocument: async (documentId) => {
     try {
-      const res = await axios.delete(`${api}/api/driver-documents/delete/${documentId}`);
+      const res = await api.delete(`${api}/api/driver-documents/delete/${documentId}`);
       return res.data;
     } catch (err) {
       console.error("Error deleting document:", err);
