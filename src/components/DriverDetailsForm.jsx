@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { startDriverRegistration } from "../api/driverRegistrationApi";
+import { startDriverRegistration } from "../api/driverDetailsApi";
 import {
   updateStep1,
   setStep,
