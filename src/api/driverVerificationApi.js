@@ -1,17 +1,16 @@
 // src/api/driverVerificationApi.js
 import api from "./axiosInstance";
 
-
-// const API_URL = `${api}api/driver-verification`;
-
 export default {
   getPendingDrivers: async () => {
-    const res = await api.get(`${api}/api/driver-verification/pending`);
+    const res = await api.get("/api/driver-verification/pending");
     return res.data;
   },
 
   getDriverDocuments: async (driverRegistrationId) => {
-    const res = await api.get(`${api}/api/driver-verification/documents/${driverRegistrationId}`);
+    const res = await api.get(
+      `/api/driver-verification/documents/${driverRegistrationId}`
+    );
     return res.data;
   },
 
@@ -21,7 +20,12 @@ export default {
       remarks,
       approved_by: approvedBy,
     };
-    return (await api.post(`${api}/api/driver-verification/approve`, payload)).data;
+
+    const res = await api.post(
+      "/api/driver-verification/approve",
+      payload
+    );
+    return res.data;
   },
 
   rejectDriver: async ({ driverRegistrationId, remarks }) => {
@@ -29,6 +33,11 @@ export default {
       driver_registration_id: driverRegistrationId,
       remarks,
     };
-    return (await api.post(`${api}/api/driver-verification/reject`, payload)).data;
+
+    const res = await api.post(
+      "/api/driver-verification/reject",
+      payload
+    );
+    return res.data;
   },
 };
