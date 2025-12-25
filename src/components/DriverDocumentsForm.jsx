@@ -107,7 +107,7 @@ const DriverDocumentsForm = ({ onNext, onBack }) => {
     try {
       await driverDocumentsApi.saveDocuments(fd);
       alert("Driver Documents saved successfully!");
-      if (onNext) onNext();
+      if (onNext) onNext(6);
     } catch (err) {
       console.error(err);
       alert("Error saving driver documents.");
