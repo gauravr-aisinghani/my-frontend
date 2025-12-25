@@ -1,7 +1,6 @@
 // src/api/driverDocumentsApi.js
 import api from "./axiosInstance";
 
-
 // const API_BASE = "http://localhost:8089/api/driver-documents";
 const API_BASE = "https://my-backend-1-qxc9.onrender.com/api/driver-documents";
 
@@ -13,7 +12,7 @@ const driverDocumentsApi = {
   saveDocuments: async (formData) => {
     try {
       const res = await api.post(
-        `${api}/api/driver-documents/upload`,
+        "/api/driver-documents/upload",
         formData,
         {
           headers: {
@@ -33,7 +32,9 @@ const driverDocumentsApi = {
    */
   getByDriverId: async (driverId) => {
     try {
-      const res = await api.get(`${api}api/driver-documents/driver/${driverId}`);
+      const res = await api.get(
+        `/api/driver-documents/driver/${driverId}`
+      );
       return res.data;
     } catch (err) {
       console.error("Error fetching driver documents:", err);
@@ -46,7 +47,9 @@ const driverDocumentsApi = {
    */
   deleteDocument: async (documentId) => {
     try {
-      const res = await api.delete(`${api}/api/driver-documents/delete/${documentId}`);
+      const res = await api.delete(
+        `/api/driver-documents/delete/${documentId}`
+      );
       return res.data;
     } catch (err) {
       console.error("Error deleting document:", err);
