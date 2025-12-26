@@ -106,65 +106,109 @@ const DailyVisitorForm2 = () => {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
       >
-        <input name="driverName" value={formData.driverName} onChange={handleChange} className="input" placeholder="Driver Name *" />
-        <input name="location" value={formData.location} onChange={handleChange} className="input" placeholder="Location" />
-        <input name="mobileNo" value={formData.mobileNo} onChange={handleChange} className="input" placeholder="Mobile Number *" />
-        <input name="grade" value={formData.grade} onChange={handleChange} className="input" placeholder="Grade" />
-        <input name="otherMobile" value={formData.otherMobile} onChange={handleChange} className="input" placeholder="Other Mobile" />
-        <input name="birthPlace" value={formData.birthPlace} onChange={handleChange} className="input" placeholder="Birth Place" />
-        <input name="relativeName" value={formData.relativeName} onChange={handleChange} className="input" placeholder="Relative Name" />
-        <input name="relativeMobile" value={formData.relativeMobile} onChange={handleChange} className="input" placeholder="Relative Mobile" />
+        {[
+          ["driverName", "Driver Name"],
+          ["location", "Location"],
+          ["mobileNo", "Mobile No"],
+          ["grade", "Grade"],
+          ["otherMobile", "Other Mobile"],
+          ["birthPlace", "Birth Place"],
+          ["relativeName", "Relative Name"],
+          ["relativeMobile", "Relative Mobile"],
+          ["preferedLocation", "Preferred Location"],
+          ["preferedMonthlySalary", "Monthly Salary"],
+          ["preferredVehicle", "Preferred Vehicle"],
+        ].map(([name, label]) => (
+          <div key={name}>
+            <label className="block text-[11px] font-medium mb-0.5">
+              {label}
+            </label>
+            <input
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              className="input"
+            />
+          </div>
+        ))}
 
-        <select name="gaadiDrivenInPast" value={formData.gaadiDrivenInPast} onChange={handleChange} className="input">
-          <option value="">Gaadi Driven in Past *</option>
-          {["Auto", "Taxi", "Pickup", "Tempo", "Bolero", "Bike", "Other"].map(v => (
-            <option key={v} value={v}>{v}</option>
-          ))}
-        </select>
-
-        <input name="preferedLocation" value={formData.preferedLocation} onChange={handleChange} className="input" placeholder="Preferred Location" />
-        <input name="preferedMonthlySalary" value={formData.preferedMonthlySalary} onChange={handleChange} className="input" placeholder="Preferred Monthly Salary" />
-        <input name="preferredVehicle" value={formData.preferredVehicle} onChange={handleChange} className="input" placeholder="Preferred Vehicle" />
+        {/* Gaadi Driven */}
+        <div>
+          <label className="block text-[11px] font-medium mb-0.5">
+            Gaadi Driven in Past
+          </label>
+          <select
+            name="gaadiDrivenInPast"
+            value={formData.gaadiDrivenInPast}
+            onChange={handleChange}
+            className="input"
+          >
+            <option value="">Select</option>
+            {["Auto", "Taxi", "Pickup", "Tempo", "Bolero", "Bike", "Other"].map(v => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        </div>
 
         {/* Load Type */}
-        <div className="flex gap-4 items-center">
-          <label className="flex items-center gap-2 text-xs">
-            <input type="checkbox" name="underload" checked={formData.underload} onChange={handleChange} />
-            Underload
+        <div>
+          <label className="block text-[11px] font-medium mb-0.5">
+            Load Type
           </label>
-          <label className="flex items-center gap-2 text-xs">
-            <input type="checkbox" name="overload" checked={formData.overload} onChange={handleChange} />
-            Overload
-          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" name="underload" checked={formData.underload} onChange={handleChange} />
+              Underload
+            </label>
+            <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" name="overload" checked={formData.overload} onChange={handleChange} />
+              Overload
+            </label>
+          </div>
         </div>
 
         {/* Timing */}
-        <div className="flex gap-4 items-center">
-          {[
-            ["regularTiming", "Regular"],
-            ["occasional", "Occasional"],
-            ["permanent", "Permanent"],
-          ].map(([name, label]) => (
-            <label key={name} className="flex items-center gap-2 text-xs">
-              <input type="checkbox" name={name} checked={formData[name]} onChange={handleChange} />
-              {label}
-            </label>
-          ))}
+        <div>
+          <label className="block text-[11px] font-medium mb-0.5">
+            Timing Preference
+          </label>
+          <div className="flex gap-4">
+            {[
+              ["regularTiming", "Regular"],
+              ["occasional", "Occasional"],
+              ["permanent", "Permanent"],
+            ].map(([name, label]) => (
+              <label key={name} className="flex items-center gap-2 text-xs">
+                <input type="checkbox" name={name} checked={formData[name]} onChange={handleChange} />
+                {label}
+              </label>
+            ))}
+          </div>
         </div>
 
         {/* Any Issue */}
         <div className="md:col-span-2 lg:col-span-3">
-          <input name="anyIssue" value={formData.anyIssue} onChange={handleChange} className="input" placeholder="Any Issue" />
+          <label className="block text-[11px] font-medium mb-0.5">
+            Any Issue
+          </label>
+          <input
+            name="anyIssue"
+            value={formData.anyIssue}
+            onChange={handleChange}
+            className="input"
+          />
         </div>
 
         {/* Notes */}
         <div className="md:col-span-2 lg:col-span-3">
+          <label className="block text-[11px] font-medium mb-0.5">
+            Notes
+          </label>
           <textarea
             name="notes"
             value={formData.notes}
             onChange={handleChange}
             className="input h-20 resize-none"
-            placeholder="Notes"
           />
         </div>
 
