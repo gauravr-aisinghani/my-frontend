@@ -1,4 +1,3 @@
-// src/components/DailyVisitorForm2.jsx
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addVisitor } from "../store/dailyVisitorsSlice";
@@ -36,10 +35,9 @@ const DailyVisitorForm2 = () => {
     const { name, value, type, checked } = e.target;
 
     if (
-      ["mobileNo", "otherMobile", "relativeMobile", "preferedMonthlySalary"].includes(name)
-    ) {
-      if (!/^\d*$/.test(value)) return;
-    }
+      ["mobileNo", "otherMobile", "relativeMobile", "preferedMonthlySalary"].includes(name) &&
+      !/^\d*$/.test(value)
+    ) return;
 
     setFormData((prev) => ({
       ...prev,
@@ -94,158 +92,85 @@ const DailyVisitorForm2 = () => {
     }
   };
 
-  const fields = [
-    ["driverName", "Driver Name", "text"],
-    ["location", "Location", "text"],
-    ["mobileNo", "Mobile No", "tel"],
-    ["grade", "Grade", "text"],
-    ["otherMobile", "Other Mobile", "tel"],
-    ["birthPlace", "Birth Place", "text"],
-    ["relativeName", "Relative Name", "text"],
-    ["relativeMobile", "Relative Mobile", "tel"],
-    ["preferedLocation", "Preferred Location", "text"],
-    ["preferedMonthlySalary", "Monthly Salary", "number"],
-    ["preferredVehicle", "Preferred Vehicle", "text"],
-  ];
-
   return (
-    <div className="bg-white shadow-md border border-gray-200 rounded-lg p-4 sm:p-6 lg:p-8 w-full max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-sm">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4 gap-4">
-        <div>
-          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-green-600">
-            Daily Visitor Entry
-          </h2>
-          <p className="text-gray-600 text-xs sm:text-sm mt-1">Fill all required details.</p>
-        </div>
-
-        <div className="ml-auto">
-          <Link
-            to="/dashboard"
-            className="inline-block bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-md text-xs sm:text-sm"
-          >
-            ← Back
-          </Link>
-        </div>
+      <div className="flex items-center justify-between mb-3 border-b pb-1">
+        <h2 className="text-lg font-semibold">Daily Visitor Entry</h2>
+        <Link to="/dashboard" className="text-xs text-blue-600 hover:underline">
+          ← Back
+        </Link>
       </div>
 
-      {/* Responsive Form Grid
-          - 1 column on extra-small
-          - 2 columns on small (sm)
-          - 3 columns on large (lg)
-      */}
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
       >
-        {fields.map(([name, label, type]) => (
-          <div key={name} className="flex flex-col">
-            <label className="text-xs sm:text-sm text-gray-700 font-medium mb-1">{label}</label>
-            <input
-              type={type}
-              name={name}
-              value={formData[name]}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-md px-2 py-2 text-sm sm:text-sm w-full focus:ring-1 focus:ring-green-400"
-            />
-          </div>
-        ))}
+        <input name="driverName" value={formData.driverName} onChange={handleChange} className="input" placeholder="Driver Name *" />
+        <input name="location" value={formData.location} onChange={handleChange} className="input" placeholder="Location" />
+        <input name="mobileNo" value={formData.mobileNo} onChange={handleChange} className="input" placeholder="Mobile Number *" />
+        <input name="grade" value={formData.grade} onChange={handleChange} className="input" placeholder="Grade" />
+        <input name="otherMobile" value={formData.otherMobile} onChange={handleChange} className="input" placeholder="Other Mobile" />
+        <input name="birthPlace" value={formData.birthPlace} onChange={handleChange} className="input" placeholder="Birth Place" />
+        <input name="relativeName" value={formData.relativeName} onChange={handleChange} className="input" placeholder="Relative Name" />
+        <input name="relativeMobile" value={formData.relativeMobile} onChange={handleChange} className="input" placeholder="Relative Mobile" />
 
-        {/* Gaadi - occupies one grid cell */}
-        <div className="flex flex-col">
-          <label className="text-xs sm:text-sm text-gray-700 font-medium mb-1">Gaadi Driven in Past</label>
-          <select
-            name="gaadiDrivenInPast"
-            value={formData.gaadiDrivenInPast}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-md px-2 py-2 text-sm w-full focus:ring-1 focus:ring-green-400"
-          >
-            <option value="">Select</option>
-            {["Auto", "Taxi", "Pickup", "Tempo", "Bolero", "Bike", "Other"].map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
-        </div>
+        <select name="gaadiDrivenInPast" value={formData.gaadiDrivenInPast} onChange={handleChange} className="input">
+          <option value="">Gaadi Driven in Past *</option>
+          {["Auto", "Taxi", "Pickup", "Tempo", "Bolero", "Bike", "Other"].map(v => (
+            <option key={v} value={v}>{v}</option>
+          ))}
+        </select>
+
+        <input name="preferedLocation" value={formData.preferedLocation} onChange={handleChange} className="input" placeholder="Preferred Location" />
+        <input name="preferedMonthlySalary" value={formData.preferedMonthlySalary} onChange={handleChange} className="input" placeholder="Preferred Monthly Salary" />
+        <input name="preferredVehicle" value={formData.preferredVehicle} onChange={handleChange} className="input" placeholder="Preferred Vehicle" />
 
         {/* Load Type */}
-        <div className="flex flex-col">
-          <label className="text-xs sm:text-sm text-gray-700 font-medium mb-1">Load Type</label>
-          <div className="flex gap-4 items-center">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="underload"
-                checked={formData.underload}
-                onChange={handleChange}
-                className="h-4 w-4"
-              />
-              <span className="text-xs sm:text-sm">Underload</span>
+        <div className="flex gap-4 items-center">
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" name="underload" checked={formData.underload} onChange={handleChange} />
+            Underload
+          </label>
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" name="overload" checked={formData.overload} onChange={handleChange} />
+            Overload
+          </label>
+        </div>
+
+        {/* Timing */}
+        <div className="flex gap-4 items-center">
+          {[
+            ["regularTiming", "Regular"],
+            ["occasional", "Occasional"],
+            ["permanent", "Permanent"],
+          ].map(([name, label]) => (
+            <label key={name} className="flex items-center gap-2 text-xs">
+              <input type="checkbox" name={name} checked={formData[name]} onChange={handleChange} />
+              {label}
             </label>
-
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="overload"
-                checked={formData.overload}
-                onChange={handleChange}
-                className="h-4 w-4"
-              />
-              <span className="text-xs sm:text-sm">Overload</span>
-            </label>
-          </div>
+          ))}
         </div>
 
-        {/* Timing Preference - make it span 2 cols on md or full width on small screens */}
-        <div className="sm:col-span-2 lg:col-span-1 flex flex-col">
-          <label className="text-xs sm:text-sm text-gray-700 font-medium mb-1">Timing Preference</label>
-          <div className="flex flex-wrap gap-3">
-            {[
-              ["regularTiming", "Regular"],
-              ["occasional", "Occasional"],
-              ["permanent", "Permanent"],
-            ].map(([name, label]) => (
-              <label key={name} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  name={name}
-                  checked={formData[name]}
-                  onChange={handleChange}
-                  className="h-4 w-4"
-                />
-                <span className="text-xs sm:text-sm">{label}</span>
-              </label>
-            ))}
-          </div>
+        {/* Any Issue */}
+        <div className="md:col-span-2 lg:col-span-3">
+          <input name="anyIssue" value={formData.anyIssue} onChange={handleChange} className="input" placeholder="Any Issue" />
         </div>
 
-        {/* Any Issue - full width */}
-        <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex flex-col">
-          <label className="text-xs sm:text-sm text-gray-700 font-medium mb-1">Any Issue</label>
-          <input
-            name="anyIssue"
-            value={formData.anyIssue}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-md px-2 py-2 text-sm w-full focus:ring-1 focus:ring-green-400"
-          />
-        </div>
-
-        {/* Notes - full width */}
-        <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex flex-col">
-          <label className="text-xs sm:text-sm text-gray-700 font-medium mb-1">Notes</label>
+        {/* Notes */}
+        <div className="md:col-span-2 lg:col-span-3">
           <textarea
             name="notes"
             value={formData.notes}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md px-2 py-2 text-sm w-full h-24 resize-vertical focus:ring-1 focus:ring-green-400"
+            className="input h-20 resize-none"
+            placeholder="Notes"
           />
         </div>
 
-        {/* Submit - centered and responsive */}
-        <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center">
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-semibold w-full sm:w-auto"
-          >
+        {/* Submit */}
+        <div className="md:col-span-2 lg:col-span-3 flex justify-end">
+          <button type="submit" className="btn-primary px-4 py-1.5 text-xs">
             Save Visitor
           </button>
         </div>
