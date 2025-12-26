@@ -25,20 +25,25 @@ const pageTitles = {
   "driver-verification": "Pending Drivers",
   "generate-gdc": "Generate GDC",
   "transport-visitor": "Visitor Transporter",
+  "final-verified-transporter": "Final Transporter",
   "transporter-registration": "Transporter Signup",
   "payments": "Payments",
+  "vehicles": "Vehicles List",
+  "add-vehicle": "Add Vehicle", 
   "reports/transporters": "Transporter Reports",
   "reports/payments": "Payments Reports",
-  "visitor-transporters-list": "Visitor Transporters List",
-  "selected-transporters-list": "Selected Transporters List",
-  "transporter-verification": "Transporter Verification",
-  "drivers-reports": "Drivers Reports",
+  "visitor-transporters-list":"Visitor Transporters List",
+  "selected-transporters-list":"Selected Transporters List",
+  "transporter-verification":"Transporter Verification ",
+  "drivers-reports":"Drivers Reports"
 };
 
 const sidebarSections = [
   {
     title: "Dashboard",
-    items: [{ label: "Dashboard", path: "", icon: <Home className="w-5 h-5" /> }],
+    items: [
+      { label: "Dashboard", path: "", icon: <Home className="w-5 h-5" /> },
+    ],
   },
   {
     title: "Drivers",
@@ -57,14 +62,19 @@ const sidebarSections = [
       { label: "Visitors Transporter", path: "transport-visitor", icon: <Truck className="w-5 h-5" /> },
       { label: "Visitors Transporters List", path: "visitor-transporters-list", icon: <Truck className="w-5 h-5" /> },
       { label: "Final Transporter", path: "selected-transporters-list", icon: <CheckSquare className="w-5 h-5" /> },
-      { label: "Transporter Signup", path: "transporter-registration", icon: <FilePlus2 className="w-5 h-5" /> },
+       { label: "Transporter Signup", path: "transporter-registration", icon: <FilePlus2 className="w-5 h-5" /> },
       { label: "Pending Transporters Verification", path: "transporter-verification", icon: <CheckSquare className="w-5 h-5" /> },
+       { label: "Generate GDC for Transporter", path: "generate-gdc-transporter", icon: <CheckSquare className="w-5 h-5" /> },
+
+
     ],
   },
   {
     title: "Payments",
-    items: [{ label: "Payments", path: "payments", icon: <DollarSign className="w-5 h-5" /> }],
-  },
+    items: [
+      { label: "Payments", path: "payments", icon: <DollarSign className="w-5 h-5" /> },
+    ],
+  }, 
   {
     title: "Reports",
     items: [
@@ -81,7 +91,6 @@ export default function SidebarLayout({ onLogout }) {
   const pageTitle = pageTitles[currentPath] || "Dashboard";
 
   const [collapsed, setCollapsed] = useState(false);
-  const [openSection, setOpenSection] = useState("Dashboard");
 
   useEffect(() => {
     const handleResize = () => {
@@ -92,14 +101,6 @@ export default function SidebarLayout({ onLogout }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    if (currentPath.includes("driver")) setOpenSection("Drivers");
-    else if (currentPath.includes("transporter") || currentPath.includes("transport")) setOpenSection("Transporters");
-    else if (currentPath.includes("payment")) setOpenSection("Payments");
-    else if (currentPath.includes("reports")) setOpenSection("Reports");
-    else setOpenSection("Dashboard");
-  }, [currentPath]);
-
   const base = "/dashboard";
 
   return (
@@ -108,80 +109,62 @@ export default function SidebarLayout({ onLogout }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 bg-white border-r shadow-sm transition-all duration-300
+        className={`fixed inset-y-0 left-0 flex flex-col bg-white shadow-xl 
+        transition-all duration-300 border-r 
         ${collapsed ? "w-20" : "w-64"}`}
       >
         <div className="flex items-center justify-between p-4 border-b">
-          {!collapsed && <span className="text-2xl font-bold text-green-600">WTL</span>}
+          {!collapsed && (
+            <span className="text-3xl font-bold text-green-600 tracking-wide">WTL</span>
+          )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-2 rounded-md hover:bg-gray-100"
+            className="p-2 rounded-lg border bg-white hover:bg-gray-100"
           >
             {collapsed ? <ChevronLeft className="rotate-180" /> : <Menu />}
           </button>
         </div>
 
-        <nav className="py-4 overflow-y-auto">
-          {sidebarSections.map((section) => {
-            const isOpen = openSection === section.title;
+        <nav className="flex-1 overflow-y-auto py-4">
+          {sidebarSections.map((section) => (
+            <div key={section.title} className="mb-5">
+              {!collapsed && (
+                <h3 className="px-4 mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                  {section.title}
+                </h3>
+              )}
 
-            return (
-              <div key={section.title} className="mb-3">
-                {/* Section Header */}
-                <button
-                  onClick={() => setOpenSection(isOpen ? "" : section.title)}
-                  className={`w-full flex items-center justify-between px-4 py-2
-                  text-xs font-semibold uppercase tracking-widest
-                  ${isOpen ? "text-green-600" : "text-gray-400"}
-                  hover:text-green-600 transition-colors`}
-                >
-                  <span>{section.title}</span>
-                  {!collapsed && (
-                    <ChevronLeft
-                      className={`w-4 h-4 transition-transform ${
-                        isOpen ? "-rotate-90" : "rotate-0"
-                      }`}
-                    />
-                  )}
-                </button>
+              <ul className="space-y-1 px-2">
+                {section.items.map((item) => {
+                  const to = item.path === "" ? base : `${base}/${item.path}`;
+                  return (
+                    <li key={to}>
+                      <NavLink
+                        to={to}
+                        end={item.path === ""}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 p-3 rounded-xl transition-all
+                          ${isActive
+                            ? "bg-green-100 text-green-700 border border-green-200"
+                            : "hover:bg-gray-200 text-gray-700"
+                          }`
+                        }
+                      >
+                        <span className="text-green-600">{item.icon}</span>
+                        {!collapsed && <span>{item.label}</span>}
+                      </NavLink>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
 
-                {/* Items */}
-                {isOpen && (
-                  <ul className="mt-2 space-y-1 pl-6">
-                    {section.items.map((item) => {
-                      const to = item.path === "" ? base : `${base}/${item.path}`;
-                      return (
-                        <li key={to}>
-                          <NavLink
-                            to={to}
-                            end={item.path === ""}
-                            className={({ isActive }) =>
-                              `flex items-center gap-3 px-4 py-2 rounded-lg text-sm
-                              border-l-4 transition-all
-                              ${
-                                isActive
-                                  ? "bg-green-50 text-green-700 border-green-500"
-                                  : "border-transparent text-gray-700 hover:bg-gray-100"
-                              }`
-                            }
-                          >
-                            <span className="text-green-600">{item.icon}</span>
-                            {!collapsed && <span>{item.label}</span>}
-                          </NavLink>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
-
-          <div className="px-4 mt-6">
+          <div className="px-2 mt-4">
             <button
               onClick={onLogout}
-              className="flex items-center gap-3 w-full px-4 py-2 rounded-lg
-              text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100"
+              className="flex items-center gap-3 w-full p-3 rounded-xl font-medium
+                bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
             >
               <LogOut className="w-4 h-4" />
               {!collapsed && <span>Logout</span>}
@@ -190,13 +173,13 @@ export default function SidebarLayout({ onLogout }) {
         </nav>
       </aside>
 
-      {/* Content */}
+      {/* Page Content */}
       <main
-        className={`transition-all duration-300 min-h-screen bg-gray-100
+        className={`transition-all duration-300 min-h-screen bg-gray-100 
         ${collapsed ? "ml-20" : "ml-64"} w-full`}
       >
-        <header className="p-5 bg-white border-b sticky top-0 z-10">
-          <h1 className="text-xl font-bold text-gray-800">{pageTitle}</h1>
+        <header className="p-5 bg-white shadow-md border-b sticky top-0 z-10">
+          <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
         </header>
 
         <div className="p-6 max-w-7xl mx-auto">
