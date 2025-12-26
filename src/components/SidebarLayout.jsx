@@ -29,13 +29,13 @@ const pageTitles = {
   "transporter-registration": "Transporter Signup",
   "payments": "Payments",
   "vehicles": "Vehicles List",
-  "add-vehicle": "Add Vehicle", 
+  "add-vehicle": "Add Vehicle",
   "reports/transporters": "Transporter Reports",
   "reports/payments": "Payments Reports",
-  "visitor-transporters-list":"Visitor Transporters List",
-  "selected-transporters-list":"Selected Transporters List",
-  "transporter-verification":"Transporter Verification ",
-  "drivers-reports":"Drivers Reports"
+  "visitor-transporters-list": "Visitor Transporters List",
+  "selected-transporters-list": "Selected Transporters List",
+  "transporter-verification": "Transporter Verification",
+  "drivers-reports": "Drivers Reports",
 };
 
 const sidebarSections = [
@@ -62,11 +62,9 @@ const sidebarSections = [
       { label: "Visitors Transporter", path: "transport-visitor", icon: <Truck className="w-5 h-5" /> },
       { label: "Visitors Transporters List", path: "visitor-transporters-list", icon: <Truck className="w-5 h-5" /> },
       { label: "Final Transporter", path: "selected-transporters-list", icon: <CheckSquare className="w-5 h-5" /> },
-       { label: "Transporter Signup", path: "transporter-registration", icon: <FilePlus2 className="w-5 h-5" /> },
+      { label: "Transporter Signup", path: "transporter-registration", icon: <FilePlus2 className="w-5 h-5" /> },
       { label: "Pending Transporters Verification", path: "transporter-verification", icon: <CheckSquare className="w-5 h-5" /> },
-       { label: "Generate GDC for Transporter", path: "generate-gdc-transporter", icon: <CheckSquare className="w-5 h-5" /> },
-
-
+      { label: "Generate GDC for Transporter", path: "generate-gdc-transporter", icon: <CheckSquare className="w-5 h-5" /> },
     ],
   },
   {
@@ -74,7 +72,7 @@ const sidebarSections = [
     items: [
       { label: "Payments", path: "payments", icon: <DollarSign className="w-5 h-5" /> },
     ],
-  }, 
+  },
   {
     title: "Reports",
     items: [
@@ -91,6 +89,7 @@ export default function SidebarLayout({ onLogout }) {
   const pageTitle = pageTitles[currentPath] || "Dashboard";
 
   const [collapsed, setCollapsed] = useState(false);
+  const [openSection, setOpenSection] = useState("Dashboard");
 
   useEffect(() => {
     const handleResize = () => {
@@ -100,6 +99,20 @@ export default function SidebarLayout({ onLogout }) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (currentPath.includes("driver")) {
+      setOpenSection("Drivers");
+    } else if (currentPath.includes("transporter") || currentPath.includes("transport")) {
+      setOpenSection("Transporters");
+    } else if (currentPath.includes("payment")) {
+      setOpenSection("Payments");
+    } else if (currentPath.includes("reports")) {
+      setOpenSection("Reports");
+    } else {
+      setOpenSection("Dashboard");
+    }
+  }, [currentPath]);
 
   const base = "/dashboard";
 
@@ -126,39 +139,56 @@ export default function SidebarLayout({ onLogout }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4">
-          {sidebarSections.map((section) => (
-            <div key={section.title} className="mb-5">
-              {!collapsed && (
-                <h3 className="px-4 mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                  {section.title}
-                </h3>
-              )}
+          {sidebarSections.map((section) => {
+            const isOpen = openSection === section.title;
 
-              <ul className="space-y-1 px-2">
-                {section.items.map((item) => {
-                  const to = item.path === "" ? base : `${base}/${item.path}`;
-                  return (
-                    <li key={to}>
-                      <NavLink
-                        to={to}
-                        end={item.path === ""}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 p-3 rounded-xl transition-all
-                          ${isActive
-                            ? "bg-green-100 text-green-700 border border-green-200"
-                            : "hover:bg-gray-200 text-gray-700"
-                          }`
-                        }
-                      >
-                        <span className="text-green-600">{item.icon}</span>
-                        {!collapsed && <span>{item.label}</span>}
-                      </NavLink>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+            return (
+              <div key={section.title} className="mb-4">
+                <button
+                  onClick={() => setOpenSection(isOpen ? "" : section.title)}
+                  className={`w-full flex items-center justify-between px-4 py-2
+                  text-[11px] font-semibold uppercase tracking-wider
+                  ${isOpen ? "text-green-600" : "text-gray-500"}
+                  hover:text-green-600`}
+                >
+                  <span>{section.title}</span>
+                  {!collapsed && (
+                    <ChevronLeft
+                      className={`w-4 h-4 transition-transform ${
+                        isOpen ? "-rotate-90" : "rotate-0"
+                      }`}
+                    />
+                  )}
+                </button>
+
+                {isOpen && (
+                  <ul className="space-y-1 px-2 mt-2">
+                    {section.items.map((item) => {
+                      const to = item.path === "" ? base : `${base}/${item.path}`;
+                      return (
+                        <li key={to}>
+                          <NavLink
+                            to={to}
+                            end={item.path === ""}
+                            className={({ isActive }) =>
+                              `flex items-center gap-3 p-3 rounded-xl transition-all
+                              ${isActive
+                                ? "bg-green-100 text-green-700 border border-green-200"
+                                : "hover:bg-gray-200 text-gray-700"
+                              }`
+                            }
+                          >
+                            <span className="text-green-600">{item.icon}</span>
+                            {!collapsed && <span>{item.label}</span>}
+                          </NavLink>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
 
           <div className="px-2 mt-4">
             <button

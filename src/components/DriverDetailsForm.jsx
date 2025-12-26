@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { startDriverRegistration } from "../api/driverDetailsApi";
+import { useDispatch } from "react-redux";
 import {
   updateStep1,
   setStep,
@@ -205,36 +205,28 @@ const EDUCATION_LEVELS = [
   });
 
   /* 🔹 SUBMIT HANDLER */
-const next = async () => {
-  const hasError = Object.values(errors).some(e => e);
-  if (hasError) {
-    alert("Please fix validation errors");
-    return;
-  }
+  const next = async () => {
+    const hasError = Object.values(errors).some(e => e);
+    if (hasError) {
+      alert("Please fix validation errors");
+      return;
+    }
 
-  setLoading(true);
-  try {
-    const payload = toSnakeCasePayload(local);
+    setLoading(true);
+    try {
+      const payload = toSnakeCasePayload(local);
+      const res = await saveDriverDetails(payload);
 
-    // Use new API
-    const res = await startDriverRegistration({
-      ...payload,
-      createdByType: "SELF", // or dynamically from form if needed
-    });
-
-    // Save driver_registration_id from backend
-    dispatch(setRegistrationId(res.driver_registration_id || res.id));
-
-    dispatch(updateStep1(local));
-    dispatch(setStep(2));
-    onNext?.();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to save driver details");
-  } finally {
-    setLoading(false);
-  }
-};
+      dispatch(setRegistrationId(res.driver_registration_id));
+      dispatch(updateStep1(local));
+      dispatch(setStep(2));
+      onNext?.();
+    } catch {
+      alert("Failed to save driver details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ⬇️ return JSX remains exactly as you already have it
 
