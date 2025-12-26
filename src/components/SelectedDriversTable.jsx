@@ -6,6 +6,10 @@ const SelectedDriversTable = () => {
   const [selectedDrivers, setSelectedDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5; // change if needed
+
   const mapSelected = (d) => ({
     selectedDriverId: d.selected_driver_id,
     driverName: d.driver_name,
@@ -34,6 +38,16 @@ const SelectedDriversTable = () => {
     fetchSelectedDrivers();
   }, []);
 
+  // pagination logic
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = selectedDrivers.slice(
+    indexOfFirstRow,
+    indexOfLastRow
+  );
+
+  const totalPages = Math.ceil(selectedDrivers.length / rowsPerPage);
+
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mt-8">
       <h3 className="text-2xl font-bold text-green-700 mb-6">
@@ -60,14 +74,14 @@ const SelectedDriversTable = () => {
                   Loading selected drivers...
                 </td>
               </tr>
-            ) : selectedDrivers.length === 0 ? (
+            ) : currentRows.length === 0 ? (
               <tr>
                 <td colSpan="6" className="text-center p-6 text-gray-500 text-lg">
                   No selected drivers yet.
                 </td>
               </tr>
             ) : (
-              selectedDrivers.map((d, idx) => (
+              currentRows.map((d, idx) => (
                 <tr
                   key={d.selectedDriverId || idx}
                   className={`border-t hover:bg-green-50 transition-all ${
@@ -90,6 +104,43 @@ const SelectedDriversTable = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && selectedDrivers.length > rowsPerPage && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 hover:bg-green-100"
+          >
+            Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-4 py-2 border rounded-lg ${
+                currentPage === page
+                  ? "bg-green-600 text-white"
+                  : "hover:bg-green-100"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 hover:bg-green-100"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
