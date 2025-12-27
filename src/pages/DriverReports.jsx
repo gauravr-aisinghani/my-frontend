@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import * as XLSX from "xlsx";
 
-// ================= COLORS =================
+/* ================= COLORS ================= */
 const COLORS = {
   visitors: "#16a34a",
   selected: "#0ea5e9",
@@ -21,9 +21,7 @@ const COLORS = {
   gdc: "#ef4444",
 };
 
-// ================= STYLES =================
-const pageStyle = { padding: "20px" };
-
+/* ================= STYLES ================= */
 const cardGrid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
@@ -58,12 +56,16 @@ const filterBox = {
   marginBottom: "16px",
 };
 
-// ================= COMPONENT =================
+/* ================= PAGINATION ================= */
+const PAGE_SIZE = 10;
+
+/* ================= COMPONENT ================= */
 const DriverReports = () => {
   const [summary, setSummary] = useState({});
   const [drivers, setDrivers] = useState([]);
   const [filters, setFilters] = useState({ stage: "" });
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadReports();
@@ -75,12 +77,13 @@ const DriverReports = () => {
       const res = await fetchDriverReports(filters);
       setSummary(res?.summary || {});
       setDrivers(res?.drivers || []);
+      setCurrentPage(1); // reset page on filter change
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= EXCEL EXPORT =================
+  /* ================= EXCEL EXPORT ================= */
   const downloadExcel = () => {
     const ws = XLSX.utils.json_to_sheet(drivers);
     const wb = XLSX.utils.book_new();
@@ -88,7 +91,7 @@ const DriverReports = () => {
     XLSX.writeFile(wb, "driver_reports.xlsx");
   };
 
-  // ================= CHART DATA (SNAKE_CASE) =================
+  /* ================= CHART DATA ================= */
   const barData = [
     { name: "Visitors", value: summary.visitors || 0, color: COLORS.visitors },
     { name: "Selected", value: summary.selected_visitors || 0, color: COLORS.selected },
@@ -104,6 +107,20 @@ const DriverReports = () => {
       color: COLORS.selected,
     },
   ];
+
+  /* ================= PAGINATION LOGIC ================= */
+  const totalPages = Math.ceil(drivers.length / PAGE_SIZE);
+
+  const paginatedDrivers = drivers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -189,42 +206,79 @@ const DriverReports = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <table style={tableStyle} border="1">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Mobile</th>
-              <th>Stage</th>
-              <th>Verification</th>
-              <th>GDC</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {drivers.length === 0 ? (
+        <>
+          <table style={tableStyle} border="1">
+            <thead>
               <tr>
-                <td colSpan="7" align="center">
-                  No data found
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Stage</th>
+                <th>Verification</th>
+                <th>GDC</th>
+                <th>Action</th>
               </tr>
-            ) : (
-              drivers.map((d) => (
-                <tr key={d.driver_id}>
-                  <td>{d.driver_id}</td>
-                  <td>{d.name}</td>
-                  <td>{d.mobile}</td>
-                  <td>{d.stage}</td>
-                  <td>{d.verification_status || "PENDING"}</td>
-                  <td>{d.gdc_number || "Not Generated"}</td>
-                  <td>
-                    <button>View</button>
+            </thead>
+            <tbody>
+              {paginatedDrivers.length === 0 ? (
+                <tr>
+                  <td colSpan="7" align="center">
+                    No data found
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                paginatedDrivers.map((d) => (
+                  <tr key={d.driver_id}>
+                    <td>{d.driver_id}</td>
+                    <td>{d.name}</td>
+                    <td>{d.mobile}</td>
+                    <td>{d.stage}</td>
+                    <td>{d.verification_status || "PENDING"}</td>
+                    <td>{d.gdc_number || "Not Generated"}</td>
+                    <td>
+                      <button>View</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {/* ================= PAGINATION UI ================= */}
+          {totalPages > 1 && (
+            <div style={{ marginTop: "12px", textAlign: "center" }}>
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+
+              {[...Array(totalPages)].map((_, i) => {
+                const page = i + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    style={{
+                      margin: "0 4px",
+                      fontWeight: currentPage === page ? "bold" : "normal",
+                    }}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
