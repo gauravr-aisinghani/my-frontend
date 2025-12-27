@@ -186,7 +186,7 @@ const TransportCompanyVisitorForm = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto bg-white p-3 rounded-2xl shadow-sm">
+    <div className="bg-white rounded-2xl shadow p-6">
       <h2 className="text-xl font-bold mb-4 text-green-600">
         Daily Visitors / Enquiry by Transport Company
       </h2>

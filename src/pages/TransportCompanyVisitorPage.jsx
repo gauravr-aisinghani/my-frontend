@@ -3,7 +3,7 @@ import TransportCompanyVisitorForm from "../components/TransportCompanyVisitorFo
 
 const TransportCompanyVisitorPage = () => {
   return (
-    <div className="w-full min-h-full bg-gray-100">
+    <div className="space-y-6">
       <TransportCompanyVisitorForm />
     </div>
   );
