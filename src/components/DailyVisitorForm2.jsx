@@ -93,7 +93,7 @@ const DailyVisitorForm2 = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto bg-white p-3 rounded-lg shadow-sm">
+    <div className="bg-white rounded-2xl shadow p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 border-b pb-1">
         <h2 className="text-lg font-semibold">Daily Visitor Entry</h2>

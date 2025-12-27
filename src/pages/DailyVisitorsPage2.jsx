@@ -23,7 +23,7 @@ const DailyVisitorsPage = () => {
         </div> */}
 
         {/* ===== FORM SECTION (NO EXTRA SPACING) ===== */}
-        <div className="p-2 md:p-3 pt-2">
+        <div className="space-y-6">
           <DailyVisitorForm2 />
         </div>
 
