@@ -90,7 +90,8 @@ const TransportCompanyVisitorForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all required fields
+    // 🔹 Synchronously validate all required fields
+    const newErrors = {};
     [
       "companyName",
       "ownerName",
@@ -99,11 +100,44 @@ const TransportCompanyVisitorForm = () => {
       "needDriver",
       "gaadiType",
       "monthlySalary",
-    ].forEach((field) => validateField(field, formData[field]));
+    ].forEach((field) => {
+      let value = formData[field];
+      let msg = "";
+      switch (field) {
+        case "companyName":
+          if (!value.trim()) msg = "Company Name is required";
+          break;
+        case "ownerName":
+          if (!value.trim()) msg = "Owner Name is required";
+          break;
+        case "ownerMobileNo":
+          if (!value.trim()) msg = "Owner Mobile is required";
+          else if (value.length !== 10) msg = "Owner Mobile must be 10 digits";
+          break;
+        case "authorisedName":
+          if (!value.trim()) msg = "Authorised Person Name is required";
+          break;
+        case "authorisedMobileNo":
+          if (value && value.length !== 10) msg = "Authorised Mobile must be 10 digits";
+          break;
+        case "needDriver":
+          if (!value.trim()) msg = "Need Driver is required";
+          break;
+        case "gaadiType":
+          if (!value.trim()) msg = "Gaadi Type is required";
+          break;
+        case "monthlySalary":
+          if (value && !/^\d+$/.test(value)) msg = "Monthly Salary must be digits only";
+          break;
+        default:
+          break;
+      }
+      if (msg) newErrors[field] = msg;
+    });
 
-    // Check if any errors exist
-    const hasError = Object.values(errors).some((e) => e);
-    if (hasError) return alert("Please fix validation errors");
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return alert("Please fix validation errors");
 
     const payload = {
       company_name: formData.companyName,
@@ -152,7 +186,7 @@ const TransportCompanyVisitorForm = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow p-3 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto bg-white p-3 rounded-2xl shadow-sm">
       <h2 className="text-xl font-bold mb-4 text-green-600">
         Daily Visitors / Enquiry by Transport Company
       </h2>
@@ -177,7 +211,7 @@ const TransportCompanyVisitorForm = () => {
           ["needTiming", "Need Timing"],
           ["notes", "Notes"],
         ].map(([key, label]) => (
-          <div key={key} className="flex flex-col">
+          <div key={key}>
             {key !== "notes" ? (
               <input
                 name={key}
@@ -185,7 +219,7 @@ const TransportCompanyVisitorForm = () => {
                 onChange={handleChange}
                 onBlur={(e) => validateField(key, e.target.value)}
                 placeholder={label}
-                className={`${inputClass(key)} border p-2 rounded`}
+                className={inputClass(key)}
               />
             ) : (
               <textarea
@@ -193,19 +227,21 @@ const TransportCompanyVisitorForm = () => {
                 value={formData[key]}
                 onChange={handleChange}
                 placeholder={label}
-                className={`${inputClass(key)} border p-2 rounded h-24 resize-none`}
+                className={`${inputClass(key)} h-24 resize-none`}
               />
             )}
             {renderError(key)}
           </div>
         ))}
 
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded col-span-1 md:col-span-2 lg:col-span-3"
-        >
-          Save Visitor
-        </button>
+        <div className="md:col-span-2 lg:col-span-3 flex justify-end">
+          <button
+            type="submit"
+            className="btn-primary px-4 py-1.5 text-xs"
+          >
+            Save Visitor
+          </button>
+        </div>
       </form>
     </div>
   );
