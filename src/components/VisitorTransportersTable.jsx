@@ -20,7 +20,7 @@ const VisitorTransportersTable = () => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(5);
 
   const mapTransporter = (t) => ({
     visitorTransporterId: t.visitor_transporter_id,
