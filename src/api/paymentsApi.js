@@ -15,14 +15,14 @@ export const createPaymentOrder = async ({ gdc_number, type }) => {
  * VERIFY PAYMENT
  */
 export const verifyPayment = async ({
-  razorpayOrderId,
-  razorpayPaymentId,
-  razorpaySignature,
+  razorpay_order_id,
+  razorpay_payment_id,
+  razorpay_signature,
 }) => {
   const res = await api.post("/api/payments/verify", {
-    razorpayOrderId,
-    razorpayPaymentId,
-    razorpaySignature,
+   razorpay_order_id,
+    razorpay_payment_id,
+   razorpay_signature,
   });
   return res.data;
 };
