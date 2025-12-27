@@ -40,10 +40,10 @@ export default function PaymentsContent() {
         type: paymentType,
       });
 
-      // 🔥 SAFETY CHECK
-      if (!res?.orderId) {
+      // ✅ CORRECT FIELD CHECK
+      if (!res?.order_id) {
         console.error("CREATE ORDER RESPONSE:", res);
-        throw new Error("Order ID missing from backend response");
+        throw new Error("order_id missing from backend");
       }
 
       setOrderData(res);
@@ -71,7 +71,7 @@ export default function PaymentsContent() {
       return;
     }
 
-    if (!orderData?.orderId) {
+    if (!orderData?.order_id) {
       alert("Order ID missing. Please try again.");
       console.error("ORDER DATA:", orderData);
       return;
@@ -79,7 +79,7 @@ export default function PaymentsContent() {
 
     const options = {
       key: orderData.key,
-      order_id: String(orderData.orderId), // ✅ FINAL FIX
+      order_id: orderData.order_id, // 🔥 MOST IMPORTANT FIX
       amount: orderData.amount,
       currency: orderData.currency,
       name: "WTL Payments",
@@ -88,7 +88,7 @@ export default function PaymentsContent() {
       handler: async function (response) {
         console.log("🔥 RAZORPAY RESPONSE:", response);
 
-        // 🔥 EXTRA SAFETY
+        // ✅ Razorpay will NOW send all 3
         if (
           !response.razorpay_order_id ||
           !response.razorpay_payment_id ||
@@ -137,7 +137,6 @@ export default function PaymentsContent() {
         💳 Payments
       </h2>
 
-      {/* STEP 0 */}
       {step === 0 && (
         <div className="grid gap-6 md:grid-cols-2">
           <div
@@ -155,7 +154,6 @@ export default function PaymentsContent() {
         </div>
       )}
 
-      {/* STEP 1 */}
       {step === 1 && (
         <div className="space-y-4">
           <input
@@ -177,7 +175,6 @@ export default function PaymentsContent() {
         </div>
       )}
 
-      {/* STEP 2 */}
       {step === 2 && (
         <div className="space-y-4">
           <p><b>Type:</b> {paymentType}</p>
