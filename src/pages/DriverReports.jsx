@@ -106,7 +106,7 @@ const DriverReports = () => {
   ];
 
   return (
-    <div style={pageStyle}>
+    <div className="max-w-7xl mx-auto">
       <h2>Driver Reports</h2>
 
       {/* ================= KPI CARDS ================= */}
