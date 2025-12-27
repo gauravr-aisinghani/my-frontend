@@ -4,8 +4,7 @@ import { addVisitor } from "../store/dailyVisitorsSlice";
 import dailyVisitorsApi2 from "../api/dailyVisitorApi2";
 import { Link } from "react-router-dom";
 
-const GRADES = ["A", "B", "C", "D", "E"]; // Optional old grade dropdown
-const LICENCE_GRADES = ["LMV", "HMV", "MCWG", "MCWOG", "TRANS", "TRAILER"];
+const GRADES = ["LMV", "HMV", "MCWG", "MCWOG", "TRANS", "TRAILER"];
 
 const DailyVisitorForm2 = () => {
   const dispatch = useDispatch();
@@ -15,7 +14,6 @@ const DailyVisitorForm2 = () => {
     location: "",
     mobileNo: "",
     grade: "",
-    licenceGrade: "",
     otherMobile: "",
     birthPlace: "",
     relativeName: "",
@@ -81,10 +79,6 @@ const DailyVisitorForm2 = () => {
         if (!value) msg = "Grade is required";
         break;
 
-      case "licenceGrade":
-        if (!value) msg = "Licence Grade is required";
-        break;
-
       default:
         break;
     }
@@ -101,7 +95,7 @@ const DailyVisitorForm2 = () => {
     e.preventDefault();
 
     // Validate required fields
-    ["driverName", "mobileNo", "otherMobile", "gaadiDrivenInPast", "grade", "licenceGrade"].forEach((field) =>
+    ["driverName", "mobileNo", "otherMobile", "gaadiDrivenInPast", "grade"].forEach((field) =>
       validateField(field, formData[field])
     );
 
@@ -113,7 +107,6 @@ const DailyVisitorForm2 = () => {
       location: formData.location,
       mobile_no: formData.mobileNo,
       grade: formData.grade,
-      licence_grade: formData.licenceGrade,
       other_mobile: formData.otherMobile,
       birth_place: formData.birthPlace,
       relative_name: formData.relativeName,
@@ -215,23 +208,6 @@ const DailyVisitorForm2 = () => {
             ))}
           </select>
           {renderError("grade")}
-        </div>
-
-        {/* Licence Grade */}
-        <div>
-          <select
-            name="licenceGrade"
-            value={formData.licenceGrade}
-            onChange={handleChange}
-            onBlur={(e) => validateField("licenceGrade", e.target.value)}
-            className={inputClass("licenceGrade")}
-          >
-            <option value="">Licence Grade *</option>
-            {LICENCE_GRADES.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
-          {renderError("licenceGrade")}
         </div>
 
         {/* Load Type */}
