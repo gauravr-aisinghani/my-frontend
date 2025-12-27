@@ -135,7 +135,7 @@ export default function DriverVerificationTable() {
   }
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow mt-6 border border-gray-200">
+<div className="bg-white rounded-2xl shadow p-6">
       <h3 className="text-2xl font-semibold text-green-700 mb-5">
         Driver Verification
       </h3>

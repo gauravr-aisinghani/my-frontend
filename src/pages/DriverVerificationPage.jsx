@@ -4,7 +4,7 @@ import DriverVerificationTable from "../components/DriverVerificationTable";
 
 export default function DriverVerificationPage() {
   return (
-    <div className="p-6">
+    <div className="space-y-6">
       <DriverVerificationTable />
     </div>
   );
