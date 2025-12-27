@@ -182,7 +182,7 @@ export default function SidebarLayout({ onLogout }) {
           <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
         </header>
 
-        <div className="p-0 m-0 w-full">
+        <div className="px-6 py-6 w-full">
           <Outlet />
         </div>
       </main>
