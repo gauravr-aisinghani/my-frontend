@@ -8,7 +8,7 @@ const BASE_URL =
 // save visitor (POST)
 export const saveTransportVisitor = async (visitorData) => {
   try {
-    const res = await axios.post(BASE_URL, visitorData, {
+    const res = await api.post(BASE_URL, visitorData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
@@ -23,7 +23,7 @@ export const saveTransportVisitor = async (visitorData) => {
 // get all visitors (GET)
 export const getAllTransportVisitors = async () => {
   try {
-    const res = await axios.get(BASE_URL, {
+    const res = await api.get(BASE_URL, {
       withCredentials: true,
     });
 
@@ -37,7 +37,7 @@ export const getAllTransportVisitors = async () => {
 // get by id
 export const getTransportVisitorById = async (id) => {
   try {
-    const res = await axios.get(`${BASE_URL}/${id}`, {
+    const res = await api.get(`${BASE_URL}/${id}`, {
       withCredentials: true,
     });
 
@@ -51,7 +51,7 @@ export const getTransportVisitorById = async (id) => {
 // update visitor
 export const updateTransportVisitor = async (id, visitorData) => {
   try {
-    const res = await axios.put(`${BASE_URL}/${id}`, visitorData, {
+    const res = await api.put(`${BASE_URL}/${id}`, visitorData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
