@@ -3,7 +3,8 @@ import store from "../store/store";
 import { startLoading, stopLoading } from "../store/loadingSlice";
 
 const axiosInstance = axios.create({
-  baseURL: "https://my-backend-1-qxc9.onrender.com", // your backend
+  baseURL: "https://my-backend-1-qxc9.onrender.com",
+  withCredentials: true, // 🔥 THIS IS THE FIX (cookie/session send hogi)
 });
 
 // 🔥 REQUEST INTERCEPTOR

@@ -5,7 +5,7 @@ import api from "./axiosInstance";
  */
 export const createPaymentOrder = async ({ gdc_number, type }) => {
   const res = await api.post("/api/payments/create-order", {
-    gdc_number,   // ✅ snake_case sent to backend
+    gdc_number,
     type,
   });
   return res.data;
@@ -20,9 +20,9 @@ export const verifyPayment = async ({
   razorpay_signature,
 }) => {
   const res = await api.post("/api/payments/verify", {
-   razorpay_order_id,
+    razorpay_order_id,
     razorpay_payment_id,
-   razorpay_signature,
+    razorpay_signature,
   });
   return res.data;
 };
