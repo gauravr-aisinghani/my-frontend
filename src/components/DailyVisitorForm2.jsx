@@ -4,6 +4,9 @@ import { addVisitor } from "../store/dailyVisitorsSlice";
 import dailyVisitorsApi2 from "../api/dailyVisitorApi2";
 import { Link } from "react-router-dom";
 
+const GRADES = ["A", "B", "C", "D", "E"]; // Optional old grade dropdown
+const LICENCE_GRADES = ["LMV", "HMV", "MCWG", "MCWOG", "TRANS", "TRAILER"];
+
 const DailyVisitorForm2 = () => {
   const dispatch = useDispatch();
 
@@ -12,6 +15,7 @@ const DailyVisitorForm2 = () => {
     location: "",
     mobileNo: "",
     grade: "",
+    licenceGrade: "",
     otherMobile: "",
     birthPlace: "",
     relativeName: "",
@@ -30,14 +34,21 @@ const DailyVisitorForm2 = () => {
   };
 
   const [formData, setFormData] = useState(initialState);
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
+    // Only allow digits for mobile fields and monthly salary
     if (
       ["mobileNo", "otherMobile", "relativeMobile", "preferedMonthlySalary"].includes(name) &&
       !/^\d*$/.test(value)
-    ) return;
+    )
+      return;
+
+    // Max length enforcement
+    if ((name === "mobileNo" || name === "otherMobile" || name === "relativeMobile") && value.length > 10) return;
+    if (name === "preferedMonthlySalary" && value.length > 7) return;
 
     setFormData((prev) => ({
       ...prev,
@@ -45,25 +56,64 @@ const DailyVisitorForm2 = () => {
     }));
   };
 
-  const validate = () => {
-    if (!formData.driverName.trim()) return "Driver Name is required";
-    if (!formData.mobileNo.trim()) return "Mobile No is required";
-    if (formData.mobileNo.length !== 10) return "Mobile No must be 10 digits";
-    if (!formData.gaadiDrivenInPast.trim()) return "Please select Gaadi Driven in Past";
-    return null;
+  const validateField = (name, value) => {
+    let msg = "";
+
+    switch (name) {
+      case "driverName":
+        if (!value.trim()) msg = "Driver Name is required";
+        break;
+
+      case "mobileNo":
+        if (!value.trim()) msg = "Mobile No is required";
+        else if (value.length !== 10) msg = "Mobile No must be 10 digits";
+        break;
+
+      case "otherMobile":
+        if (value && value.length !== 10) msg = "Alternate Mobile must be 10 digits";
+        break;
+
+      case "gaadiDrivenInPast":
+        if (!value.trim()) msg = "Please select Gaadi Driven in Past";
+        break;
+
+      case "grade":
+        if (!value) msg = "Grade is required";
+        break;
+
+      case "licenceGrade":
+        if (!value) msg = "Licence Grade is required";
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: msg }));
   };
+
+  const inputClass = (name) => `input ${errors[name] ? "border-red-500" : ""}`;
+
+  const renderError = (name) =>
+    errors[name] ? <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p> : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const error = validate();
-    if (error) return alert(error);
+    // Validate required fields
+    ["driverName", "mobileNo", "otherMobile", "gaadiDrivenInPast", "grade", "licenceGrade"].forEach((field) =>
+      validateField(field, formData[field])
+    );
+
+    const hasError = Object.values(errors).some((e) => e);
+    if (hasError) return alert("Please fix validation errors");
 
     const payload = {
       driver_name: formData.driverName,
       location: formData.location,
       mobile_no: formData.mobileNo,
       grade: formData.grade,
+      licence_grade: formData.licenceGrade,
       other_mobile: formData.otherMobile,
       birth_place: formData.birthPlace,
       relative_name: formData.relativeName,
@@ -110,7 +160,6 @@ const DailyVisitorForm2 = () => {
           ["driverName", "Driver Name"],
           ["location", "Location"],
           ["mobileNo", "Mobile No"],
-          ["grade", "Grade"],
           ["otherMobile", "Other Mobile"],
           ["birthPlace", "Birth Place"],
           ["relativeName", "Relative Name"],
@@ -120,41 +169,74 @@ const DailyVisitorForm2 = () => {
           ["preferredVehicle", "Preferred Vehicle"],
         ].map(([name, label]) => (
           <div key={name}>
-            <label className="block text-[11px] font-medium mb-0.5">
-              {label}
-            </label>
+            <label className="block text-[11px] font-medium mb-0.5">{label}</label>
             <input
               name={name}
               value={formData[name]}
               onChange={handleChange}
-              className="input"
+              onBlur={(e) => validateField(name, e.target.value)}
+              className={inputClass(name)}
             />
+            {renderError(name)}
           </div>
         ))}
 
         {/* Gaadi Driven */}
         <div>
-          <label className="block text-[11px] font-medium mb-0.5">
-            Gaadi Driven in Past
-          </label>
+          <label className="block text-[11px] font-medium mb-0.5">Gaadi Driven in Past *</label>
           <select
             name="gaadiDrivenInPast"
             value={formData.gaadiDrivenInPast}
             onChange={handleChange}
-            className="input"
+            onBlur={(e) => validateField("gaadiDrivenInPast", e.target.value)}
+            className={inputClass("gaadiDrivenInPast")}
           >
             <option value="">Select</option>
-            {["Auto", "Taxi", "Pickup", "Tempo", "Bolero", "Bike", "Other"].map(v => (
+            {["Auto", "Taxi", "Pickup", "Tempo", "Bolero", "Bike", "Other"].map((v) => (
               <option key={v} value={v}>{v}</option>
             ))}
           </select>
+          {renderError("gaadiDrivenInPast")}
+        </div>
+
+        {/* Grade */}
+        <div>
+          <label className="block text-[11px] font-medium mb-0.5">Grade *</label>
+          <select
+            name="grade"
+            value={formData.grade}
+            onChange={handleChange}
+            onBlur={(e) => validateField("grade", e.target.value)}
+            className={inputClass("grade")}
+          >
+            <option value="">Select Grade</option>
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+          {renderError("grade")}
+        </div>
+
+        {/* Licence Grade */}
+        <div>
+          <select
+            name="licenceGrade"
+            value={formData.licenceGrade}
+            onChange={handleChange}
+            onBlur={(e) => validateField("licenceGrade", e.target.value)}
+            className={inputClass("licenceGrade")}
+          >
+            <option value="">Licence Grade *</option>
+            {LICENCE_GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+          {renderError("licenceGrade")}
         </div>
 
         {/* Load Type */}
         <div>
-          <label className="block text-[11px] font-medium mb-0.5">
-            Load Type
-          </label>
+          <label className="block text-[11px] font-medium mb-0.5">Load Type</label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 text-xs">
               <input type="checkbox" name="underload" checked={formData.underload} onChange={handleChange} />
@@ -169,9 +251,7 @@ const DailyVisitorForm2 = () => {
 
         {/* Timing */}
         <div>
-          <label className="block text-[11px] font-medium mb-0.5">
-            Timing Preference
-          </label>
+          <label className="block text-[11px] font-medium mb-0.5">Timing Preference</label>
           <div className="flex gap-4">
             {[
               ["regularTiming", "Regular"],
@@ -188,9 +268,7 @@ const DailyVisitorForm2 = () => {
 
         {/* Any Issue */}
         <div className="md:col-span-2 lg:col-span-3">
-          <label className="block text-[11px] font-medium mb-0.5">
-            Any Issue
-          </label>
+          <label className="block text-[11px] font-medium mb-0.5">Any Issue</label>
           <input
             name="anyIssue"
             value={formData.anyIssue}
@@ -201,9 +279,7 @@ const DailyVisitorForm2 = () => {
 
         {/* Notes */}
         <div className="md:col-span-2 lg:col-span-3">
-          <label className="block text-[11px] font-medium mb-0.5">
-            Notes
-          </label>
+          <label className="block text-[11px] font-medium mb-0.5">Notes</label>
           <textarea
             name="notes"
             value={formData.notes}
