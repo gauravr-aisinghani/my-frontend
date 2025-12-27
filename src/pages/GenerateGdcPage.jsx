@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import generateGdcApi from "../api/generateGdcApi";
 
+const PAGE_SIZE = 5;
+
 export default function GenerateGdcPage() {
   const [approvedDrivers, setApprovedDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [adminName, setAdminName] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [form, setForm] = useState({
     driverRegistrationId: "",
@@ -63,7 +66,6 @@ export default function GenerateGdcPage() {
     e.preventDefault();
 
     try {
-      // Snake_case payload for backend
       const payload = {
         driver_registration_id: form.driverRegistrationId,
         verification_id: form.verificationId,
@@ -76,6 +78,7 @@ export default function GenerateGdcPage() {
 
       alert("GDC Generated Successfully!");
       setModalOpen(false);
+      setCurrentPage(1);
       loadApprovedDrivers();
     } catch (err) {
       alert("Failed to generate GDC");
@@ -83,8 +86,25 @@ export default function GenerateGdcPage() {
     }
   };
 
+  /* ================= Pagination Logic ================= */
+
+  const totalPages = Math.ceil(approvedDrivers.length / PAGE_SIZE);
+
+  const paginatedDrivers = approvedDrivers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  /* ==================================================== */
+
   return (
-    <div className="p-6">
+    <div className="max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Generate GDC</h2>
 
       {loading ? (
@@ -92,37 +112,75 @@ export default function GenerateGdcPage() {
       ) : approvedDrivers.length === 0 ? (
         <p>No approved drivers found.</p>
       ) : (
-        <table className="w-full border bg-white shadow">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 border">Driver Name</th>
-              <th className="p-3 border">Mobile</th>
-              <th className="p-3 border">Village</th>
-              <th className="p-3 border">Verified At</th>
-              <th className="p-3 border">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {approvedDrivers.map((d) => (
-              <tr key={d.verificationId}>
-                <td className="p-3 border">{d.fullName}</td>
-                <td className="p-3 border">{d.mobileNumber}</td>
-                <td className="p-3 border">{d.village}</td>
-                <td className="p-3 border">{d.verifiedAt}</td>
-
-                <td className="p-3 border">
-                  <button
-                    onClick={() => openModal(d)}
-                    className="bg-green-600 text-white px-3 py-1 rounded"
-                  >
-                    Generate GDC
-                  </button>
-                </td>
+        <>
+          <table className="w-full border bg-white shadow">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 border">Driver Name</th>
+                <th className="p-3 border">Mobile</th>
+                <th className="p-3 border">Village</th>
+                <th className="p-3 border">Verified At</th>
+                <th className="p-3 border">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {paginatedDrivers.map((d) => (
+                <tr key={d.verificationId}>
+                  <td className="p-3 border">{d.fullName}</td>
+                  <td className="p-3 border">{d.mobileNumber}</td>
+                  <td className="p-3 border">{d.village}</td>
+                  <td className="p-3 border">{d.verifiedAt}</td>
+
+                  <td className="p-3 border">
+                    <button
+                      onClick={() => openModal(d)}
+                      className="bg-green-600 text-white px-3 py-1 rounded"
+                    >
+                      Generate GDC
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Pagination UI */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+
+            {[...Array(totalPages)].map((_, index) => {
+              const page = index + 1;
+              return (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  className={`px-3 py-1 border rounded ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white"
+                      : "bg-white"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
 
       {/* Modal */}
