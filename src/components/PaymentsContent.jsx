@@ -22,9 +22,9 @@ export default function PaymentsContent() {
     setStep(1);
   };
 
-  // ==================================================
-  // STEP 1: CREATE ORDER (VALIDATES GDC IN BACKEND)
-  // ==================================================
+  // ===============================
+  // STEP 1: CREATE ORDER
+  // ===============================
   const proceedToPay = async () => {
     if (!gdcRegistrationNumber.trim()) {
       setError("Please enter GDC registration number");
@@ -36,53 +36,70 @@ export default function PaymentsContent() {
       setError("");
 
       const res = await createPaymentOrder({
-        gdc_number: gdcRegistrationNumber.trim(), // ✅ DTO FIELD
+        gdc_number: gdcRegistrationNumber.trim(),
         type: paymentType,
       });
 
+      // 🔥 SAFETY CHECK
+      if (!res?.orderId) {
+        console.error("CREATE ORDER RESPONSE:", res);
+        throw new Error("Order ID missing from backend response");
+      }
+
       setOrderData(res);
-      setAmount(res.amount / 100); // paise → rupees
+      setAmount(res.amount / 100);
       setStep(2);
 
     } catch (err) {
+      console.error(err);
       setError(
         err?.response?.data?.message ||
-        "Invalid or unapproved GDC number"
+        err.message ||
+        "Unable to create payment order"
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // ==================================================
+  // ===============================
   // STEP 2: OPEN RAZORPAY
-  // ==================================================
+  // ===============================
   const openRazorpay = () => {
     if (!window.Razorpay) {
       alert("Razorpay SDK not loaded");
       return;
     }
 
+    if (!orderData?.orderId) {
+      alert("Order ID missing. Please try again.");
+      console.error("ORDER DATA:", orderData);
+      return;
+    }
+
     const options = {
       key: orderData.key,
-      order_id: orderData.orderId,
+      order_id: String(orderData.orderId), // ✅ FINAL FIX
       amount: orderData.amount,
       currency: orderData.currency,
       name: "WTL Payments",
       description: `${paymentType} GDC Activation`,
 
       handler: async function (response) {
-        // 🔹 Debug: Razorpay frontend response
         console.log("🔥 RAZORPAY RESPONSE:", response);
-        alert(
-          "Razorpay Response:\n" +
-          "Order ID: " + response.razorpay_order_id + "\n" +
-          "Payment ID: " + response.razorpay_payment_id + "\n" +
-          "Signature: " + response.razorpay_signature
-        );
+
+        // 🔥 EXTRA SAFETY
+        if (
+          !response.razorpay_order_id ||
+          !response.razorpay_payment_id ||
+          !response.razorpay_signature
+        ) {
+          alert("Invalid payment response from Razorpay");
+          console.error("INVALID RAZORPAY RESPONSE:", response);
+          return;
+        }
 
         try {
-          // 🔹 Backend verification
           const res = await verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
@@ -101,7 +118,10 @@ export default function PaymentsContent() {
 
         } catch (err) {
           console.error("❌ VERIFY ERROR:", err);
-          alert("Payment verification failed. Contact support.");
+          alert(
+            err?.response?.data?.message ||
+            "Payment verification failed. Contact support."
+          );
         }
       },
 
@@ -117,7 +137,7 @@ export default function PaymentsContent() {
         💳 Payments
       </h2>
 
-      {/* STEP 0: SELECT TYPE */}
+      {/* STEP 0 */}
       {step === 0 && (
         <div className="grid gap-6 md:grid-cols-2">
           <div
@@ -135,7 +155,7 @@ export default function PaymentsContent() {
         </div>
       )}
 
-      {/* STEP 1: ENTER GDC */}
+      {/* STEP 1 */}
       {step === 1 && (
         <div className="space-y-4">
           <input
@@ -157,7 +177,7 @@ export default function PaymentsContent() {
         </div>
       )}
 
-      {/* STEP 2: CONFIRM & PAY */}
+      {/* STEP 2 */}
       {step === 2 && (
         <div className="space-y-4">
           <p><b>Type:</b> {paymentType}</p>
