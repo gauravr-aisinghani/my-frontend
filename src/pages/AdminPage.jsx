@@ -4,24 +4,25 @@ import { Outlet } from "react-router-dom";
 import axios from "../api/axiosConfig";
 
 export default function AdminPage() {
-const handleLogout = async () => {
-  const confirmLogout = window.confirm("Are you sure you want to logout?");
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    if (!confirmLogout) return;
 
-  if (!confirmLogout) return; // ❌ Cancel pressed → do nothing
+    try {
+      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+    } catch (err) {
+      console.log("Logout error:", err);
+    }
 
-  try {
-    await axios.post("/api/auth/logout", {}, { withCredentials: true });
-  } catch (err) {
-    console.log("Logout error:", err);
-  }
-
-  window.location.href = "/";
-};
-
+    window.location.href = "/";
+  };
 
   return (
     <SidebarLayout onLogout={handleLogout}>
-      <Outlet />
+      {/* ✅ GLOBAL CONTENT SPACING */}
+      <div className="px-6 py-6 w-full">
+        <Outlet />
+      </div>
     </SidebarLayout>
   );
 }
