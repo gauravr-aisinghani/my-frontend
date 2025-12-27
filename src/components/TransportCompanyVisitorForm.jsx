@@ -26,16 +26,13 @@ const TransportCompanyVisitorForm = () => {
     const { name, value } = e.target;
 
     if (
-      ["ownerMobileNo", "authorisedMobileNo"].includes(name) &&
+      ["ownerMobileNo", "authorisedMobileNo", "needDriver", "monthlySalary"].includes(name) &&
       !/^\d*$/.test(value)
     )
       return;
 
-    if (name === "ownerMobileNo" || name === "authorisedMobileNo") {
-      if (value.length > 10) return;
-    }
-
-    if (name === "needDriver" && !/^\d*$/.test(value)) return;
+    if (["ownerMobileNo", "authorisedMobileNo"].includes(name) && value.length > 10)
+      return;
 
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -73,6 +70,10 @@ const TransportCompanyVisitorForm = () => {
         if (!value.trim()) msg = "Gaadi Type is required";
         break;
 
+      case "monthlySalary":
+        if (value && !/^\d+$/.test(value)) msg = "Monthly Salary must be digits only";
+        break;
+
       default:
         break;
     }
@@ -81,7 +82,6 @@ const TransportCompanyVisitorForm = () => {
   };
 
   const inputClass = (name) => `input ${errors[name] ? "border-red-500" : ""}`;
-
   const renderError = (name) =>
     errors[name] ? (
       <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
@@ -90,7 +90,7 @@ const TransportCompanyVisitorForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
+    // Validate all required fields
     [
       "companyName",
       "ownerName",
@@ -98,8 +98,10 @@ const TransportCompanyVisitorForm = () => {
       "authorisedName",
       "needDriver",
       "gaadiType",
+      "monthlySalary",
     ].forEach((field) => validateField(field, formData[field]));
 
+    // Check if any errors exist
     const hasError = Object.values(errors).some((e) => e);
     if (hasError) return alert("Please fix validation errors");
 
@@ -125,7 +127,6 @@ const TransportCompanyVisitorForm = () => {
       await saveTransportVisitor(payload);
       alert("Transport Visitor saved successfully!");
 
-      // reset form
       setFormData({
         companyName: "",
         ownerName: "",
@@ -151,14 +152,14 @@ const TransportCompanyVisitorForm = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow p-6 max-w-6xl mx-auto">
+    <div className="bg-white rounded-2xl shadow p-3 max-w-6xl mx-auto">
       <h2 className="text-xl font-bold mb-4 text-green-600">
         Daily Visitors / Enquiry by Transport Company
       </h2>
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
       >
         {[
           ["companyName", "Company Name *"],
