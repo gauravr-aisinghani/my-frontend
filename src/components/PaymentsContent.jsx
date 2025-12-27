@@ -72,17 +72,35 @@ export default function PaymentsContent() {
       description: `${paymentType} GDC Activation`,
 
       handler: async function (response) {
+        // 🔹 Debug: Razorpay frontend response
+        console.log("🔥 RAZORPAY RESPONSE:", response);
+        alert(
+          "Razorpay Response:\n" +
+          "Order ID: " + response.razorpay_order_id + "\n" +
+          "Payment ID: " + response.razorpay_payment_id + "\n" +
+          "Signature: " + response.razorpay_signature
+        );
+
         try {
-          await verifyPayment({
+          // 🔹 Backend verification
+          const res = await verifyPayment({
             razorpayOrderId: response.razorpay_order_id,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpaySignature: response.razorpay_signature,
           });
 
+          console.log("✅ VERIFY RESPONSE:", res);
+
+          if (res.status !== "SUCCESS") {
+            alert("Payment verification failed: " + res.message);
+            return;
+          }
+
           alert("Payment successful!");
           setStep(0);
 
-        } catch {
+        } catch (err) {
+          console.error("❌ VERIFY ERROR:", err);
           alert("Payment verification failed. Contact support.");
         }
       },
