@@ -1,9 +1,7 @@
 import api from "./axiosInstance";
 
-
-// ✅ MUST MATCH BACKEND CONTROLLER
-const BASE_URL =
-  `${api}/api/visitor-transporter`;
+// ✅ Relative path (api already has baseURL)
+const BASE_URL = "/api/visitor-transporter";
 
 // save visitor (POST)
 export const saveTransportVisitor = async (visitorData) => {
@@ -12,7 +10,6 @@ export const saveTransportVisitor = async (visitorData) => {
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
-
     return res.data;
   } catch (err) {
     console.error("Error saving transport visitor", err);
@@ -26,7 +23,6 @@ export const getAllTransportVisitors = async () => {
     const res = await api.get(BASE_URL, {
       withCredentials: true,
     });
-
     return res.data;
   } catch (err) {
     console.error("Error fetching transport visitors", err);
@@ -34,13 +30,12 @@ export const getAllTransportVisitors = async () => {
   }
 };
 
-// get by id
+// get visitor by id (GET)
 export const getTransportVisitorById = async (id) => {
   try {
     const res = await api.get(`${BASE_URL}/${id}`, {
       withCredentials: true,
     });
-
     return res.data;
   } catch (err) {
     console.error("Error fetching transport visitor by id", err);
@@ -48,14 +43,13 @@ export const getTransportVisitorById = async (id) => {
   }
 };
 
-// update visitor
+// update visitor (PUT)
 export const updateTransportVisitor = async (id, visitorData) => {
   try {
     const res = await api.put(`${BASE_URL}/${id}`, visitorData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
-
     return res.data;
   } catch (err) {
     console.error("Error updating transport visitor", err);
@@ -63,13 +57,12 @@ export const updateTransportVisitor = async (id, visitorData) => {
   }
 };
 
-// delete visitor
+// delete visitor (DELETE)
 export const deleteTransportVisitor = async (id) => {
   try {
-    const res = await axios.delete(`${BASE_URL}/${id}`, {
+    const res = await api.delete(`${BASE_URL}/${id}`, {
       withCredentials: true,
     });
-
     return res.data;
   } catch (err) {
     console.error("Error deleting transport visitor", err);
