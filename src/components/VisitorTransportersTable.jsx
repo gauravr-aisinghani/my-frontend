@@ -12,33 +12,30 @@ const VisitorTransportersTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  // ONLY fields that DO NOT exist in visitor table
   const [finalForm, setFinalForm] = useState({
     qty_final_driver: 1,
     final_application: "",
     final_date: "",
   });
 
-  // Map DB → frontend
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
   const mapTransporter = (t) => ({
     visitorTransporterId: t.visitor_transporter_id,
-
     company_name: t.company_name,
     owner_name: t.owner_name,
     owner_mobile_no: t.owner_mobile_no,
-
     authorised_name: t.authorised_name,
     authorised_mobile_no: t.authorised_mobile_no,
-
     gaadi_type: t.gaadi_type,
     loading_place: t.loading_place,
     unload_place: t.unload_place,
     monthly_salary: t.monthly_salary,
-
     other_benefit: t.other_benefit,
     need_timing: t.need_timing,
     notes: t.notes,
-
     date: t.created_at?.split("T")[0],
     status: t.status,
   });
@@ -74,31 +71,23 @@ const VisitorTransportersTable = () => {
     try {
       const payload = {
         visitor_transporter_id: selectedRow.visitorTransporterId,
-
         company_name: selectedRow.company_name,
         owner_name: selectedRow.owner_name,
         owner_mobile_no: selectedRow.owner_mobile_no,
-
         authorised_name: selectedRow.authorised_name,
         authorised_mobile_no: selectedRow.authorised_mobile_no,
-
         gaadi_type: selectedRow.gaadi_type,
         loading_place: selectedRow.loading_place,
         unload_place: selectedRow.unload_place,
         monthly_salary: selectedRow.monthly_salary,
-
         other_benefit: selectedRow.other_benefit,
         need_timing: selectedRow.need_timing,
         notes: selectedRow.notes,
-
         qty_final_driver: finalForm.qty_final_driver,
         final_application: finalForm.final_application,
         final_date: finalForm.final_date,
-
         approval_status: "PENDING",
       };
-
-      console.log("FINAL PAYLOAD 👉", payload);
 
       await saveSelectedTransporter(payload);
       await deleteTransportVisitor(selectedRow.visitorTransporterId);
@@ -112,8 +101,20 @@ const VisitorTransportersTable = () => {
     }
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(transporters.length / pageSize);
+  const paginatedTransporters = transporters.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
   return (
-    <div className="bg-white p-8 rounded-xl shadow mt-10">
+    <div className="max-w-7xl mx-auto">
       <h3 className="text-2xl font-semibold text-blue-700 mb-5">
         Transport Company Visitors
       </h3>
@@ -147,15 +148,13 @@ const VisitorTransportersTable = () => {
                 </td>
               </tr>
             ) : (
-              transporters.map((t) => (
+              paginatedTransporters.map((t) => (
                 <tr
                   key={t.visitorTransporterId}
                   className="hover:bg-blue-50 transition"
                 >
                   <td className="p-2 border">{t.date}</td>
-                  <td className="p-2 border font-medium">
-                    {t.company_name}
-                  </td>
+                  <td className="p-2 border font-medium">{t.company_name}</td>
                   <td className="p-2 border">{t.owner_name}</td>
                   <td className="p-2 border">{t.owner_mobile_no}</td>
                   <td className="p-2 border">{t.gaadi_type}</td>
@@ -177,6 +176,39 @@ const VisitorTransportersTable = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination controls */}
+      {transporters.length > pageSize && (
+        <div className="flex justify-end mt-3 gap-2">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => goToPage(i + 1)}
+              className={`px-3 py-1 border rounded ${
+                currentPage === i + 1 ? "bg-blue-600 text-white" : ""
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* FINAL MODAL */}
       {showModal && (
