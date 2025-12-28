@@ -177,7 +177,7 @@ export default function TransporterVerificationTable() {
                     {t.transporter_registration_id}
                   </td>
                   <td className="p-3 border">{t.company_name || "-"}</td>
-                  <td className="p-3 border">{t.contact_number || "-"}</td>
+                  <td className="p-3 border">{t.owner_mobile || "-"}</td>
                   <td className="p-3 border">{t.total_docs || 0}</td>
                   <td className="p-3 border text-center">
                     <button

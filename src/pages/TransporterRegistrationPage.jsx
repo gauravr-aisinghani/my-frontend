@@ -118,9 +118,9 @@ const Inner = () => {
         </div>
 
         {/* ===== SUMMARY (unchanged) ===== */}
-        <div className="mt-6">
+        {/* <div className="mt-6">
           <TransporterSummary />
-        </div>
+        </div> */}
       </div>
     </div>
   );
