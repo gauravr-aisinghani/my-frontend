@@ -1,8 +1,6 @@
-// src/components/TransporterStep1.jsx
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 
-// ✅ IMPORT CORRECT ACTIONS
 import {
   updateTransporterStep1,
   setTransporterRegistrationId,
@@ -11,10 +9,10 @@ import {
 
 import { saveTransporterDetails } from "../api/transporterDetailsApi";
 
-export default function TransporterStep1({ onNext }) {
+const TransporterStep1 = ({ onNext }) => {
   const dispatch = useDispatch();
 
-  const [local, setLocal] = useState({
+  const [formData, setFormData] = useState({
     transportCompanyName: "",
     gstNumber: "",
     address: "",
@@ -23,17 +21,25 @@ export default function TransporterStep1({ onNext }) {
     contactManagerName: "",
     contactManagerMobileNumber: "",
     emailId: "",
-    aadharNumber: "",
     panCardNumber: "",
+    aadharNumber: "",
     dlNumber: "",
-    mobileOtp: "",
   });
 
-  const [otpSent, setOtpSent] = useState(false);
-  const [mockOtp, setMockOtp] = useState("");
-  const [otpVerified, setOtpVerified] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  /* ===================== HANDLE CHANGE ===================== */
+  /* ---------- INPUT CLASS (SAME AS LICENCE FORM) ---------- */
+  const inputClass = (name) =>
+    `border rounded px-2 py-1 text-sm w-full ${
+      errors[name] ? "border-red-500" : ""
+    }`;
+
+  const renderError = (name) =>
+    errors[name] ? (
+      <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
+    ) : null;
+
+  /* ---------- HANDLE CHANGE ---------- */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -48,88 +54,110 @@ export default function TransporterStep1({ onNext }) {
     }
 
     if (name === "panCardNumber") {
-      setLocal((prev) => ({
-        ...prev,
-        [name]: value.toUpperCase(),
-      }));
-      return;
+      if (value.length > 10) return;
+      if (!/^[A-Z0-9]*$/i.test(value)) return;
     }
 
-    setLocal((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "panCardNumber" ? value.toUpperCase() : value,
+    }));
   };
 
-  /* ===================== OTP MOCK ===================== */
-  const sendOtp = () => {
-    if (!/^\d{10}$/.test(local.ownerMobileNumber)) {
-      alert("Enter valid 10-digit mobile number");
-      return;
+  /* ---------- VALIDATION (ON BLUR + SUBMIT) ---------- */
+  const validateField = (name, value) => {
+    let msg = "";
+
+    switch (name) {
+      case "transportCompanyName":
+        if (!value) msg = "Transport Company Name is required";
+        break;
+
+      case "gstNumber":
+        if (value && !/^[0-9A-Z]{15}$/.test(value))
+          msg = "Invalid GST Number";
+        break;
+
+      case "address":
+        if (!value) msg = "Address is required";
+        break;
+
+      case "ownerName":
+        if (!value) msg = "Owner Name is required";
+        break;
+
+      case "ownerMobileNumber":
+        if (!/^\d{10}$/.test(value))
+          msg = "Valid 10-digit mobile number required";
+        break;
+
+      case "contactManagerName":
+        if (!value) msg = "Contact Manager Name is required";
+        break;
+
+      case "contactManagerMobileNumber":
+        if (!/^\d{10}$/.test(value))
+          msg = "Valid 10-digit mobile number required";
+        break;
+
+      case "emailId":
+        if (
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        )
+          msg = "Invalid Email ID";
+        break;
+
+      case "panCardNumber":
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value))
+          msg = "Invalid PAN format";
+        break;
+
+      case "aadharNumber":
+        if (!/^\d{12}$/.test(value))
+          msg = "Aadhaar must be 12 digits";
+        break;
+
+      case "dlNumber":
+        if (!value) msg = "Driving Licence Number is required";
+        break;
+
+      default:
+        break;
     }
 
-    const otp = String(100000 + Math.floor(Math.random() * 900000));
-    setMockOtp(otp);
-    setOtpSent(true);
-    alert(`Mock OTP sent: ${otp}`);
+    setErrors((prev) => ({ ...prev, [name]: msg }));
+    return !msg;
   };
 
-  const verifyOtp = () => {
-    if (local.mobileOtp === mockOtp) {
-      setOtpVerified(true);
-      alert("OTP verified");
-    } else {
-      alert("Invalid OTP");
-    }
-  };
+  /* ---------- SUBMIT ---------- */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  /* ===================== SUBMIT ===================== */
-  const handleNext = async () => {
-    const normalizedAadhar = local.aadharNumber.replace(/\s/g, "");
-    const normalizedPan = local.panCardNumber.toUpperCase().trim();
+    const fields = Object.keys(formData);
+    let hasError = false;
 
-    if (!local.transportCompanyName.trim()) {
-      alert("Transport company name required");
-      return;
-    }
+    fields.forEach((f) => {
+      if (!validateField(f, formData[f])) hasError = true;
+    });
 
-    if (!local.ownerName.trim()) {
-      alert("Owner name required");
-      return;
-    }
-
-    if (!/^\d{10}$/.test(local.ownerMobileNumber)) {
-      alert("Valid owner mobile number required");
-      return;
-    }
-
-    if (!/^\d{12}$/.test(normalizedAadhar)) {
-      alert("Aadhaar must be exactly 12 digits");
-      return;
-    }
-
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(normalizedPan)) {
-      alert("Invalid PAN format (ABCDE1234F)");
-      return;
-    }
-
-    if (!local.dlNumber.trim()) {
-      alert("Driving Licence number required");
-      return;
-    }
+    if (hasError) return;
 
     try {
-      // ✅ snake_case payload
+      /* ✅ EXACT DB FIELD NAMES (snake_case) */
       const payload = {
-        transport_company_name: local.transportCompanyName.trim(),
-        gst_number: local.gstNumber.trim(),
-        address: local.address.trim(),
-        owner_name: local.ownerName.trim(),
-        owner_mobile_number: local.ownerMobileNumber,
-        contact_manager_name: local.contactManagerName.trim(),
+        transport_company_name: formData.transportCompanyName.trim(),
+        gst_number: formData.gstNumber.trim() || null,
+        address: formData.address.trim(),
+        owner_name: formData.ownerName.trim(),
+        owner_mobile_number: formData.ownerMobileNumber,
+        contact_manager_name: formData.contactManagerName.trim(),
         contact_manager_mobile_number:
-          local.contactManagerMobileNumber || null,
-        email_id: local.emailId.trim(),
-        aadhar_number: normalizedAadhar,
-        pan_card_number: normalizedPan,
-        dl_number: local.dlNumber.trim(),
+          formData.contactManagerMobileNumber,
+        email_id: formData.emailId.trim(),
+        pan_card_number: formData.panCardNumber,
+        aadhar_number: formData.aadharNumber,
+        dl_number: formData.dlNumber.trim(),
       };
 
       const res = await saveTransporterDetails(payload);
@@ -139,57 +167,57 @@ export default function TransporterStep1({ onNext }) {
         return;
       }
 
-      // ✅ CORRECT DISPATCHES
-      dispatch(setTransporterRegistrationId(res.transporter_registration_id));
-      dispatch(updateTransporterStep1(local));
+      dispatch(
+        setTransporterRegistrationId(
+          res.transporter_registration_id
+        )
+      );
+      dispatch(updateTransporterStep1(formData));
       dispatch(setTransporterStep(2));
 
       onNext?.();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to save transporter details");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving transporter details");
     }
   };
 
-  /* ===================== UI ===================== */
+  /* ---------- JSX ---------- */
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-4">
-        Step 1 — Transporter Details
-      </h3>
+    <div className="w-full p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-semibold text-center mb-4">
+        Transporter Details
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input name="transportCompanyName" placeholder="Transport Company Name"
-          value={local.transportCompanyName} onChange={handleChange} className="input" />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {Object.entries(formData).map(([key, value]) => (
+            <div key={key}>
+              <input
+                name={key}
+                value={value}
+                onChange={handleChange}
+                onBlur={(e) =>
+                  validateField(key, e.target.value)
+                }
+                placeholder={key
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/^./, (s) => s.toUpperCase())}
+                className={inputClass(key)}
+              />
+              {renderError(key)}
+            </div>
+          ))}
+        </div>
 
-        <input name="gstNumber" placeholder="GST Number"
-          value={local.gstNumber} onChange={handleChange} className="input" />
-
-        <input name="address" placeholder="Address"
-          value={local.address} onChange={handleChange}
-          className="input md:col-span-2" />
-
-        <input name="ownerName" placeholder="Owner Name"
-          value={local.ownerName} onChange={handleChange} className="input" />
-
-        <input name="ownerMobileNumber" placeholder="Owner Mobile Number"
-          value={local.ownerMobileNumber} onChange={handleChange} className="input" />
-
-        <input name="aadharNumber" placeholder="Aadhaar Number"
-          value={local.aadharNumber} onChange={handleChange} className="input" />
-
-        <input name="panCardNumber" placeholder="PAN Card Number"
-          value={local.panCardNumber} onChange={handleChange} className="input" />
-
-        <input name="dlNumber" placeholder="Driving Licence Number"
-          value={local.dlNumber} onChange={handleChange} className="input" />
-      </div>
-
-      <div className="mt-6 text-right">
-        <button onClick={handleNext} className="btn-primary">
-          Next →
-        </button>
-      </div>
+        <div className="flex justify-end">
+          <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">
+            Save & Continue →
+          </button>
+        </div>
+      </form>
     </div>
   );
-}
+};
+
+export default TransporterStep1;
