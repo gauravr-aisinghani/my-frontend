@@ -52,7 +52,7 @@ export default function TransporterStep3({ onNext, onBack }) {
       <p className="text-red-500 text-[11px] mt-0.5">{errors[name]}</p>
     ) : null;
 
-  /* ================= HANDLE FILE CHANGE ================= */
+  /* ================= FILE CHANGE ================= */
   const handleChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
@@ -65,7 +65,7 @@ export default function TransporterStep3({ onNext, onBack }) {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       setErrors((prev) => ({
         ...prev,
-        [name]: "Invalid file type (jpg, png, pdf allowed)",
+        [name]: "Only JPG, PNG or PDF allowed",
       }));
       return;
     }
@@ -73,7 +73,7 @@ export default function TransporterStep3({ onNext, onBack }) {
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
       setErrors((prev) => ({
         ...prev,
-        [name]: `File size must be under ${MAX_FILE_SIZE_MB}MB`,
+        [name]: `File must be under ${MAX_FILE_SIZE_MB}MB`,
       }));
       return;
     }
@@ -89,8 +89,8 @@ export default function TransporterStep3({ onNext, onBack }) {
       return false;
     }
 
-    let hasError = false;
     const newErrors = {};
+    let hasError = false;
 
     Object.keys(formData).forEach((key) => {
       if (!formData[key]) {
@@ -108,41 +108,16 @@ export default function TransporterStep3({ onNext, onBack }) {
     if (!validateAll()) return;
 
     const fd = new FormData();
-    fd.append("transporter_registration_id", transporterRegistrationId);
 
-    fd.append(
-      "transporter_selfie_live_location_url",
-      formData.transporterSelfieLiveLocation
-    );
-    fd.append(
-      "live_home_office_photo_url",
-      formData.liveHomeOfficePhoto
-    );
-    fd.append("gst_certificate_url", formData.gstCertificate);
-    fd.append(
-      "transporter_account_passbook_url",
-      formData.transporterAccountPassbook
-    );
-    fd.append(
-      "aadhar_original_photo_url",
-      formData.aadharOriginal
-    );
-    fd.append(
-      "pan_original_photo_url",
-      formData.panOriginal
-    );
-    fd.append(
-      "licence_original_photo_url",
-      formData.licenceOriginal
-    );
-    fd.append(
-      "stamp_letter_agreement_url",
-      formData.stampLetterAgreement
-    );
-    fd.append(
-      "transporter_auto_signature_url",
-      formData.transporterAutoSignature
-    );
+    // 🔥 VERY IMPORTANT — keys MUST match backend @RequestPart
+    Object.keys(formData).forEach((key) => {
+      if (formData[key]) {
+        fd.append(key, formData[key]);
+      }
+    });
+
+    // debug (optional)
+    // for (let pair of fd.entries()) console.log(pair[0], pair[1]);
 
     try {
       setLoading(true);
@@ -185,8 +160,8 @@ export default function TransporterStep3({ onNext, onBack }) {
         <button
           type="button"
           onClick={onBack}
-          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm"
           disabled={loading}
+          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm"
         >
           ← Back
         </button>
