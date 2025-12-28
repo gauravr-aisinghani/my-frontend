@@ -7,7 +7,7 @@ const SelectedTransportersTable = () => {
 
   // ===== PAGINATION STATE =====
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 5;
 
   // Map DB snake_case → UI camelCase
   const mapSelected = (t) => ({

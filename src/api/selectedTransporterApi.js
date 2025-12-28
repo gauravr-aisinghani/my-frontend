@@ -1,7 +1,7 @@
 import api from "./axiosInstance";
 
 // ✅ relative path only
-const BASE_URL = "/api/selected-transporter";
+const BASE_URL = `${api}/api/selected-transporter`;
 
 // save selected transporter
 export const saveSelectedTransporter = async (data) => {
