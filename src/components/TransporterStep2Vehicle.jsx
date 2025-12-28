@@ -29,7 +29,7 @@ const TransporterStep2Vehicle = ({ onNext, onBack }) => {
   const [errors, setErrors] = useState({});
 
   const inputClass = (name) =>
-    `border rounded px-3 py-2 text-sm w-full ${
+    `border rounded px-2 py-1 text-sm w-full ${
       errors[name] ? "border-red-500" : "border-gray-300"
     }`;
 
