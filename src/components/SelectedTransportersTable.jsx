@@ -5,6 +5,10 @@ const SelectedTransportersTable = () => {
   const [selectedList, setSelectedList] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ===== PAGINATION STATE =====
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+
   // Map DB snake_case → UI camelCase
   const mapSelected = (t) => ({
     id: t.selected_transporter_id,
@@ -17,7 +21,6 @@ const SelectedTransportersTable = () => {
     unloadPlace: t.unload_place,
     qtyFinalDriver: t.qty_final_driver,
     monthlySalary: t.monthly_salary,
-    approvalStatus: t.approval_status,
   });
 
   const loadData = async () => {
@@ -25,6 +28,7 @@ const SelectedTransportersTable = () => {
       setLoading(true);
       const data = await getAllSelectedTransporters();
       setSelectedList((data || []).map(mapSelected));
+      setCurrentPage(1); // reset page on reload
     } catch (err) {
       alert("Failed to load selected transporters");
     } finally {
@@ -36,8 +40,16 @@ const SelectedTransportersTable = () => {
     loadData();
   }, []);
 
+  // ===== PAGINATION LOGIC =====
+  const totalPages = Math.ceil(selectedList.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const currentData = selectedList.slice(
+    startIndex,
+    startIndex + pageSize
+  );
+
   return (
-    <div className="bg-white p-8 rounded-2xl shadow mt-10 border border-gray-200">
+    <div className="max-w-7xl mx-auto">
       <h3 className="text-2xl font-semibold text-green-700 mb-5">
         Selected Transporters (Final)
       </h3>
@@ -52,31 +64,27 @@ const SelectedTransportersTable = () => {
               <th className="p-3 border">Mobile</th>
               <th className="p-3 border">Gaadi</th>
               <th className="p-3 border">Route</th>
-              <th className="p-3 border">Qty</th>
+              <th className="p-3 border text-center">Qty</th>
               <th className="p-3 border">Salary</th>
-              <th className="p-3 border">Status</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="9" className="text-center p-5">
+                <td colSpan="8" className="text-center p-5">
                   Loading selected transporters...
                 </td>
               </tr>
-            ) : selectedList.length === 0 ? (
+            ) : currentData.length === 0 ? (
               <tr>
-                <td colSpan="9" className="text-center p-5 text-gray-500">
+                <td colSpan="8" className="text-center p-5 text-gray-500">
                   No selected transporters found.
                 </td>
               </tr>
             ) : (
-              selectedList.map((t) => (
-                <tr
-                  key={t.id}
-                  className="hover:bg-green-50 transition-all"
-                >
+              currentData.map((t) => (
+                <tr key={t.id} className="hover:bg-green-50 transition-all">
                   <td className="p-3 border">{t.finalDate}</td>
                   <td className="p-3 border font-medium">
                     {t.companyName}
@@ -93,25 +101,37 @@ const SelectedTransportersTable = () => {
                   <td className="p-3 border">
                     {t.monthlySalary ? `₹${t.monthlySalary}` : "-"}
                   </td>
-                  <td className="p-3 border">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        t.approvalStatus === "APPROVED"
-                          ? "bg-green-100 text-green-700"
-                          : t.approvalStatus === "REJECTED"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {t.approvalStatus}
-                    </span>
-                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      {/* ===== PAGINATION UI ===== */}
+      {totalPages > 1 && (
+        <div className="flex justify-end items-center gap-3 mt-4">
+          <button
+            onClick={() => setCurrentPage((p) => p - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-1 border rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+
+          <span className="text-sm text-gray-600">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage((p) => p + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
