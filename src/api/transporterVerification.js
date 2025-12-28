@@ -1,8 +1,8 @@
 // src/api/transporterVerificationApi.js
 import api from "./axiosInstance";
 
-
-const API_URL = `${api}/api/transporter-verification`;
+// ✅ relative path only (axiosInstance already has baseURL)
+const API_URL = "/api/transporter-verification";
 
 export default {
   getPendingTransporters: async () => {
@@ -11,17 +11,25 @@ export default {
   },
 
   getTransporterDocuments: async (transporterRegistrationId) => {
-    const res = await api.get(`${API_URL}/documents/${transporterRegistrationId}`);
+    const res = await api.get(
+      `${API_URL}/documents/${transporterRegistrationId}`
+    );
     return res.data;
   },
 
-  approveTransporter: async ({ transporterRegistrationId, remarks, approvedBy }) => {
+  approveTransporter: async ({
+    transporterRegistrationId,
+    remarks,
+    approvedBy,
+  }) => {
     const payload = {
       transporter_registration_id: transporterRegistrationId,
       remarks,
       approved_by: approvedBy,
     };
-    return (await api.post(`${API_URL}/approve`, payload)).data;
+
+    const res = await api.post(`${API_URL}/approve`, payload);
+    return res.data;
   },
 
   rejectTransporter: async ({ transporterRegistrationId, remarks }) => {
@@ -29,6 +37,8 @@ export default {
       transporter_registration_id: transporterRegistrationId,
       remarks,
     };
-    return (await api.post(`${API_URL}/reject`, payload)).data;
+
+    const res = await api.post(`${API_URL}/reject`, payload);
+    return res.data;
   },
 };

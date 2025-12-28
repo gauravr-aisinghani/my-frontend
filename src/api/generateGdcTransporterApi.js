@@ -1,12 +1,12 @@
 import api from "./axiosInstance";
 
-
-const API_BASE = `${api}/api/transporter-final`;
+// ✅ api already has baseURL
+const API_BASE = "/api/transporter-final";
 
 const generateGdcTransporterApi = {
   async generateGdc(payload) {
     try {
-      const res = await axios.post(`${API_BASE}/generate-gdc`, payload, {
+      const res = await api.post(`${API_BASE}/generate-gdc`, payload, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
@@ -17,10 +17,10 @@ const generateGdcTransporterApi = {
     }
   },
 
-  // ✅ fetch verified transporters
+  // ✅ fetch verified transporters (ABSOLUTE URL — kept as-is)
   async getApprovedTransporters() {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         "https://my-backend-1-qxc9.onrender.com/api/transporter-verification/approved",
         { withCredentials: true }
       );
