@@ -7,7 +7,7 @@ const SelectedTransportersTable = () => {
 
   // ===== PAGINATION STATE =====
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 10;
 
   // Map DB snake_case → UI camelCase
   const mapSelected = (t) => ({
@@ -28,7 +28,7 @@ const SelectedTransportersTable = () => {
       setLoading(true);
       const data = await getAllSelectedTransporters();
       setSelectedList((data || []).map(mapSelected));
-      setCurrentPage(1); // reset page on reload
+      setCurrentPage(1);
     } catch (err) {
       alert("Failed to load selected transporters");
     } finally {
@@ -47,6 +47,8 @@ const SelectedTransportersTable = () => {
     startIndex,
     startIndex + pageSize
   );
+
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -84,7 +86,7 @@ const SelectedTransportersTable = () => {
               </tr>
             ) : (
               currentData.map((t) => (
-                <tr key={t.id} className="hover:bg-green-50 transition-all">
+                <tr key={t.id} className="hover:bg-green-50">
                   <td className="p-3 border">{t.finalDate}</td>
                   <td className="p-3 border font-medium">
                     {t.companyName}
@@ -108,25 +110,35 @@ const SelectedTransportersTable = () => {
         </table>
       </div>
 
-      {/* ===== PAGINATION UI ===== */}
+      {/* ===== PAGINATION ===== */}
       {totalPages > 1 && (
-        <div className="flex justify-end items-center gap-3 mt-4">
+        <div className="flex justify-end items-center gap-2 mt-4">
           <button
             onClick={() => setCurrentPage((p) => p - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1 border rounded disabled:opacity-50"
           >
             Prev
           </button>
 
-          <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
-          </span>
+          {pages.map((p) => (
+            <button
+              key={p}
+              onClick={() => setCurrentPage(p)}
+              className={`px-3 py-1 border rounded ${
+                currentPage === p
+                  ? "bg-green-600 text-white border-green-600"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
 
           <button
             onClick={() => setCurrentPage((p) => p + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1 border rounded disabled:opacity-50"
           >
             Next
           </button>
