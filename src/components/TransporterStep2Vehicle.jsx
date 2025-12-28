@@ -312,7 +312,7 @@ const TransporterStep2Vehicle = ({ onNext, onBack }) => {
               }
             >
               <option value="">Select</option>
-              <option value="TRANSPORTER">Transporter</option>
+              <option value="TRANSPORT_ACCOUNT">Transporter</option>
               <option value="DRIVER">Driver</option>
             </select>
             {renderError("hirePayment")}
