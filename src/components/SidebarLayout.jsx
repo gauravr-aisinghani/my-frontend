@@ -37,7 +37,15 @@ const pageTitles = {
   "transporter-verification": "Transporter Verification ",
   "drivers-reports": "Drivers Reports",
   "transporter-reports": "Transporter Reports",
-  "payment-reports": "Payment Reports"
+  "payment-reports": "Payment Reports",
+  "assign-driver": "Assign Driver",
+"paid-by-transporter": "Paid By Transporter",
+"payment-verified": "Payment Verified",
+"current-posting": "Current Posting",
+"final-settlement": "Final Settlement",
+"transporter-ledger": "Transporter Ledger",
+"driver-ledger": "Driver Ledger",
+
 };
 
 const sidebarSections = [
@@ -85,12 +93,19 @@ const sidebarSections = [
       { label: "Payments Reports", path: "payment-reports", icon: <DollarSign className="w-5 h-5" /> },
     ],
   },
-   {
-    title: "Operations",
-    items: [
-      { label: "Assign Driver", path: "assign-driver", icon: <Users className="w-5 h-5" /> },      
-    ],
-  },
+  {
+  title: "Operations",
+  items: [
+    { label: "Assign Driver", path: "assign-driver", icon: <Users className="w-5 h-5" /> },
+    { label: "Paid By Transporter", path: "paid-by-transporter", icon: <DollarSign className="w-5 h-5" /> },
+    { label: "Payment Verified", path: "payment-verified", icon: <CheckSquare className="w-5 h-5" /> },
+    { label: "Current Posting", path: "current-posting", icon: <Truck className="w-5 h-5" /> },
+    { label: "Final Settlement", path: "final-settlement", icon: <CheckSquare className="w-5 h-5" /> },
+    { label: "Transporter Ledger", path: "transporter-ledger", icon: <FilePlus2 className="w-5 h-5" /> },
+    { label: "Driver Ledger", path: "driver-ledger", icon: <Users className="w-5 h-5" /> },
+  ],
+},
+
 ];
 
 export default function SidebarLayout({ onLogout }) {

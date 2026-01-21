@@ -43,7 +43,15 @@ import TransporterReports from "./pages/TransporterReports.jsx";
 import EntrySelection from "./pages/EntrySelection.jsx";
 import GlobalLoader from "./components/GlobalLoader";
 import PaymentReports from "./pages/paymentReportApi.jsx";
+
+// 🔥 OPERATIONS PAGES
 import AssignDriver from "./pages/operations/AssignDriver.jsx";
+import PaidByTransporter from "./pages/operations/PaidByTransporter.jsx";
+import PaymentVerified from "./pages/operations/PaymentVerified.jsx";
+import CurrentPosting from "./pages/operations/CurrentPosting.jsx";
+import FinalSettlement from "./pages/operations/FinalSettlement.jsx";
+import TransporterLedger from "./pages/operations/TransporterLedger.jsx";
+import DriverLedger from "./pages/operations/DriverLedger.jsx";
 
 function App() {
   return (
@@ -60,14 +68,14 @@ function App() {
           <Route path="/driver/signup" element={<DriverRegistrationPage />} />
           <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
 
-          {/* 🌍 PUBLIC PAYMENT (Driver + Transporter + Anyone) */}
+          {/* 🌍 PUBLIC PAYMENT */}
           <Route path="/payment" element={<Payments />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
 
-          {/* 🔐 ADMIN LOGIN (SEPARATE ENTRY) */}
+          {/* 🔐 ADMIN LOGIN */}
           <Route path="/admin" element={<LoginForm />} />
 
-          {/* OPTIONAL AUTH ROUTES */}
+          {/* OPTIONAL AUTH */}
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -76,7 +84,7 @@ function App() {
           <Route path="/super-admin" element={<SuperAdminLogin />} />
           <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
 
-          {/* 🔒 ADMIN DASHBOARD (PROTECTED) */}
+          {/* 🔒 ADMIN DASHBOARD */}
           <Route
             path="/dashboard/*"
             element={
@@ -105,18 +113,24 @@ function App() {
             <Route path="transporter-verification" element={<TransporterVerificationPage />} />
             <Route path="drivers-reports" element={<DriverReports />} />
             <Route path="transporter-reports" element={<TransporterReports />} />
-             <Route path="payment-reports" element={<PaymentReports />} />
-
+            <Route path="payment-reports" element={<PaymentReports />} />
 
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
             <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
 
-            {/* 🔒 ADMIN PAYMENT (SAME UI) */}
             <Route path="payments" element={<Payments />} />
 
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
             <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
+
+            {/* 🔥 OPERATIONS ROUTES */}
             <Route path="assign-driver" element={<AssignDriver />} />
+            <Route path="paid-by-transporter" element={<PaidByTransporter />} />
+            <Route path="payment-verified" element={<PaymentVerified />} />
+            <Route path="current-posting" element={<CurrentPosting />} />
+            <Route path="final-settlement" element={<FinalSettlement />} />
+            <Route path="transporter-ledger" element={<TransporterLedger />} />
+            <Route path="driver-ledger" element={<DriverLedger />} />
 
           </Route>
 
