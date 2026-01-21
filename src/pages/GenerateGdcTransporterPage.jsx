@@ -124,9 +124,17 @@ export default function GenerateGdcTransporterPage() {
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg w-[400px]">
-            <h3 className="text-lg font-bold mb-4">
-              Generate Transporter GDC
-            </h3>
+           <div className="flex justify-between items-center mb-4">
+  <h3 className="text-lg font-bold">Generate Transporter GDC</h3>
+
+  <button
+    onClick={() => setModalOpen(false)}
+    className="text-gray-500 hover:text-red-600 text-xl font-bold"
+  >
+    ✕
+  </button>
+</div>
+
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
