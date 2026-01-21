@@ -42,6 +42,7 @@ import SelectedTransportersTable from "./components/SelectedTransportersTable.js
 import TransporterReports from "./pages/TransporterReports.jsx";
 import EntrySelection from "./pages/EntrySelection.jsx";
 import GlobalLoader from "./components/GlobalLoader";
+import PaymentReports from "./pages/paymentReportApi.js";
 
 function App() {
   return (
@@ -103,6 +104,8 @@ function App() {
             <Route path="transporter-verification" element={<TransporterVerificationPage />} />
             <Route path="drivers-reports" element={<DriverReports />} />
             <Route path="transporter-reports" element={<TransporterReports />} />
+             <Route path="payment-reports" element={<PaymentReports />} />
+
 
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
             <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />

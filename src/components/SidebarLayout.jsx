@@ -36,7 +36,8 @@ const pageTitles = {
   "selected-transporters-list": "Selected Transporters List",
   "transporter-verification": "Transporter Verification ",
   "drivers-reports": "Drivers Reports",
-  "transporter-reports": "Transporter Reports"
+  "transporter-reports": "Transporter Reports",
+  "payment-reports": "Payment Reports"
 };
 
 const sidebarSections = [
@@ -73,7 +74,7 @@ const sidebarSections = [
   {
     title: "Payments",
     items: [
-      { label: "Payments", path: "payments", icon: <DollarSign className="w-5 h-5" /> },
+      { label: "Payments", path: "payment-reports", icon: <DollarSign className="w-5 h-5" /> },
     ],
   },
   {
