@@ -39,7 +39,7 @@ import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
 
 import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
 import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
-
+import TransporterReports from "./pages/TransporterReports.jsx";
 import EntrySelection from "./pages/EntrySelection.jsx";
 import GlobalLoader from "./components/GlobalLoader";
 
@@ -102,6 +102,8 @@ function App() {
             <Route path="driver-verification" element={<DriverVerificationPage />} />
             <Route path="transporter-verification" element={<TransporterVerificationPage />} />
             <Route path="drivers-reports" element={<DriverReports />} />
+            <Route path="transporter-reports" element={<TransporterReports />} />
+
             <Route path="generate-gdc" element={<GenerateGdcPage />} />
             <Route path="generate-gdc-transporter" element={<GenerateGdcTransporterPage />} />
 
