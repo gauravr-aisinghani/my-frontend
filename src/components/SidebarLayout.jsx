@@ -82,7 +82,7 @@ const sidebarSections = [
     items: [
       { label: "Driver Reports", path: "drivers-reports", icon: <Users className="w-5 h-5" /> },
       { label: "Transporter Reports", path: "transporter-reports", icon: <Truck className="w-5 h-5" /> },
-      { label: "Payments Reports", path: "reports/payments", icon: <DollarSign className="w-5 h-5" /> },
+      { label: "Payments Reports", path: "payment-reports", icon: <DollarSign className="w-5 h-5" /> },
     ],
   },
 ];
