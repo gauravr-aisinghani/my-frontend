@@ -51,22 +51,25 @@ const tableStyle = {
   borderCollapse: "collapse",
 };
 
-const filterBox = {
+const filterRow = {
   display: "flex",
-  justifyContent: "space-between",
+  gap: "10px",
+  alignItems: "center",
   marginBottom: "16px",
+  flexWrap: "wrap",
 };
 
 /* ================= PAGINATION ================= */
 const PAGE_SIZE = 5;
 
-/* ================= COMPONENT ================= */
 const PaymentReports = () => {
   const [summary, setSummary] = useState({});
   const [payments, setPayments] = useState([]);
   const [filters, setFilters] = useState({
     paymentType: "",
     status: "",
+    fromDate: "",
+    toDate: "",
   });
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,20 +100,20 @@ const PaymentReports = () => {
 
   /* ================= CHART DATA ================= */
   const barData = [
-    { name: "Total", value: summary.totalPayments || 0, color: COLORS.total },
-    { name: "Paid", value: summary.paidPayments || 0, color: COLORS.paid },
-    { name: "Failed", value: summary.failedPayments || 0, color: COLORS.failed },
+    { name: "Total", value: summary.total_payments || 0, color: COLORS.total },
+    { name: "Paid", value: summary.paid_payments || 0, color: COLORS.paid },
+    { name: "Failed", value: summary.failed_payments || 0, color: COLORS.failed },
   ];
 
   const pieData = [
     {
       name: "Driver",
-      value: summary.driverPayments || 0,
+      value: summary.driver_payments || 0,
       color: COLORS.driver,
     },
     {
       name: "Transporter",
-      value: summary.transporterPayments || 0,
+      value: summary.transporter_payments || 0,
       color: COLORS.transporter,
     },
   ];
@@ -123,48 +126,37 @@ const PaymentReports = () => {
     currentPage * PAGE_SIZE
   );
 
-  const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
   return (
     <div className="max-w-7xl mx-auto">
       <h2>Payment Reports</h2>
 
-      {/* ================= KPI CARDS ================= */}
+      {/* ================= KPI ================= */}
       <div style={cardGrid}>
         <div style={card(COLORS.total)}>
           <h4>Total Payments</h4>
-          <b>{summary.totalPayments || 0}</b>
+          <b>{summary.total_payments || 0}</b>
         </div>
-
         <div style={card(COLORS.paid)}>
           <h4>Paid</h4>
-          <b>{summary.paidPayments || 0}</b>
+          <b>{summary.paid_payments || 0}</b>
         </div>
-
         <div style={card(COLORS.failed)}>
           <h4>Failed</h4>
-          <b>{summary.failedPayments || 0}</b>
+          <b>{summary.failed_payments || 0}</b>
         </div>
-
         <div style={card(COLORS.driver)}>
-          <h4>Driver Payments</h4>
-          <b>{summary.driverPayments || 0}</b>
+          <h4>Driver</h4>
+          <b>{summary.driver_payments || 0}</b>
         </div>
-
         <div style={card(COLORS.transporter)}>
-          <h4>Transporter Payments</h4>
-          <b>{summary.transporterPayments || 0}</b>
+          <h4>Transporter</h4>
+          <b>{summary.transporter_payments || 0}</b>
         </div>
       </div>
 
       {/* ================= CHARTS ================= */}
       <div style={sectionGrid}>
         <div style={card("#e5e7eb")}>
-          <h4>Payment Status Overview</h4>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={barData}>
               <XAxis dataKey="name" />
@@ -180,7 +172,6 @@ const PaymentReports = () => {
         </div>
 
         <div style={card("#e5e7eb")}>
-          <h4>Payment Type Split</h4>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={pieData} dataKey="value" innerRadius={60}>
@@ -194,112 +185,86 @@ const PaymentReports = () => {
         </div>
       </div>
 
-      {/* ================= FILTER + EXPORT ================= */}
-      <div style={filterBox}>
-        <div>
-          <select
-            value={filters.paymentType}
-            onChange={(e) =>
-              setFilters({ ...filters, paymentType: e.target.value })
-            }
-          >
-            <option value="">All Types</option>
-            <option value="DRIVER">Driver</option>
-            <option value="TRANSPORTER">Transporter</option>
-          </select>
+      {/* ================= FILTER ROW ================= */}
+      <div style={filterRow}>
+        <select
+          value={filters.paymentType}
+          onChange={(e) =>
+            setFilters({ ...filters, paymentType: e.target.value })
+          }
+        >
+          <option value="">All Types</option>
+          <option value="DRIVER">Driver</option>
+          <option value="TRANSPORTER">Transporter</option>
+        </select>
 
-          <select
-            value={filters.status}
-            onChange={(e) =>
-              setFilters({ ...filters, status: e.target.value })
-            }
-            style={{ marginLeft: "8px" }}
-          >
-            <option value="">All Status</option>
-            <option value="PAID">Paid</option>
-            <option value="FAILED">Failed</option>
-            <option value="CREATED">Created</option>
-          </select>
-        </div>
+        <select
+          value={filters.status}
+          onChange={(e) =>
+            setFilters({ ...filters, status: e.target.value })
+          }
+        >
+          <option value="">All Status</option>
+          <option value="PAID">Paid</option>
+          <option value="FAILED">Failed</option>
+          <option value="CREATED">Created</option>
+        </select>
 
-        <button onClick={downloadExcel}>⬇ Export Excel</button>
+        <input
+          type="date"
+          value={filters.fromDate}
+          onChange={(e) =>
+            setFilters({ ...filters, fromDate: e.target.value })
+          }
+        />
+
+        <input
+          type="date"
+          value={filters.toDate}
+          onChange={(e) =>
+            setFilters({ ...filters, toDate: e.target.value })
+          }
+        />
+
+        <button onClick={downloadExcel}>⬇ Export</button>
       </div>
 
       {/* ================= TABLE ================= */}
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <>
-          <table style={tableStyle} border="1">
-            <thead>
+        <table style={tableStyle} border="1">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>GDC</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Razorpay</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedPayments.length === 0 ? (
               <tr>
-                <th>ID</th>
-                <th>GDC</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Razorpay ID</th>
-                <th>Date</th>
+                <td colSpan="7" align="center">No data</td>
               </tr>
-            </thead>
-            <tbody>
-              {paginatedPayments.length === 0 ? (
-                <tr>
-                  <td colSpan="7" align="center">
-                    No data found
-                  </td>
+            ) : (
+              paginatedPayments.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.id}</td>
+                  <td>{p.gdc_number}</td>
+                  <td>{p.payment_type}</td>
+                  <td>{p.amount}</td>
+                  <td>{p.status}</td>
+                  <td>{p.razorpay_payment_id || "-"}</td>
+                  <td>{p.created_at}</td>
                 </tr>
-              ) : (
-                paginatedPayments.map((p) => (
-                  <tr key={p.id}>
-                    <td>{p.id}</td>
-                    <td>{p.gdcNumber}</td>
-                    <td>{p.paymentType}</td>
-                    <td>{p.amount}</td>
-                    <td>{p.status}</td>
-                    <td>{p.razorpayPaymentId || "-"}</td>
-                    <td>{p.createdAt}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-
-          {/* ================= PAGINATION ================= */}
-          {totalPages > 1 && (
-            <div style={{ marginTop: "12px", textAlign: "center" }}>
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Prev
-              </button>
-
-              {[...Array(totalPages)].map((_, i) => {
-                const page = i + 1;
-                return (
-                  <button
-                    key={page}
-                    onClick={() => goToPage(page)}
-                    style={{
-                      margin: "0 4px",
-                      fontWeight: currentPage === page ? "bold" : "normal",
-                    }}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
+              ))
+            )}
+          </tbody>
+        </table>
       )}
     </div>
   );
