@@ -78,7 +78,7 @@ export default function GenerateGdcTransporterPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Generate Transporter GDC</h2>
 
       {loading ? (
