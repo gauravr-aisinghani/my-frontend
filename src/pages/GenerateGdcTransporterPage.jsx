@@ -10,7 +10,7 @@ export default function GenerateGdcTransporterPage() {
 
   const [form, setForm] = useState({
     transporterRegistrationId: "",
-    verificationId: "", // Added verificationId
+    verificationId: null, // ✅ Always have this key
     remarks: "",
   });
 
@@ -47,7 +47,7 @@ export default function GenerateGdcTransporterPage() {
   const openModal = (t) => {
     setForm({
       transporterRegistrationId: t.transporterRegistrationId,
-      verificationId: t.verificationId, // set verificationId from selected transporter
+      verificationId: t.verification_id || null, // ✅ default to null if missing
       remarks: "",
     });
     setModalOpen(true);
@@ -61,10 +61,9 @@ export default function GenerateGdcTransporterPage() {
     e.preventDefault();
 
     try {
-      // ✅ backend expects snake_case
       const payload = {
         transporter_registration_id: form.transporterRegistrationId,
-        verification_id: form.verificationId, // Added verification_id
+        verification_id: form.verificationId, // ✅ always included
         final_approved_by: adminName,
         remarks: form.remarks,
       };
