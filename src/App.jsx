@@ -42,7 +42,7 @@ import SelectedTransportersTable from "./components/SelectedTransportersTable.js
 import TransporterReports from "./pages/TransporterReports.jsx";
 import EntrySelection from "./pages/EntrySelection.jsx";
 import GlobalLoader from "./components/GlobalLoader";
-import PaymentReports from "./pages/paymentReportApi.js";
+import PaymentReports from "./pages/paymentReportApi.jsx";
 
 function App() {
   return (
