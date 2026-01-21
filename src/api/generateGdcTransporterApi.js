@@ -1,12 +1,12 @@
 import api from "./axiosInstance";
 
-// ✅ api already has baseURL
-const API_BASE = "/api/transporter-final";
+// ✅ Backend ke exact endpoint ke according
+const API_BASE = "/api/transporter-gdc";
 
 const generateGdcTransporterApi = {
   async generateGdc(payload) {
     try {
-      const res = await api.post(`${API_BASE}/generate-gdc`, payload, {
+      const res = await api.post(`${API_BASE}/generate`, payload, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
@@ -17,7 +17,6 @@ const generateGdcTransporterApi = {
     }
   },
 
-  // ✅ fetch verified transporters (ABSOLUTE URL — kept as-is)
   async getApprovedTransporters() {
     try {
       const res = await api.get(
