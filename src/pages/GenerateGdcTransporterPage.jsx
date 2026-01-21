@@ -10,6 +10,7 @@ export default function GenerateGdcTransporterPage() {
 
   const [form, setForm] = useState({
     transporterRegistrationId: "",
+    verificationId: "", // Added verificationId
     remarks: "",
   });
 
@@ -46,6 +47,7 @@ export default function GenerateGdcTransporterPage() {
   const openModal = (t) => {
     setForm({
       transporterRegistrationId: t.transporterRegistrationId,
+      verificationId: t.verificationId, // set verificationId from selected transporter
       remarks: "",
     });
     setModalOpen(true);
@@ -62,6 +64,7 @@ export default function GenerateGdcTransporterPage() {
       // ✅ backend expects snake_case
       const payload = {
         transporter_registration_id: form.transporterRegistrationId,
+        verification_id: form.verificationId, // Added verification_id
         final_approved_by: adminName,
         remarks: form.remarks,
       };
@@ -124,17 +127,15 @@ export default function GenerateGdcTransporterPage() {
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg w-[400px]">
-           <div className="flex justify-between items-center mb-4">
-  <h3 className="text-lg font-bold">Generate Transporter GDC</h3>
-
-  <button
-    onClick={() => setModalOpen(false)}
-    className="text-gray-500 hover:text-red-600 text-xl font-bold"
-  >
-    ✕
-  </button>
-</div>
-
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Generate Transporter GDC</h3>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="text-gray-500 hover:text-red-600 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
@@ -166,9 +167,15 @@ export default function GenerateGdcTransporterPage() {
       {result && (
         <div className="mt-6 p-4 border rounded bg-gray-100">
           <h3 className="font-bold mb-2">Generated GDC Details</h3>
-          <p><strong>GDC Number:</strong> {result.gdc_registration_number}</p>
-          <p><strong>ID Card URL:</strong> {result.id_card_url}</p>
-          <p><strong>Message:</strong> {result.message}</p>
+          <p>
+            <strong>GDC Number:</strong> {result.gdc_registration_number}
+          </p>
+          <p>
+            <strong>ID Card URL:</strong> {result.id_card_url}
+          </p>
+          <p>
+            <strong>Message:</strong> {result.message}
+          </p>
         </div>
       )}
     </div>
