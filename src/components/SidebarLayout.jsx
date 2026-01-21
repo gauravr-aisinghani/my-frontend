@@ -85,6 +85,12 @@ const sidebarSections = [
       { label: "Payments Reports", path: "payment-reports", icon: <DollarSign className="w-5 h-5" /> },
     ],
   },
+   {
+    title: "Operations",
+    items: [
+      { label: "Assign Driver", path: "assign-driver", icon: <Users className="w-5 h-5" /> },      
+    ],
+  },
 ];
 
 export default function SidebarLayout({ onLogout }) {

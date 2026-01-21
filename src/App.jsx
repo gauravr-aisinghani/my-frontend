@@ -43,6 +43,7 @@ import TransporterReports from "./pages/TransporterReports.jsx";
 import EntrySelection from "./pages/EntrySelection.jsx";
 import GlobalLoader from "./components/GlobalLoader";
 import PaymentReports from "./pages/paymentReportApi.jsx";
+import AssignDriver from "./pages/operations/AssignDriver.jsx";
 
 function App() {
   return (
@@ -115,6 +116,8 @@ function App() {
 
             <Route path="visitor-transporters-list" element={<VisitorTransportersTable />} />
             <Route path="selected-transporters-list" element={<SelectedTransportersTable />} />
+            <Route path="assign-driver" element={<AssignDriver />} />
+
           </Route>
 
           {/* 🔁 FALLBACK */}
