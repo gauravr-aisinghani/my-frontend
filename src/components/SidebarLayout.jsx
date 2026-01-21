@@ -82,7 +82,7 @@ const sidebarSections = [
   {
     title: "Payments",
     items: [
-      { label: "Payments", path: "payment-reports", icon: <DollarSign className="w-5 h-5" /> },
+      { label: "Payments", path: "payments", icon: <DollarSign className="w-5 h-5" /> },
     ],
   },
   {
