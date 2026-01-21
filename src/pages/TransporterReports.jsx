@@ -74,8 +74,11 @@ const TransporterReports = () => {
     setLoading(true);
     try {
       const res = await fetchTransporterReports(filters);
+
+      // 🔽 Snake case support
       setSummary(res?.summary || {});
       setTransporters(res?.transporters || []);
+
       setCurrentPage(1);
     } finally {
       setLoading(false);
@@ -94,17 +97,17 @@ const TransporterReports = () => {
   const barData = [
     {
       name: "Registered",
-      value: summary.registeredTransporters || 0,
+      value: summary.registered_transporters || 0,
       color: COLORS.registered,
     },
     {
       name: "Verified",
-      value: summary.verifiedTransporters || 0,
+      value: summary.verified_transporters || 0,
       color: COLORS.verified,
     },
     {
       name: "GDC Generated",
-      value: summary.gdcGenerated || 0,
+      value: summary.gdc_generated || 0,
       color: COLORS.gdc,
     },
   ];
@@ -112,14 +115,14 @@ const TransporterReports = () => {
   const pieData = [
     {
       name: "GDC Generated",
-      value: summary.gdcGenerated || 0,
+      value: summary.gdc_generated || 0,
       color: COLORS.gdc,
     },
     {
       name: "Pending",
       value:
-        (summary.registeredTransporters || 0) -
-        (summary.gdcGenerated || 0),
+        (summary.registered_transporters || 0) -
+        (summary.gdc_generated || 0),
       color: COLORS.registered,
     },
   ];
@@ -146,22 +149,22 @@ const TransporterReports = () => {
       <div style={cardGrid}>
         <div style={card(COLORS.registered)}>
           <h4>Registered</h4>
-          <b>{summary.registeredTransporters || 0}</b>
+          <b>{summary.registered_transporters || 0}</b>
         </div>
 
         <div style={card(COLORS.verified)}>
           <h4>Verified</h4>
-          <b>{summary.verifiedTransporters || 0}</b>
+          <b>{summary.verified_transporters || 0}</b>
         </div>
 
         <div style={card("#f59e0b")}>
           <h4>Verification Pending</h4>
-          <b>{summary.verificationPending || 0}</b>
+          <b>{summary.verification_pending || 0}</b>
         </div>
 
         <div style={card(COLORS.gdc)}>
           <h4>GDC Generated</h4>
-          <b>{summary.gdcGenerated || 0}</b>
+          <b>{summary.gdc_generated || 0}</b>
         </div>
       </div>
 
@@ -238,13 +241,13 @@ const TransporterReports = () => {
                 </tr>
               ) : (
                 paginatedData.map((t) => (
-                  <tr key={t.transporterId}>
-                    <td>{t.transporterId}</td>
-                    <td>{t.companyName}</td>
-                    <td>{t.ownerMobile}</td>
+                  <tr key={t.transporter_id}>
+                    <td>{t.transporter_id}</td>
+                    <td>{t.company_name}</td>
+                    <td>{t.owner_mobile}</td>
                     <td>{t.stage}</td>
-                    <td>{t.verificationStatus || "PENDING"}</td>
-                    <td>{t.gdcNumber || "Not Generated"}</td>
+                    <td>{t.verification_status || "PENDING"}</td>
+                    <td>{t.gdc_number || "Not Generated"}</td>
                   </tr>
                 ))
               )}
