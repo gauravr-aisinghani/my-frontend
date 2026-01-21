@@ -47,7 +47,7 @@ export default function GenerateGdcTransporterPage() {
   const openModal = (t) => {
     setForm({
       transporterRegistrationId: t.transporterRegistrationId,
-      verificationId: t.verification_id || null, // ✅ default to null if missing
+      verificationId: t.verificationId|| null, // ✅ default to null if missing
       remarks: "",
     });
     setModalOpen(true);
