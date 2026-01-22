@@ -42,13 +42,24 @@ export default function EntrySelection() {
       navigate("/driver/dashboard");
     }
   };
+return (
+  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col">
 
- return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    {/* TOP HEADER */}
+    <div className="relative px-6 py-6">
 
-    {/* TOP BAR */}
-    <div className="flex items-center justify-between px-10 py-6">
-      <div>
+      {/* LOGIN BUTTON */}
+      <div className="absolute right-6 top-6 md:static md:flex md:justify-end">
+        <button
+          onClick={() => setShowLogin(true)}
+          className="px-5 py-2 bg-black text-white rounded-lg text-sm whitespace-nowrap"
+        >
+          Already a member? Login
+        </button>
+      </div>
+
+      {/* CENTERED WELCOME */}
+      <div className="flex flex-col items-center text-center mt-6 md:mt-0">
         <h1 className="text-4xl font-bold text-gray-800">
           Welcome to <span className="text-green-600">WTL</span>
         </h1>
@@ -56,8 +67,8 @@ export default function EntrySelection() {
           India’s trusted Driver–Transporter Network
         </p>
 
-        {/* STATS INLINE */}
-        <div className="flex gap-8 mt-3 text-sm">
+        {/* STATS */}
+        <div className="flex gap-8 mt-3 text-sm flex-wrap justify-center">
           <div>
             <p className="font-semibold">100,000+</p>
             <p className="text-gray-500 text-xs">Active Drivers</p>
@@ -72,19 +83,11 @@ export default function EntrySelection() {
           </div>
         </div>
       </div>
-
-      {/* LOGIN */}
-      <button
-        onClick={() => setShowLogin(true)}
-        className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
-      >
-        Already a member? Login
-      </button>
     </div>
 
-    {/* MAIN CARDS */}
-    <div className="mt-10 px-10">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    {/* CENTERED CARDS SECTION */}
+    <div className="flex-1 flex items-center justify-center px-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
 
         {/* DRIVER */}
         <div
