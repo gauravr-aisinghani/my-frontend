@@ -6,24 +6,37 @@ import {
 
 export default function PaymentsContent() {
   const [step, setStep] = useState(0);
-  const [paymentType, setPaymentType] = useState("");
+  const [category, setCategory] = useState(""); // DRIVER / TRANSPORTER
+  const [paymentType, setPaymentType] = useState(""); // REG / ADVANCE / SETTLEMENT
   const [gdcRegistrationNumber, setGdcRegistrationNumber] = useState("");
   const [amount, setAmount] = useState(null);
   const [orderData, setOrderData] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const selectType = (type) => {
-    setPaymentType(type);
+  const resetFlow = () => {
+    setStep(0);
+    setCategory("");
+    setPaymentType("");
     setGdcRegistrationNumber("");
     setAmount(null);
     setOrderData(null);
     setError("");
+  };
+
+  const selectCategory = (cat) => {
+    resetFlow();
+    setCategory(cat);
     setStep(1);
   };
 
+  const selectPaymentType = (type) => {
+    setPaymentType(type);
+    setStep(2);
+  };
+
   // ===============================
-  // STEP 1: CREATE ORDER
+  // STEP 3: CREATE ORDER
   // ===============================
   const proceedToPay = async () => {
     if (!gdcRegistrationNumber.trim()) {
@@ -37,21 +50,19 @@ export default function PaymentsContent() {
 
       const res = await createPaymentOrder({
         gdc_number: gdcRegistrationNumber.trim(),
-        type: paymentType,
+        category,          // DRIVER / TRANSPORTER
+        type: paymentType, // REG / ADVANCE / SETTLEMENT
       });
 
-      // ✅ CORRECT FIELD CHECK
       if (!res?.order_id) {
-        console.error("CREATE ORDER RESPONSE:", res);
         throw new Error("order_id missing from backend");
       }
 
       setOrderData(res);
       setAmount(res.amount / 100);
-      setStep(2);
+      setStep(3);
 
     } catch (err) {
-      console.error(err);
       setError(
         err?.response?.data?.message ||
         err.message ||
@@ -63,7 +74,7 @@ export default function PaymentsContent() {
   };
 
   // ===============================
-  // STEP 2: OPEN RAZORPAY
+  // STEP 4: RAZORPAY
   // ===============================
   const openRazorpay = () => {
     if (!window.Razorpay) {
@@ -71,34 +82,15 @@ export default function PaymentsContent() {
       return;
     }
 
-    if (!orderData?.order_id) {
-      alert("Order ID missing. Please try again.");
-      console.error("ORDER DATA:", orderData);
-      return;
-    }
-
     const options = {
       key: orderData.key,
-      order_id: orderData.order_id, // 🔥 MOST IMPORTANT FIX
+      order_id: orderData.order_id,
       amount: orderData.amount,
       currency: orderData.currency,
       name: "WTL Payments",
-      description: `${paymentType} GDC Activation`,
+      description: `${category} - ${paymentType}`,
 
       handler: async function (response) {
-        console.log("🔥 RAZORPAY RESPONSE:", response);
-
-        // ✅ Razorpay will NOW send all 3
-        if (
-          !response.razorpay_order_id ||
-          !response.razorpay_payment_id ||
-          !response.razorpay_signature
-        ) {
-          alert("Invalid payment response from Razorpay");
-          console.error("INVALID RAZORPAY RESPONSE:", response);
-          return;
-        }
-
         try {
           const res = await verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
@@ -106,22 +98,16 @@ export default function PaymentsContent() {
             razorpay_signature: response.razorpay_signature,
           });
 
-          console.log("✅ VERIFY RESPONSE:", res);
-
           if (res.status !== "SUCCESS") {
-            alert("Payment verification failed: " + res.message);
+            alert(res.message || "Verification failed");
             return;
           }
 
           alert("Payment successful!");
-          setStep(0);
+          resetFlow();
 
-        } catch (err) {
-          console.error("❌ VERIFY ERROR:", err);
-          alert(
-            err?.response?.data?.message ||
-            "Payment verification failed. Contact support."
-          );
+        } catch {
+          alert("Payment verification failed");
         }
       },
 
@@ -137,24 +123,65 @@ export default function PaymentsContent() {
         💳 Payments
       </h2>
 
+      {/* STEP 0: CATEGORY */}
       {step === 0 && (
         <div className="grid gap-6 md:grid-cols-2">
           <div
-            onClick={() => selectType("DRIVER")}
+            onClick={() => selectCategory("DRIVER")}
             className="p-8 border rounded-2xl cursor-pointer hover:shadow-lg"
           >
-            🚚 Driver Payment
+            🚚 Driver Payments
           </div>
+
           <div
-            onClick={() => selectType("TRANSPORTER")}
+            onClick={() => selectCategory("TRANSPORTER")}
             className="p-8 border rounded-2xl cursor-pointer hover:shadow-lg"
           >
-            🏢 Transporter Payment
+            🏢 Transporter Payments
           </div>
         </div>
       )}
 
-      {step === 1 && (
+      {/* STEP 1: DRIVER TYPES */}
+      {step === 1 && category === "DRIVER" && (
+        <div className="space-y-4">
+          <button
+            onClick={() => selectPaymentType("DRIVER_REGISTRATION")}
+            className="w-full p-4 border rounded-xl hover:bg-gray-50"
+          >
+            Driver Registration Fee
+          </button>
+        </div>
+      )}
+
+      {/* STEP 1: TRANSPORTER TYPES */}
+      {step === 1 && category === "TRANSPORTER" && (
+        <div className="space-y-4">
+          <button
+            onClick={() => selectPaymentType("TRANSPORTER_REGISTRATION")}
+            className="w-full p-4 border rounded-xl hover:bg-gray-50"
+          >
+            Transporter Registration Fee
+          </button>
+
+          <button
+            onClick={() => selectPaymentType("TRANSPORTER_ADVANCE")}
+            className="w-full p-4 border rounded-xl hover:bg-gray-50"
+          >
+            Transporter Advance (Driver Assignment)
+          </button>
+
+          <button
+            onClick={() => selectPaymentType("TRANSPORTER_MONTHLY_SETTLEMENT")}
+            className="w-full p-4 border rounded-xl hover:bg-gray-50"
+          >
+            Transporter Monthly Settlement
+          </button>
+        </div>
+      )}
+
+      {/* STEP 2: GDC INPUT */}
+      {step === 2 && (
         <div className="space-y-4">
           <input
             value={gdcRegistrationNumber}
@@ -175,8 +202,10 @@ export default function PaymentsContent() {
         </div>
       )}
 
-      {step === 2 && (
+      {/* STEP 3: CONFIRM */}
+      {step === 3 && (
         <div className="space-y-4">
+          <p><b>Category:</b> {category}</p>
           <p><b>Type:</b> {paymentType}</p>
           <p><b>GDC:</b> {gdcRegistrationNumber}</p>
           <p className="text-lg font-semibold">
