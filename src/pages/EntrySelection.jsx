@@ -43,92 +43,93 @@ export default function EntrySelection() {
     }
   };
 
-  return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-xl p-8">
+ return (
+  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
 
-        {/* TOP SECTION */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+    {/* TOP BAR */}
+    <div className="flex items-center justify-between px-10 py-6">
+      <div>
+        <h1 className="text-4xl font-bold text-gray-800">
+          Welcome to <span className="text-green-600">WTL</span>
+        </h1>
+        <p className="text-gray-500 mt-1">
+          India’s trusted Driver–Transporter Network
+        </p>
 
-          {/* LEFT */}
+        {/* STATS INLINE */}
+        <div className="flex gap-8 mt-3 text-sm">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Welcome to <span className="text-green-600">WTL</span>
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">
-              India’s trusted Driver–Transporter Network
-            </p>
-
-            {/* STATS INLINE */}
-            <div className="flex gap-6 mt-3 text-sm">
-              <div>
-                <p className="font-semibold">100,000+</p>
-                <p className="text-gray-500 text-xs">Active Drivers</p>
-              </div>
-              <div>
-                <p className="font-semibold">10,000+</p>
-                <p className="text-gray-500 text-xs">Transporters</p>
-              </div>
-              <div>
-                <p className="font-semibold">₹50Cr+</p>
-                <p className="text-gray-500 text-xs">Monthly Transactions</p>
-              </div>
-            </div>
+            <p className="font-semibold">100,000+</p>
+            <p className="text-gray-500 text-xs">Active Drivers</p>
           </div>
-
-          {/* RIGHT */}
-          <button
-            onClick={() => setShowLogin(true)}
-            className="px-6 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800"
-          >
-            Already a member? Login
-          </button>
-        </div>
-
-        {/* CARDS */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-
-          <div
-            onClick={() => navigate("/driver/signup")}
-            className="cursor-pointer border rounded-2xl p-6 hover:shadow-lg transition text-center"
-          >
-            <div className="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-green-100 text-green-600">
-              <User size={28} />
-            </div>
-            <h3 className="mt-4 font-semibold text-lg">Driver</h3>
-            <p className="text-sm text-gray-500">
-              Register & activate Driver GDC
-            </p>
+          <div>
+            <p className="font-semibold">10,000+</p>
+            <p className="text-gray-500 text-xs">Transporters</p>
           </div>
-
-          <div
-            onClick={() => navigate("/transporter/signup")}
-            className="cursor-pointer border rounded-2xl p-6 hover:shadow-lg transition text-center"
-          >
-            <div className="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
-              <Truck size={28} />
-            </div>
-            <h3 className="mt-4 font-semibold text-lg">Transporter</h3>
-            <p className="text-sm text-gray-500">
-              Register & activate Transporter GDC
-            </p>
+          <div>
+            <p className="font-semibold">₹50Cr+</p>
+            <p className="text-gray-500 text-xs">Monthly Transactions</p>
           </div>
-
-          <div
-            onClick={() => navigate("/payment")}
-            className="cursor-pointer border rounded-2xl p-6 hover:shadow-lg transition text-center"
-          >
-            <div className="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-orange-100 text-orange-600">
-              <CreditCard size={28} />
-            </div>
-            <h3 className="mt-4 font-semibold text-lg">Payments</h3>
-            <p className="text-sm text-gray-500">
-              Recharge & manage services
-            </p>
-          </div>
-
         </div>
       </div>
+
+      {/* LOGIN */}
+      <button
+        onClick={() => setShowLogin(true)}
+        className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+      >
+        Already a member? Login
+      </button>
+    </div>
+
+    {/* MAIN CARDS */}
+    <div className="mt-10 px-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        {/* DRIVER */}
+        <div
+          onClick={() => navigate("/driver/signup")}
+          className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
+        >
+          <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-green-100 text-green-600">
+            <User size={34} />
+          </div>
+          <h3 className="mt-6 text-2xl font-semibold">Driver</h3>
+          <p className="mt-2 text-gray-500">
+            Register & activate Driver GDC
+          </p>
+        </div>
+
+        {/* TRANSPORTER */}
+        <div
+          onClick={() => navigate("/transporter/signup")}
+          className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
+        >
+          <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
+            <Truck size={34} />
+          </div>
+          <h3 className="mt-6 text-2xl font-semibold">Transporter</h3>
+          <p className="mt-2 text-gray-500">
+            Register & activate Transporter GDC
+          </p>
+        </div>
+
+        {/* PAYMENTS */}
+        <div
+          onClick={() => navigate("/payment")}
+          className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
+        >
+          <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-orange-100 text-orange-600">
+            <CreditCard size={34} />
+          </div>
+          <h3 className="mt-6 text-2xl font-semibold">Payments</h3>
+          <p className="mt-2 text-gray-500">
+            Recharge & manage services
+          </p>
+        </div>
+
+      </div>
+    </div>
 
       {/* LOGIN MODAL */}
       {showLogin && (
