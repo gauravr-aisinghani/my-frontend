@@ -1,242 +1,244 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import generateGdcApi from "../api/generateGdcApi";
 
-/* 🔹 Dummy data (API se replace hoga) */
-const dummyTransporters = [
-  { id: 1, name: "ABC Transport", city: "Delhi" },
-  { id: 2, name: "FastMove Logistics", city: "Jaipur" },
-];
+const PAGE_SIZE = 5;
 
-const dummyDrivers = [
-  { id: 101, name: "Ramesh Kumar", license: "DL-1234" },
-  { id: 102, name: "Suresh Singh", license: "DL-5678" },
-];
-
-export default function AssignDriver() {
-  const [selectedTransporter, setSelectedTransporter] = useState(null);
+export default function GenerateGdcPage() {
+  const [approvedDrivers, setApprovedDrivers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [adminName, setAdminName] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [form, setForm] = useState({
-    driverId: "",
-    route: "",
-    vehicleNumber: "",
-    licenceGrade: "",
-    monthlySalary: "",
-    joiningDate: "",
-    durationMonths: "",
-    underload: false,
-    overload: false,
+    driverRegistrationId: "",
+    verificationId: "",
     remarks: "",
   });
 
-  const handleAssign = () => {
-    if (!selectedTransporter || !form.driverId) {
-      alert("Please select transporter & driver");
-      return;
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    loadApprovedDrivers();
+    loadAdminName();
+  }, []);
+
+  const loadAdminName = async () => {
+    try {
+      const res = await axios.get(
+        "https://my-backend-1-qxc9.onrender.com/api/auth/session-status",
+        { withCredentials: true }
+      );
+
+      if (res.data?.role) setAdminName(res.data.role);
+    } catch (err) {
+      console.error("Session fetch error", err);
     }
-
-    const payload = {
-      transporterId: selectedTransporter.id,
-      hireType: "MONTHLY",
-      ...form,
-    };
-
-    console.log("ASSIGN PAYLOAD 👉", payload);
-    alert("Driver Assigned Successfully");
   };
+
+  const loadApprovedDrivers = async () => {
+    try {
+      const data = await generateGdcApi.getApprovedDrivers();
+      setApprovedDrivers(data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch approved drivers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openModal = (driver) => {
+    setForm({
+      driverRegistrationId: driver.driverRegistrationId,
+      verificationId: driver.verificationId,
+      remarks: "",
+    });
+    setModalOpen(true);
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        driver_registration_id: form.driverRegistrationId,
+        verification_id: form.verificationId,
+        final_approved_by: adminName,
+        remarks: form.remarks,
+      };
+
+      const res = await generateGdcApi.generateGdc(payload);
+      setResult(res);
+
+      alert("GDC Generated Successfully!");
+      setModalOpen(false);
+      setCurrentPage(1);
+      loadApprovedDrivers();
+    } catch (err) {
+      alert("Failed to generate GDC");
+      console.error(err);
+    }
+  };
+
+  /* ================= Pagination Logic ================= */
+
+  const totalPages = Math.ceil(approvedDrivers.length / PAGE_SIZE);
+
+  const paginatedDrivers = approvedDrivers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  /* ==================================================== */
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Assign Driver (Monthly)</h2>
+      <h2 className="text-2xl font-bold mb-6">Generate GDC</h2>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* ================= Transporters ================= */}
-        <div className="bg-white border shadow rounded">
-          <table className="w-full text-sm">
+      {loading ? (
+        <p>Loading...</p>
+      ) : approvedDrivers.length === 0 ? (
+        <p>No approved drivers found.</p>
+      ) : (
+        <>
+          <table className="w-full border bg-white shadow">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3 border">Transporter</th>
-                <th className="p-3 border">City</th>
+                <th className="p-3 border">Driver Name</th>
+                <th className="p-3 border">Mobile</th>
+                <th className="p-3 border">Village</th>
+                <th className="p-3 border">Verified At</th>
                 <th className="p-3 border">Action</th>
               </tr>
             </thead>
+
             <tbody>
-              {dummyTransporters.map((t) => (
-                <tr key={t.id}>
-                  <td className="p-3 border">{t.name}</td>
-                  <td className="p-3 border">{t.city}</td>
+              {paginatedDrivers.map((d) => (
+                <tr key={d.verificationId}>
+                  <td className="p-3 border">{d.fullName}</td>
+                  <td className="p-3 border">{d.mobileNumber}</td>
+                  <td className="p-3 border">{d.village}</td>
+                  <td className="p-3 border">{d.verifiedAt}</td>
+
                   <td className="p-3 border">
                     <button
-                      onClick={() => setSelectedTransporter(t)}
-                      className="bg-green-600 text-white px-3 py-1 rounded text-xs"
+                      onClick={() => openModal(d)}
+                      className="bg-green-600 text-white px-3 py-1 rounded"
                     >
-                      Select
+                      Generate GDC
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
 
-        {/* ================= Assignment Form ================= */}
-        <div className="bg-white border shadow rounded p-4 space-y-3">
-          <h3 className="font-semibold text-lg">Assignment Details</h3>
-
-          {selectedTransporter && (
-            <p className="text-sm text-green-700">
-              Selected: <strong>{selectedTransporter.name}</strong>
-            </p>
-          )}
-
-          {/* Driver */}
-          <div>
-            <label className="text-sm font-medium">Select Driver *</label>
-            <select
-              className="w-full border p-2 rounded text-sm"
-              onChange={(e) =>
-                setForm({ ...form, driverId: e.target.value })
-              }
+          {/* Pagination UI */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
             >
-              <option value="">-- Select --</option>
-              {dummyDrivers.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} ({d.license})
-                </option>
-              ))}
-            </select>
-          </div>
+              Prev
+            </button>
 
-          {/* Route */}
-          <div>
-            <label className="text-sm font-medium">Route</label>
-            <input
-              className="w-full border p-2 rounded text-sm"
-              placeholder="Delhi – Jaipur"
-              onChange={(e) =>
-                setForm({ ...form, route: e.target.value })
-              }
-            />
-          </div>
+            {[...Array(totalPages)].map((_, index) => {
+              const page = index + 1;
+              return (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  className={`px-3 py-1 border rounded ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white"
+                      : "bg-white"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
 
-          {/* Vehicle Number */}
-          <div>
-            <label className="text-sm font-medium">Vehicle Number</label>
-            <input
-              className="w-full border p-2 rounded text-sm"
-              placeholder="RJ14 AB 1234"
-              onChange={(e) =>
-                setForm({ ...form, vehicleNumber: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Licence Grade */}
-          <div>
-            <label className="text-sm font-medium">
-              Licence Grade *
-            </label>
-            <select
-              className="w-full border p-2 rounded text-sm"
-              onChange={(e) =>
-                setForm({ ...form, licenceGrade: e.target.value })
-              }
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
             >
-              <option value="">Select</option>
-              <option value="LMV">LMV</option>
-              <option value="HMV">HMV</option>
-              <option value="MCWG">MCWG</option>
-              <option value="MCWOG">MCWOG</option>
-              <option value="TRANS">Transport</option>
-              <option value="TRAILER">Trailer</option>
-            </select>
+              Next
+            </button>
           </div>
+        </>
+      )}
 
-          {/* Monthly Salary */}
-          <div>
-            <label className="text-sm font-medium">
-              Monthly Salary (₹)
-            </label>
-            <input
-              type="number"
-              className="w-full border p-2 rounded text-sm"
-              onChange={(e) =>
-                setForm({ ...form, monthlySalary: e.target.value })
-              }
-            />
-          </div>
+      {/* Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded shadow-lg w-[400px]">
+            <h3 className="text-lg font-bold mb-4">Generate GDC</h3>
 
-          {/* Joining Date */}
-          <div>
-            <label className="text-sm font-medium">
-              Joining Date
-            </label>
-            <input
-              type="date"
-              className="w-full border p-2 rounded text-sm"
-              onChange={(e) =>
-                setForm({ ...form, joiningDate: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Duration */}
-          <div>
-            <label className="text-sm font-medium">
-              Duration (Months)
-            </label>
-            <input
-              type="number"
-              className="w-full border p-2 rounded text-sm"
-              onChange={(e) =>
-                setForm({ ...form, durationMonths: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Underload / Overload */}
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 text-sm">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <input
-                type="checkbox"
-                checked={form.underload}
-                onChange={(e) =>
-                  setForm({ ...form, underload: e.target.checked })
-                }
+                disabled
+                value={form.verificationId}
+                className="w-full p-2 border rounded bg-gray-200"
               />
-              Underload
-            </label>
 
-            <label className="flex items-center gap-2 text-sm">
               <input
-                type="checkbox"
-                checked={form.overload}
-                onChange={(e) =>
-                  setForm({ ...form, overload: e.target.checked })
-                }
+                disabled
+                value={form.driverRegistrationId}
+                className="w-full p-2 border rounded bg-gray-200"
               />
-              Overload
-            </label>
-          </div>
 
-          {/* Remarks */}
-          <div>
-            <label className="text-sm font-medium">Remarks</label>
-            <textarea
-              className="w-full border p-2 rounded text-sm"
-              rows="2"
-              onChange={(e) =>
-                setForm({ ...form, remarks: e.target.value })
-              }
-            />
-          </div>
+              <textarea
+                name="remarks"
+                placeholder="Remarks"
+                value={form.remarks}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
 
-          <button
-            onClick={handleAssign}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded text-sm"
-          >
-            Assign Driver
-          </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded w-full"
+              >
+                Generate GDC
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Result Section */}
+      {result && (
+        <div className="mt-6 p-4 border rounded bg-gray-100">
+          <h3 className="font-bold mb-2">Generated GDC Details</h3>
+
+          <p>
+            <strong>GDC Number:</strong> {result.gdc_registration_number}
+          </p>
+
+          <p>
+            <strong>Image URL:</strong> {result.id_card_url}
+          </p>
+
+          <p>
+            <strong>Message:</strong> {result.message}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
