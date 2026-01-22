@@ -76,6 +76,10 @@ function App() {
           {/* 🔐 ADMIN LOGIN */}
           <Route path="/admin" element={<LoginForm />} />
 
+           {/* 🔐 Transporter LOGIN */}
+          <Route path="transporter-dashboard" element={<TransporterDashboard />} />
+
+
           {/* OPTIONAL AUTH */}
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/verifyEmail" element={<VerifyEmail />} />
@@ -132,7 +136,6 @@ function App() {
             <Route path="final-settlement" element={<FinalSettlement />} />
             <Route path="transporter-ledger" element={<TransporterLedger />} />
             <Route path="driver-ledger" element={<DriverLedger />} />
-             <Route path="transporter-dashboard" element={<TransporterDashboard />} />
 
 
           </Route>

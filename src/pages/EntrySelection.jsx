@@ -57,7 +57,7 @@ export default function EntrySelection() {
     }
 
     if (loginRole === "TRANSPORTER") {
-      navigate("/transporter/dashboard");
+      navigate("/transporter-dashboard");
     } else {
       navigate("/driver/dashboard");
     }
