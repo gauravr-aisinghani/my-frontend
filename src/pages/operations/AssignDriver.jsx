@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 
+/* 🔹 Dummy Data (baad me API se replace karega) */
 const dummyTransporters = [
-  { id: 1, name: "ABC Transport", city: "Delhi", vehicle: "Truck" },
-  { id: 2, name: "FastMove Logistics", city: "Jaipur", vehicle: "Trailer" },
+  { id: 1, name: "ABC Transport", city: "Delhi" },
+  { id: 2, name: "FastMove Logistics", city: "Jaipur" },
 ];
 
 const dummyDrivers = [
@@ -15,12 +16,12 @@ export default function AssignDriver() {
 
   const [form, setForm] = useState({
     driverId: "",
-    hireType: "TRIP", // TRIP or MONTHLY
     route: "",
-    tripCharges: "",
-    tripDate: "",
+    vehicleNumber: "",
+    licenceGrade: "",
     monthlySalary: "",
-    startDate: "",
+    joiningDate: "",
+    durationMonths: "",
     remarks: "",
   });
 
@@ -32,30 +33,30 @@ export default function AssignDriver() {
 
     const payload = {
       transporterId: selectedTransporter.id,
+      hireType: "MONTHLY",
       ...form,
     };
 
-    console.log("Assignment Payload:", payload);
-
-    alert("Driver Assigned Successfully!");
+    console.log("FINAL ASSIGNMENT PAYLOAD 👉", payload);
+    alert("Driver Assigned Successfully (Monthly)");
   };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-xl font-semibold mb-4">Assign Driver to Transporter</h1>
+      <h1 className="text-xl font-semibold mb-6">
+        Assign Driver (Monthly Basis)
+      </h1>
 
       <div className="grid md:grid-cols-2 gap-6">
-        
-        {/* Transporter List */}
+        {/* 🔹 Transporter List */}
         <div className="bg-white border rounded-lg p-4">
-          <h2 className="font-medium mb-3">Transporters</h2>
+          <h2 className="font-medium mb-3">Registered Transporters</h2>
 
           <table className="w-full text-sm border">
             <thead className="bg-green-600 text-white">
               <tr>
                 <th className="p-2">Name</th>
                 <th className="p-2">City</th>
-                <th className="p-2">Vehicle</th>
                 <th className="p-2">Action</th>
               </tr>
             </thead>
@@ -64,7 +65,6 @@ export default function AssignDriver() {
                 <tr key={t.id} className="border-t">
                   <td className="p-2">{t.name}</td>
                   <td className="p-2">{t.city}</td>
-                  <td className="p-2">{t.vehicle}</td>
                   <td className="p-2">
                     <button
                       onClick={() => setSelectedTransporter(t)}
@@ -79,24 +79,25 @@ export default function AssignDriver() {
           </table>
         </div>
 
-        {/* Assign Form */}
+        {/* 🔹 Assignment Form */}
         <div className="bg-white border rounded-lg p-4 space-y-3">
-          <h2 className="font-medium">Assign Driver</h2>
+          <h2 className="font-medium">Driver Assignment Details</h2>
 
           {selectedTransporter && (
             <p className="text-sm text-green-700">
-              Selected: {selectedTransporter.name}
+              Selected Transporter:{" "}
+              <strong>{selectedTransporter.name}</strong>
             </p>
           )}
 
-          {/* Driver Select */}
+          {/* Driver */}
           <select
             className="w-full border p-2 rounded"
             onChange={(e) =>
               setForm({ ...form, driverId: e.target.value })
             }
           >
-            <option value="">Select Driver</option>
+            <option value="">Select Available Driver *</option>
             {dummyDrivers.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name} ({d.license})
@@ -104,69 +105,68 @@ export default function AssignDriver() {
             ))}
           </select>
 
-          {/* Hire Type */}
+          {/* Route */}
+          <input
+            className="w-full border p-2 rounded"
+            placeholder="Route (e.g. Delhi – Jaipur)"
+            onChange={(e) =>
+              setForm({ ...form, route: e.target.value })
+            }
+          />
+
+          {/* Vehicle Number */}
+          <input
+            className="w-full border p-2 rounded"
+            placeholder="Vehicle Number"
+            onChange={(e) =>
+              setForm({ ...form, vehicleNumber: e.target.value })
+            }
+          />
+
+          {/* Licence Grade */}
           <select
             className="w-full border p-2 rounded"
-            value={form.hireType}
             onChange={(e) =>
-              setForm({ ...form, hireType: e.target.value })
+              setForm({ ...form, licenceGrade: e.target.value })
             }
           >
-            <option value="TRIP">Trip Basis</option>
-            <option value="MONTHLY">Monthly Basis</option>
+            <option value="">Licence Grade *</option>
+            <option value="LMV">LMV</option>
+            <option value="HMV">HMV</option>
+            <option value="MCWG">MCWG</option>
+            <option value="MCWOG">MCWOG</option>
+            <option value="TRANS">Transport</option>
+            <option value="TRAILER">Trailer</option>
           </select>
 
-          {/* Trip आधारित Fields */}
-          {form.hireType === "TRIP" && (
-            <>
-              <input
-                className="w-full border p-2 rounded"
-                placeholder="Route (Delhi - Jaipur)"
-                onChange={(e) =>
-                  setForm({ ...form, route: e.target.value })
-                }
-              />
+          {/* Monthly Salary */}
+          <input
+            type="number"
+            className="w-full border p-2 rounded"
+            placeholder="Monthly Salary (₹)"
+            onChange={(e) =>
+              setForm({ ...form, monthlySalary: e.target.value })
+            }
+          />
 
-              <input
-                type="number"
-                className="w-full border p-2 rounded"
-                placeholder="Trip Charges"
-                onChange={(e) =>
-                  setForm({ ...form, tripCharges: e.target.value })
-                }
-              />
+          {/* Joining Date */}
+          <input
+            type="date"
+            className="w-full border p-2 rounded"
+            onChange={(e) =>
+              setForm({ ...form, joiningDate: e.target.value })
+            }
+          />
 
-              <input
-                type="date"
-                className="w-full border p-2 rounded"
-                onChange={(e) =>
-                  setForm({ ...form, tripDate: e.target.value })
-                }
-              />
-            </>
-          )}
-
-          {/* Monthly आधारित Fields */}
-          {form.hireType === "MONTHLY" && (
-            <>
-              <input
-                type="number"
-                className="w-full border p-2 rounded"
-                placeholder="Monthly Salary"
-                onChange={(e) =>
-                  setForm({ ...form, monthlySalary: e.target.value })
-                }
-              />
-
-              <input
-                type="date"
-                className="w-full border p-2 rounded"
-                onChange={(e) =>
-                  setForm({ ...form, startDate: e.target.value })
-                }
-              />
-            </>
-          )}
+          {/* Duration */}
+          <input
+            type="number"
+            className="w-full border p-2 rounded"
+            placeholder="Duration (Months)"
+            onChange={(e) =>
+              setForm({ ...form, durationMonths: e.target.value })
+            }
+          />
 
           {/* Remarks */}
           <textarea
@@ -179,9 +179,9 @@ export default function AssignDriver() {
 
           <button
             onClick={handleAssign}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full"
           >
-            Assign Driver
+            Assign Driver (Monthly)
           </button>
         </div>
       </div>
