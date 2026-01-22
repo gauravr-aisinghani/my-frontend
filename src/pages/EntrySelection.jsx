@@ -11,6 +11,7 @@ export default function EntrySelection() {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
   const [error, setError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
   const resetLogin = () => {
     setShowLogin(false);
@@ -19,6 +20,7 @@ export default function EntrySelection() {
     setOtp("");
     setStep(1);
     setError("");
+    setOtpSent(false);
   };
 
   const sendOtp = () => {
@@ -27,12 +29,13 @@ export default function EntrySelection() {
       return;
     }
     setError("");
+    setOtpSent(true); // mock OTP sent
     setStep(2);
   };
 
   const verifyOtp = () => {
     if (otp !== "123456") {
-      setError("Invalid OTP");
+      setError("Invalid OTP (try 123456)");
       return;
     }
 
@@ -42,24 +45,24 @@ export default function EntrySelection() {
       navigate("/driver/dashboard");
     }
   };
-return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col">
 
-    {/* TOP HEADER */}
-    <div className="relative px-6 py-6">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
 
-      {/* LOGIN BUTTON */}
-      <div className="absolute right-6 top-6 md:static md:flex md:justify-end">
+      {/* HEADER */}
+      <header className="flex items-center justify-between px-6 py-5">
+        <div></div>
+
         <button
           onClick={() => setShowLogin(true)}
-          className="px-5 py-2 bg-black text-white rounded-lg text-sm whitespace-nowrap"
+          className="px-5 py-2 bg-black text-white rounded-lg text-sm"
         >
           Already a member? Login
         </button>
-      </div>
+      </header>
 
-      {/* CENTERED WELCOME */}
-      <div className="flex flex-col items-center text-center mt-6 md:mt-0">
+      {/* HERO */}
+      <section className="text-center px-6">
         <h1 className="text-4xl font-bold text-gray-800">
           Welcome to <span className="text-green-600">WTL</span>
         </h1>
@@ -67,8 +70,7 @@ return (
           India’s trusted Driver–Transporter Network
         </p>
 
-        {/* STATS */}
-        <div className="flex gap-8 mt-3 text-sm flex-wrap justify-center">
+        <div className="flex gap-8 mt-4 text-sm flex-wrap justify-center">
           <div>
             <p className="font-semibold">100,000+</p>
             <p className="text-gray-500 text-xs">Active Drivers</p>
@@ -82,61 +84,64 @@ return (
             <p className="text-gray-500 text-xs">Monthly Transactions</p>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    {/* CENTERED CARDS SECTION */}
-    <div className="flex-1 flex items-center justify-center px-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+      {/* CARDS */}
+      <section className="flex justify-center mt-14 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
 
-        {/* DRIVER */}
-        <div
-          onClick={() => navigate("/driver/signup")}
-          className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
-        >
-          <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-green-100 text-green-600">
-            <User size={34} />
+          {/* DRIVER */}
+          <div
+            onClick={() => navigate("/driver/signup")}
+            className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
+          >
+            <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-gray-100 text-black">
+              <User size={34} />
+            </div>
+            <h3 className="mt-6 text-2xl font-semibold text-black">Driver</h3>
+            <p className="mt-2 text-gray-500">
+              Register & activate Driver GDC
+            </p>
           </div>
-          <h3 className="mt-6 text-2xl font-semibold">Driver</h3>
-          <p className="mt-2 text-gray-500">
-            Register & activate Driver GDC
-          </p>
-        </div>
 
-        {/* TRANSPORTER */}
-        <div
-          onClick={() => navigate("/transporter/signup")}
-          className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
-        >
-          <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
-            <Truck size={34} />
+          {/* TRANSPORTER */}
+          <div
+            onClick={() => navigate("/transporter/signup")}
+            className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
+          >
+            <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-gray-100 text-black">
+              <Truck size={34} />
+            </div>
+            <h3 className="mt-6 text-2xl font-semibold text-black">
+              Transporter
+            </h3>
+            <p className="mt-2 text-gray-500">
+              Register & activate Transporter GDC
+            </p>
           </div>
-          <h3 className="mt-6 text-2xl font-semibold">Transporter</h3>
-          <p className="mt-2 text-gray-500">
-            Register & activate Transporter GDC
-          </p>
-        </div>
 
-        {/* PAYMENTS */}
-        <div
-          onClick={() => navigate("/payment")}
-          className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
-        >
-          <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-orange-100 text-orange-600">
-            <CreditCard size={34} />
+          {/* PAYMENTS */}
+          <div
+            onClick={() => navigate("/payment")}
+            className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-xl transition"
+          >
+            <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-gray-100 text-black">
+              <CreditCard size={34} />
+            </div>
+            <h3 className="mt-6 text-2xl font-semibold text-black">
+              Payments
+            </h3>
+            <p className="mt-2 text-gray-500">
+              Recharge & manage services
+            </p>
           </div>
-          <h3 className="mt-6 text-2xl font-semibold">Payments</h3>
-          <p className="mt-2 text-gray-500">
-            Recharge & manage services
-          </p>
-        </div>
 
-      </div>
-    </div>
+        </div>
+      </section>
 
       {/* LOGIN MODAL */}
       {showLogin && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white w-full max-w-md rounded-2xl p-6 relative">
             <button
               onClick={resetLogin}
@@ -151,13 +156,13 @@ return (
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setLoginRole("DRIVER")}
-                    className="border rounded-xl py-5 hover:bg-gray-50"
+                    className="border rounded-xl py-4 hover:bg-gray-100"
                   >
                     Driver
                   </button>
                   <button
                     onClick={() => setLoginRole("TRANSPORTER")}
-                    className="border rounded-xl py-5 hover:bg-gray-50"
+                    className="border rounded-xl py-4 hover:bg-gray-100"
                   >
                     Transporter
                   </button>
@@ -176,10 +181,12 @@ return (
                   onChange={(e) => setGdc(e.target.value)}
                   className="w-full p-3 border rounded-lg"
                 />
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {error && (
+                  <p className="text-red-500 text-sm mt-2">{error}</p>
+                )}
                 <button
                   onClick={sendOtp}
-                  className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg"
+                  className="w-full mt-4 bg-black text-white py-2 rounded-lg"
                 >
                   Send OTP
                 </button>
@@ -188,14 +195,21 @@ return (
 
             {step === 2 && (
               <>
-                <h3 className="text-lg font-semibold mb-3">Verify OTP</h3>
+                <h3 className="text-lg font-semibold mb-1">Verify OTP</h3>
+                {otpSent && (
+                  <p className="text-xs text-gray-500 mb-2">
+                    Mock OTP sent: <b>123456</b>
+                  </p>
+                )}
                 <input
-                  placeholder="Enter OTP (123456)"
+                  placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   className="w-full p-3 border rounded-lg"
                 />
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {error && (
+                  <p className="text-red-500 text-sm mt-2">{error}</p>
+                )}
                 <button
                   onClick={verifyOtp}
                   className="w-full mt-4 bg-green-600 text-white py-2 rounded-lg"
