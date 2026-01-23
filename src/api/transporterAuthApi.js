@@ -6,7 +6,7 @@ import api from "./axiosInstance";
  */
 export const loginWithMobile = async (mobile, role) => {
   const res = await api.post("/api/generalauth/generallogin", {
-    mobile_number: mobile, // ✅ snake_case
+    mobile: mobile, // ✅ snake_case
     role: role
   });
 
