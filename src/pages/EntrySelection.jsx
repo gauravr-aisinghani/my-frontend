@@ -214,11 +214,10 @@ export default function EntrySelection() {
                   Verify OTP
                 </h3>
 
-                {/* DEV ONLY */}
-                <p className="text-xs text-gray-500 mb-2">
-                  Mock OTP:{" "}
-                  <span className="font-semibold">{generatedOtp}</span>
-                </p>
+                {/* DEV ONLY - MOCK OTP DISPLAY FIXED */}
+                <div className="mb-2 p-2 bg-gray-100 rounded text-gray-700 text-sm">
+                  Mock OTP: <span className="font-semibold">{generatedOtp}</span>
+                </div>
 
                 <input
                   placeholder="Enter OTP"
