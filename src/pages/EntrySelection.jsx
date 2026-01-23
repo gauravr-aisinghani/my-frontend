@@ -41,9 +41,15 @@ export default function EntrySelection() {
         return;
       }
 
-      setGeneratedOtp(res.otp); // backend mock OTP
+      // 🔥 FRONTEND MOCK OTP (6 digit)
+      const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      setGeneratedOtp(mockOtp);
       setError("");
       setStep(2);
+
+      console.log("Mock OTP (DEV):", mockOtp); // dev log
+
     } catch (err) {
       setError("Something went wrong");
     }
@@ -51,6 +57,11 @@ export default function EntrySelection() {
 
   // ================= VERIFY OTP =================
   const verifyOtp = () => {
+    if (otp.length !== 6) {
+      setError("Enter valid 6 digit OTP");
+      return;
+    }
+
     if (otp !== generatedOtp) {
       setError("Invalid OTP");
       return;
@@ -208,32 +219,35 @@ export default function EntrySelection() {
               </>
             )}
 
-           {step === 2 && (
-  <>
-    <h3 className="text-lg font-semibold mb-2">Verify OTP</h3>
+            {step === 2 && (
+              <>
+                <h3 className="text-lg font-semibold mb-2">Verify OTP</h3>
 
-    {/* DEV ONLY - MOCK OTP DISPLAY FIXED */}
-    <div className="w-full p-3 mb-3 border border-gray-300 rounded-lg bg-yellow-100 text-black text-center font-semibold">
-      Mock OTP: {generatedOtp || "N/A"}
-    </div>
+                {/* 🔥 DEV ONLY - MOCK OTP */}
+                <div className="w-full p-3 mb-3 border rounded-lg bg-yellow-100 text-center font-semibold">
+                  Mock OTP: {generatedOtp}
+                </div>
 
-    <input
-      placeholder="Enter OTP"
-      value={otp}
-      onChange={(e) => setOtp(e.target.value)}
-      className="w-full p-3 border rounded-lg"
-    />
+                <input
+                  placeholder="Enter OTP"
+                  value={otp}
+                  maxLength={6}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="w-full p-3 border rounded-lg"
+                />
 
-    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {error && (
+                  <p className="text-red-500 text-sm mt-2">{error}</p>
+                )}
 
-    <button
-      onClick={verifyOtp}
-      className="w-full mt-4 bg-black text-white py-2 rounded-lg"
-    >
-      Verify & Login
-    </button>
-  </>
-)}
+                <button
+                  onClick={verifyOtp}
+                  className="w-full mt-4 bg-black text-white py-2 rounded-lg"
+                >
+                  Verify & Login
+                </button>
+              </>
+            )}
 
           </div>
         </div>
