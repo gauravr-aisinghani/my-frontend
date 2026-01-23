@@ -1,13 +1,13 @@
 import api from "./axiosInstance";
 
 /**
- * Mobile based login (Driver / Transporter)
+ * Driver / Transporter login
  * POST /api/auth/login
  */
-export const loginWithMobile = async (mobileNumber, role) => {
-  const res = await api.post("/api/generalauth/generallogin", {
-    mobileNumber,
-    role,
+export const loginWithMobile = async (mobile, role) => {
+  const res = await api.post("/api/auth/login", {
+    mobile_number: mobile, // ✅ snake_case
+    role: role
   });
 
   return res.data;
