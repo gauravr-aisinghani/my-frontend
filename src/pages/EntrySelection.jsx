@@ -208,36 +208,33 @@ export default function EntrySelection() {
               </>
             )}
 
-            {step === 2 && (
-              <>
-                <h3 className="text-lg font-semibold mb-2">
-                  Verify OTP
-                </h3>
+           {step === 2 && (
+  <>
+    <h3 className="text-lg font-semibold mb-2">Verify OTP</h3>
 
-                {/* DEV ONLY - MOCK OTP DISPLAY FIXED */}
-                <div className="mb-2 p-2 bg-gray-100 rounded text-gray-700 text-sm">
-                  Mock OTP: <span className="font-semibold">{generatedOtp}</span>
-                </div>
+    {/* DEV ONLY - MOCK OTP DISPLAY FIXED */}
+    <div className="w-full p-3 mb-3 border border-gray-300 rounded-lg bg-yellow-100 text-black text-center font-semibold">
+      Mock OTP: {generatedOtp || "N/A"}
+    </div>
 
-                <input
-                  placeholder="Enter OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                />
+    <input
+      placeholder="Enter OTP"
+      value={otp}
+      onChange={(e) => setOtp(e.target.value)}
+      className="w-full p-3 border rounded-lg"
+    />
 
-                {error && (
-                  <p className="text-red-500 text-sm mt-2">{error}</p>
-                )}
+    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-                <button
-                  onClick={verifyOtp}
-                  className="w-full mt-4 bg-black text-white py-2 rounded-lg"
-                >
-                  Verify & Login
-                </button>
-              </>
-            )}
+    <button
+      onClick={verifyOtp}
+      className="w-full mt-4 bg-black text-white py-2 rounded-lg"
+    >
+      Verify & Login
+    </button>
+  </>
+)}
+
           </div>
         </div>
       )}
