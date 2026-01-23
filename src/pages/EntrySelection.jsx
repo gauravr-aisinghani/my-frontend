@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Truck, User, CreditCard } from "lucide-react";
 import { useState } from "react";
-import { checkTransporterMobile } from "../api/transporterAuthApi";
+import { loginWithMobile } from "../api/transporterAuthApi";
 
 export default function EntrySelection() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function EntrySelection() {
 
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [serverOtp, setServerOtp] = useState("");
 
   const [step, setStep] = useState(1);
   const [error, setError] = useState("");
@@ -21,7 +21,7 @@ export default function EntrySelection() {
     setLoginRole(null);
     setMobile("");
     setOtp("");
-    setGeneratedOtp("");
+    setServerOtp("");
     setStep(1);
     setError("");
   };
@@ -34,24 +34,24 @@ export default function EntrySelection() {
     }
 
     try {
-      const res = await checkTransporterMobile(mobile);
+      const res = await loginWithMobile(mobile, loginRole);
 
       if (!res.exists) {
-        setError("Not a registered transporter");
+        setError("Mobile number not registered");
         return;
       }
 
-      setGeneratedOtp(res.otp); // mock otp
+      setServerOtp(res.otp); // 🔥 backend generated OTP
       setError("");
       setStep(2);
     } catch (err) {
-      setError("Something went wrong");
+      setError("Server error");
     }
   };
 
   // ================= VERIFY OTP =================
   const verifyOtp = () => {
-    if (otp !== generatedOtp) {
+    if (otp !== serverOtp) {
       setError("Invalid OTP");
       return;
     }
@@ -66,7 +66,7 @@ export default function EntrySelection() {
   return (
     <div className="min-h-screen bg-white">
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <div className="flex flex-col items-center text-center pt-10 px-4">
         <h1 className="text-4xl font-bold text-gray-800">
           Welcome to <span className="text-green-600">WTL</span>
@@ -76,21 +76,6 @@ export default function EntrySelection() {
           India’s trusted Driver–Transporter Network
         </p>
 
-        <div className="flex gap-8 mt-4 text-sm flex-wrap justify-center">
-          <div>
-            <p className="font-semibold">100,000+</p>
-            <p className="text-gray-500 text-xs">Active Drivers</p>
-          </div>
-          <div>
-            <p className="font-semibold">10,000+</p>
-            <p className="text-gray-500 text-xs">Transporters</p>
-          </div>
-          <div>
-            <p className="font-semibold">₹50Cr+</p>
-            <p className="text-gray-500 text-xs">Monthly Transactions</p>
-          </div>
-        </div>
-
         <button
           onClick={() => setShowLogin(true)}
           className="mt-6 px-6 py-2 bg-black text-white rounded-lg text-sm"
@@ -99,53 +84,38 @@ export default function EntrySelection() {
         </button>
       </div>
 
-      {/* ================= CARDS ================= */}
+      {/* CARDS */}
       <div className="mt-16 px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
 
           <div
             onClick={() => navigate("/driver/signup")}
-            className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-lg transition"
+            className="cursor-pointer bg-white rounded-3xl border p-10 text-center"
           >
-            <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-green-100 text-green-600">
-              <User size={34} />
-            </div>
+            <User size={34} className="mx-auto text-green-600" />
             <h3 className="mt-6 text-2xl font-semibold">Driver</h3>
-            <p className="mt-2 text-gray-500">
-              Register & activate Driver GDC
-            </p>
           </div>
 
           <div
             onClick={() => navigate("/transporter/signup")}
-            className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-lg transition"
+            className="cursor-pointer bg-white rounded-3xl border p-10 text-center"
           >
-            <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
-              <Truck size={34} />
-            </div>
+            <Truck size={34} className="mx-auto text-blue-600" />
             <h3 className="mt-6 text-2xl font-semibold">Transporter</h3>
-            <p className="mt-2 text-gray-500">
-              Register & activate Transporter GDC
-            </p>
           </div>
 
           <div
             onClick={() => navigate("/payment")}
-            className="cursor-pointer bg-white rounded-3xl border p-10 text-center hover:shadow-lg transition"
+            className="cursor-pointer bg-white rounded-3xl border p-10 text-center"
           >
-            <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-orange-100 text-orange-600">
-              <CreditCard size={34} />
-            </div>
+            <CreditCard size={34} className="mx-auto text-orange-600" />
             <h3 className="mt-6 text-2xl font-semibold">Payments</h3>
-            <p className="mt-2 text-gray-500">
-              Recharge & manage services
-            </p>
           </div>
 
         </div>
       </div>
 
-      {/* ================= LOGIN MODAL ================= */}
+      {/* LOGIN MODAL */}
       {showLogin && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-md rounded-2xl p-6 relative">
@@ -187,17 +157,14 @@ export default function EntrySelection() {
                   placeholder="Enter Mobile Number"
                   value={mobile}
                   maxLength={10}
-                  onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value)) {
-                      setMobile(e.target.value);
-                    }
-                  }}
+                  onChange={(e) =>
+                    /^\d*$/.test(e.target.value) &&
+                    setMobile(e.target.value)
+                  }
                   className="w-full p-3 border rounded-lg"
                 />
 
-                {error && (
-                  <p className="text-red-500 text-sm mt-2">{error}</p>
-                )}
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
                 <button
                   onClick={sendOtp}
@@ -210,13 +177,11 @@ export default function EntrySelection() {
 
             {step === 2 && (
               <>
-                <h3 className="text-lg font-semibold mb-2">
-                  Verify OTP
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Verify OTP</h3>
 
+                {/* DEV ONLY */}
                 <p className="text-xs text-gray-500 mb-2">
-                  Mock OTP:{" "}
-                  <span className="font-semibold">{generatedOtp}</span>
+                  Mock OTP: <b>{serverOtp}</b>
                 </p>
 
                 <input
@@ -226,9 +191,7 @@ export default function EntrySelection() {
                   className="w-full p-3 border rounded-lg"
                 />
 
-                {error && (
-                  <p className="text-red-500 text-sm mt-2">{error}</p>
-                )}
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
                 <button
                   onClick={verifyOtp}
