@@ -1,14 +1,28 @@
+// src/components/NotificationBell.jsx
 import React, { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import api from "../api/axiosInstance"; // tero axios instance
 
 export default function NotificationBell({ adminId }) {
   const [notifications, setNotifications] = useState([]);
   const [stompClient, setStompClient] = useState(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // SockJS connection
+    // fetch offline notifications from backend
+    const fetchOffline = async () => {
+      try {
+        const res = await api.get(`/api/notifications/admin`);
+        setNotifications(res.data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+    fetchOffline();
+
+    // SockJS + STOMP
     const socket = new SockJS("https://my-backend-1-qxc9.onrender.com/ws");
     const client = new Client({
       webSocketFactory: () => socket,
@@ -19,11 +33,10 @@ export default function NotificationBell({ adminId }) {
     client.onConnect = () => {
       console.log("Connected to WebSocket");
 
-      // Subscribe to admin topic
+      // subscribe to admin topic
       client.subscribe("/topic/admin", (message) => {
         const payload = JSON.parse(message.body);
         console.log("New notification:", payload);
-
         setNotifications((prev) => [payload, ...prev]);
       });
     };
@@ -38,26 +51,30 @@ export default function NotificationBell({ adminId }) {
 
   return (
     <div className="relative">
-      <Bell className="w-6 h-6 text-gray-700" />
+      <Bell
+        className="w-6 h-6 text-gray-700 cursor-pointer"
+        onClick={() => setOpen(!open)}
+      />
       {notifications.length > 0 && (
         <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
           {notifications.length}
         </span>
       )}
 
-      {/* Dropdown */}
-      <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-xl z-50">
-        {notifications.length === 0 ? (
-          <p className="p-2 text-sm text-gray-500">No notifications</p>
-        ) : (
-          notifications.map((n, idx) => (
-            <div key={idx} className="border-b p-2 text-sm">
-              <strong>{n.title}</strong>
-              <p>{n.message}</p>
-            </div>
-          ))
-        )}
-      </div>
+      {open && (
+        <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-xl z-50">
+          {notifications.length === 0 ? (
+            <p className="p-2 text-sm text-gray-500">No notifications</p>
+          ) : (
+            notifications.map((n, idx) => (
+              <div key={idx} className="border-b p-2 text-sm">
+                <strong>{n.title}</strong>
+                <p>{n.message}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
