@@ -7,7 +7,7 @@ const transporterDriverRequestApi = {
   raiseRequest: async (payload) => {
     try {
       const res = await api.post(
-        "/api/transporter/driver-requests",
+        "/api/driver-request/create",
         payload
       );
       return res.data;
