@@ -84,6 +84,10 @@ function App() {
   element={<RaiseDriverRequest />}
 />
 
+           <Route
+  path="/driver-requests"
+  element={<AdminDriverRequestsPage />}
+/>
 
 
 
@@ -116,10 +120,7 @@ function App() {
             <Route path="transporter-registration" element={<TransporterRegistrationPage />} />
             <Route path="driver-registration" element={<DriverRegistrationPage />} />
             <Route path="create-table" element={<CreateTable />} />
-            <Route
-  path="/driver-requests"
-  element={<AdminDriverRequestsPage />}
-/>
+ 
 <Route
   path="/admin/notifications"
   element={<AdminNotificationsPage />}
