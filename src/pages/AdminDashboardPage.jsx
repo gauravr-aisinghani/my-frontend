@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
       {/* Top header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-        <NotificationBell adminId={2} /> {/* bell top right */}
+        <NotificationBell adminId={"ADMIN"} /> {/* bell top right */}
       </div>
 
       {/* Top Cards */}
