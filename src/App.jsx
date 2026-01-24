@@ -11,7 +11,7 @@ import SuperAdminDashboard from "./pages/SuperAdminDashboard.jsx";
 
 import AdminPage from "./pages/AdminPage.jsx";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
-
+import AdminDriverRequestsPage from "./pages/AdminDriverRequestsPage";
 import DailyVisitorPage2 from "./pages/DailyVisitorsPage2.jsx";
 import SelectedDriversPage from "./pages/SelectedDriversPage.jsx";
 import VehiclesPage from "./pages/VehiclesPage.jsx";
@@ -82,6 +82,11 @@ function App() {
           <Route
   path="/transporter/raise-driver-request"
   element={<RaiseDriverRequest />}
+/>
+
+<Route
+  path="/admin/driver-requests"
+  element={<AdminDriverRequestsPage />}
 />
 
 

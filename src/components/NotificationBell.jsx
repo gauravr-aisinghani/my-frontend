@@ -2,35 +2,40 @@ import React, { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import api from "../api/axiosInstance"; // make sure path correct
+import api from "../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 export default function NotificationBell({ adminId }) {
   const [notifications, setNotifications] = useState([]);
-  const [stompClient, setStompClient] = useState(null);
+  const navigate = useNavigate();
 
-  // ========== INITIAL FETCH ==========
+  // ===== INITIAL FETCH =====
   const fetchNotifications = async () => {
     try {
       const res = await api.get(`/api/notifications/admin/${adminId}`);
-      setNotifications(res.data);
+      setNotifications(res.data || []);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     }
   };
 
   useEffect(() => {
-    fetchNotifications(); // fetch existing notifications first
+    if (!adminId) return;
 
-    // ======== WEBSOCKET =========
-    const socket = new SockJS("https://my-backend-1-qxc9.onrender.com/ws");
+    fetchNotifications();
+
+    // ===== WEBSOCKET =====
+    const socket = new SockJS(
+      "https://my-backend-1-qxc9.onrender.com/ws"
+    );
+
     const client = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => console.log(str),
       reconnectDelay: 5000,
+      debug: () => {},
     });
 
     client.onConnect = () => {
-      console.log("Connected to WebSocket");
       client.subscribe("/topic/admin", (message) => {
         const payload = JSON.parse(message.body);
         setNotifications((prev) => [payload, ...prev]);
@@ -38,31 +43,24 @@ export default function NotificationBell({ adminId }) {
     };
 
     client.activate();
-    setStompClient(client);
 
-    return () => client.deactivate();
+    return () => {
+      client.deactivate();
+    };
   }, [adminId]);
 
   return (
-    <div className="relative">
+    <div
+      className="relative cursor-pointer"
+      onClick={() => navigate("/admin/notifications")}
+    >
       <Bell className="w-6 h-6 text-gray-700" />
+
       {notifications.length > 0 && (
-        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold">
           {notifications.length}
         </span>
       )}
-      <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-xl z-50">
-        {notifications.length === 0 ? (
-          <p className="p-2 text-sm text-gray-500">No notifications</p>
-        ) : (
-          notifications.map((n, idx) => (
-            <div key={idx} className="border-b p-2 text-sm">
-              <strong>{n.title}</strong>
-              <p>{n.message}</p>
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
 }
