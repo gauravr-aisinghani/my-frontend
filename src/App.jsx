@@ -53,6 +53,7 @@ import FinalSettlement from "./pages/operations/FinalSettlement.jsx";
 import TransporterLedger from "./pages/operations/TransporterLedger.jsx";
 import DriverLedger from "./pages/operations/DriverLedger.jsx";
 import TransporterDashboard from "./pages/TransporterDashboard.jsx";
+import RaiseDriverRequest from "./pages/RaiseDriverRequest.jsx";
 
 function App() {
   return (
