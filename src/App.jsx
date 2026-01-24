@@ -36,7 +36,7 @@ import GenerateGdcTransporterPage from "./pages/GenerateGdcTransporterPage.jsx";
 
 import Payments from "./pages/Payments.jsx";
 import PaymentConfirmation from "./components/PaymentConfirmation.jsx";
-
+import AdminNotificationsPage from "./pages/AdminNotificationsPage.jsx";
 import VisitorTransportersTable from "./components/VisitorTransportersTable.jsx";
 import SelectedTransportersTable from "./components/SelectedTransportersTable.jsx";
 import TransporterReports from "./pages/TransporterReports.jsx";
@@ -120,6 +120,11 @@ function App() {
   path="/driver-requests"
   element={<AdminDriverRequestsPage />}
 />
+<Route
+  path="/admin/notifications"
+  element={<AdminNotificationsPage />}
+/>
+
             <Route path="xml-table" element={<XmlTableCreator />} />
             <Route path="driver-details" element={<DriverDetails />} />
             <Route path="licence-details" element={<LicenceDetailsPage />} />
