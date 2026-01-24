@@ -7,8 +7,11 @@ import {
   ClipboardList,
   CalendarCheck,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function TransporterDashboard() {
+  const navigate = useNavigate();
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Transporter Dashboard</h1>
@@ -27,9 +30,12 @@ export default function TransporterDashboard() {
           <p className="text-gray-600 mb-3">
             Need more drivers? Raise a requirement request.
           </p>
-          <button className="px-4 py-2 bg-green-600 text-white rounded-lg">
-            Raise Request
-          </button>
+          <button
+      onClick={() => navigate("/transporter/raise-driver-request")}
+      className="px-4 py-2 bg-green-600 text-white rounded-lg"
+    >
+      Raise Request
+    </button>
         </Box>
 
         <Box title="Attendance Overview">

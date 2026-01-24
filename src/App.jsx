@@ -78,6 +78,11 @@ function App() {
 
            {/* 🔐 Transporter LOGIN */}
           <Route path="transporter-dashboard" element={<TransporterDashboard />} />
+          <Route
+  path="/transporter/raise-driver-request"
+  element={<RaiseDriverRequest />}
+/>
+
 
 
           {/* OPTIONAL AUTH */}
