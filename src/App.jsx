@@ -90,6 +90,12 @@ function App() {
 />
 
 
+<Route
+  path="/admin/notifications"
+  element={<AdminNotificationsPage />}
+/>
+
+
 
 
           {/* OPTIONAL AUTH */}
@@ -121,10 +127,7 @@ function App() {
             <Route path="driver-registration" element={<DriverRegistrationPage />} />
             <Route path="create-table" element={<CreateTable />} />
  
-<Route
-  path="/admin/notifications"
-  element={<AdminNotificationsPage />}
-/>
+
 
             <Route path="xml-table" element={<XmlTableCreator />} />
             <Route path="driver-details" element={<DriverDetails />} />
