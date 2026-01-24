@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DashboardCard from "../components/DashboardCard";
 import dashboardApi from "../api/dashboardApi";
+import NotificationBell from "../components/NotificationBell";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const COLORS = ["#16a34a", "#0ea5e9", "#f59e0b", "#ef4444"];
@@ -11,15 +12,21 @@ export default function AdminDashboardPage() {
 
   const load = async () => {
     setLoading(true);
-    const data = await dashboardApi.fetchSummary();
-    setStats(data);
-    setLoading(false);
+    try {
+      const data = await dashboardApi.fetchSummary();
+      setStats(data);
+    } catch (err) {
+      console.error("Error loading dashboard stats:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     load();
   }, []);
 
+  // Chart Data
   const barData = stats
     ? [
         { name: "Driver Visitors", value: stats.driverVisitors },
@@ -37,7 +44,15 @@ export default function AdminDashboardPage() {
     : [];
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-6 bg-gray-100 min-h-screen">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+        {/* Notification Bell */}
+        <NotificationBell adminId={1} />
+      </div>
+
+      {/* Top Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <DashboardCard title="Driver Visitors" value={stats?.driverVisitors ?? "—"} icon="📥" color="green" />
         <DashboardCard title="Transporter Visitors" value={stats?.transporterVisitors ?? "—"} icon="🚚" color="cyan" />
@@ -47,6 +62,7 @@ export default function AdminDashboardPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Bar Chart */}
         <div className="col-span-2 bg-white rounded-2xl shadow p-4">
           <h3 className="text-lg font-semibold mb-3">Visitors & Payments Overview</h3>
           <div style={{ width: "100%", height: 300 }}>
@@ -65,6 +81,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Pie Chart */}
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-lg font-semibold mb-3">Payments Overview</h3>
           <div style={{ width: "100%", height: 260 }}>
