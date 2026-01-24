@@ -10,7 +10,7 @@ export default function AdminNotificationsPage() {
   // ===== FETCH ALL NOTIFICATIONS =====
   const fetchNotifications = async () => {
     try {
-      const res = await api.get(`/api/notifications/admin/${adminId}`);
+      const res = await api.get(`/api/notifications/admin/ADMIN`);
       setNotifications(res.data || []);
     } catch (err) {
       console.error("Failed to load notifications", err);
