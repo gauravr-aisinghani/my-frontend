@@ -52,7 +52,7 @@ export default function NotificationBell({ adminId }) {
   return (
     <div
       className="relative cursor-pointer"
-      onClick={() => navigate("/admin/notifications")}
+      onClick={() => navigate("/driver-requests")}
     >
       <Bell className="w-6 h-6 text-gray-700" />
 

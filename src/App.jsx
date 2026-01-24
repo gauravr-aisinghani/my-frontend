@@ -85,7 +85,7 @@ function App() {
 />
 
 <Route
-  path="/admin/driver-requests"
+  path="/driver-requests"
   element={<AdminDriverRequestsPage />}
 />
 
