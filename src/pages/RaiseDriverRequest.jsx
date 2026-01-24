@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import transporterDriverRequestApi from "../../api/transporterDriverRequestApi";
-
+import transporterDriverRequestApi from "../api/transporterDriverRequestApi";
 export default function RaiseDriverRequest() {
   const navigate = useNavigate();
 
