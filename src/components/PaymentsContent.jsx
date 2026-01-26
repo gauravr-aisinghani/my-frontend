@@ -6,8 +6,8 @@ import {
 
 export default function PaymentsContent() {
   const [step, setStep] = useState(0);
-  const [category, setCategory] = useState(""); // DRIVER / TRANSPORTER
-  const [paymentType, setPaymentType] = useState(""); // REG / ADVANCE / SETTLEMENT
+  const [category, setCategory] = useState("");
+  const [paymentType, setPaymentType] = useState("");
   const [gdcRegistrationNumber, setGdcRegistrationNumber] = useState("");
   const [amount, setAmount] = useState(null);
   const [orderData, setOrderData] = useState(null);
@@ -27,16 +27,19 @@ export default function PaymentsContent() {
   const selectCategory = (cat) => {
     resetFlow();
     setCategory(cat);
+
+    // 👇 auto-select registration type
+    if (cat === "DRIVER") {
+      setPaymentType("DRIVER_REGISTRATION");
+    } else {
+      setPaymentType("TRANSPORTER_REGISTRATION");
+    }
+
     setStep(1);
   };
 
-  const selectPaymentType = (type) => {
-    setPaymentType(type);
-    setStep(2);
-  };
-
   // ===============================
-  // STEP 3: CREATE ORDER
+  // CREATE ORDER
   // ===============================
   const proceedToPay = async () => {
     if (!gdcRegistrationNumber.trim()) {
@@ -50,8 +53,8 @@ export default function PaymentsContent() {
 
       const res = await createPaymentOrder({
         gdc_number: gdcRegistrationNumber.trim(),
-        category,          // DRIVER / TRANSPORTER
-        type: paymentType, // REG / ADVANCE / SETTLEMENT
+        category,
+        type: paymentType,
       });
 
       if (!res?.order_id) {
@@ -60,7 +63,7 @@ export default function PaymentsContent() {
 
       setOrderData(res);
       setAmount(res.amount / 100);
-      setStep(3);
+      setStep(2);
 
     } catch (err) {
       setError(
@@ -74,7 +77,7 @@ export default function PaymentsContent() {
   };
 
   // ===============================
-  // STEP 4: RAZORPAY
+  // RAZORPAY
   // ===============================
   const openRazorpay = () => {
     if (!window.Razorpay) {
@@ -88,7 +91,7 @@ export default function PaymentsContent() {
       amount: orderData.amount,
       currency: orderData.currency,
       name: "WTL Payments",
-      description: `${category} - ${paymentType}`,
+      description: `${category} Registration Fee`,
 
       handler: async function (response) {
         try {
@@ -103,23 +106,23 @@ export default function PaymentsContent() {
             return;
           }
 
-          alert("Payment successful!");
+          alert("✅ Payment successful!");
           resetFlow();
 
         } catch {
-          alert("Payment verification failed");
+          alert("❌ Payment verification failed");
         }
       },
 
-      theme: { color: "#2563eb" },
+      theme: { color: "#0f172a" },
     };
 
     new window.Razorpay(options).open();
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-8 rounded-3xl shadow-2xl mt-12">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8 border-b pb-3">
+    <div className="max-w-3xl mx-auto bg-white p-10 rounded-3xl shadow-xl mt-12">
+      <h2 className="text-3xl font-bold text-slate-800 mb-10 border-b pb-4">
         💳 Payments
       </h2>
 
@@ -128,66 +131,40 @@ export default function PaymentsContent() {
         <div className="grid gap-6 md:grid-cols-2">
           <div
             onClick={() => selectCategory("DRIVER")}
-            className="p-8 border rounded-2xl cursor-pointer hover:shadow-lg"
+            className="p-8 rounded-2xl cursor-pointer
+              bg-gradient-to-br from-blue-600 to-blue-700
+              text-white font-semibold text-lg
+              hover:scale-105 transition-transform shadow-lg"
           >
-            🚚 Driver Payments
+            🚚 Driver Registration
           </div>
 
           <div
             onClick={() => selectCategory("TRANSPORTER")}
-            className="p-8 border rounded-2xl cursor-pointer hover:shadow-lg"
+            className="p-8 rounded-2xl cursor-pointer
+              bg-gradient-to-br from-emerald-600 to-emerald-700
+              text-white font-semibold text-lg
+              hover:scale-105 transition-transform shadow-lg"
           >
-            🏢 Transporter Payments
+            🏢 Transporter Registration
           </div>
         </div>
       )}
 
-      {/* STEP 1: DRIVER TYPES */}
-      {step === 1 && category === "DRIVER" && (
-        <div className="space-y-4">
-          <button
-            onClick={() => selectPaymentType("DRIVER_REGISTRATION")}
-            className="w-full p-4 border rounded-xl hover:bg-gray-50"
-          >
-            Driver Registration Fee
-          </button>
-        </div>
-      )}
+      {/* STEP 1: GDC INPUT */}
+      {step === 1 && (
+        <div className="space-y-5">
+          <div className="text-lg font-semibold text-slate-700">
+            {category === "DRIVER"
+              ? "Driver Registration Fee"
+              : "Transporter Registration Fee"}
+          </div>
 
-      {/* STEP 1: TRANSPORTER TYPES */}
-      {step === 1 && category === "TRANSPORTER" && (
-        <div className="space-y-4">
-          <button
-            onClick={() => selectPaymentType("TRANSPORTER_REGISTRATION")}
-            className="w-full p-4 border rounded-xl hover:bg-gray-50"
-          >
-            Transporter Registration Fee
-          </button>
-
-          <button
-            onClick={() => selectPaymentType("TRANSPORTER_ADVANCE")}
-            className="w-full p-4 border rounded-xl hover:bg-gray-50"
-          >
-            Transporter Advance (Driver Assignment)
-          </button>
-
-          <button
-            onClick={() => selectPaymentType("TRANSPORTER_MONTHLY_SETTLEMENT")}
-            className="w-full p-4 border rounded-xl hover:bg-gray-50"
-          >
-            Transporter Monthly Settlement
-          </button>
-        </div>
-      )}
-
-      {/* STEP 2: GDC INPUT */}
-      {step === 2 && (
-        <div className="space-y-4">
           <input
             value={gdcRegistrationNumber}
             onChange={(e) => setGdcRegistrationNumber(e.target.value)}
             placeholder="Enter GDC Registration Number"
-            className="w-full p-3 border rounded-xl"
+            className="w-full p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           {error && <p className="text-red-600">{error}</p>}
@@ -195,26 +172,27 @@ export default function PaymentsContent() {
           <button
             onClick={proceedToPay}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl"
+            className="w-full bg-slate-900 text-white py-3 rounded-xl
+              hover:bg-slate-800 transition disabled:opacity-60"
           >
-            {loading ? "Checking..." : "Proceed"}
+            {loading ? "Checking..." : "Continue"}
           </button>
         </div>
       )}
 
-      {/* STEP 3: CONFIRM */}
-      {step === 3 && (
+      {/* STEP 2: CONFIRM */}
+      {step === 2 && (
         <div className="space-y-4">
           <p><b>Category:</b> {category}</p>
-          <p><b>Type:</b> {paymentType}</p>
           <p><b>GDC:</b> {gdcRegistrationNumber}</p>
-          <p className="text-lg font-semibold">
-            <b>Amount:</b> ₹{amount}
+          <p className="text-xl font-bold text-slate-800">
+            Amount: ₹{amount}
           </p>
 
           <button
             onClick={openRazorpay}
-            className="w-full bg-green-600 text-white py-3 rounded-xl"
+            className="w-full bg-green-600 text-white py-3 rounded-xl
+              hover:bg-green-700 transition"
           >
             Pay Now
           </button>
