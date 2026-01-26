@@ -56,7 +56,8 @@ export default function EntrySelection() {
   };
 
   // ================= VERIFY OTP =================
- const verifyOtp = () => {
+// ================= VERIFY OTP =================
+const verifyOtp = async () => {
   if (otp.length !== 6) {
     setError("Enter valid 6 digit OTP");
     return;
@@ -67,27 +68,46 @@ export default function EntrySelection() {
     return;
   }
 
-  // 🔥 Normally ye backend response hoga
-  const loginResponse = {
-    role: loginRole,
-    userId: mobile,
-    transporterRegistrationId: "TR-10021",
-    driverRegistrationId: null,
-    gdcNumber: "GDC-TR-8899",
-  };
+  try {
+    // 🔥 BACKEND CALL (example endpoint)
+    const res = await loginWithMobile(mobile, loginRole);
 
-  // ✅ SAVE CONTEXT
-  localStorage.setItem(
-    "user_context",
-    JSON.stringify(loginResponse)
-  );
+    /*
+      Expected backend response (snake_case):
+      {
+        exists: true,
+        message: "...",
+        role: "TRANSPORTER" | "DRIVER",
+        user_id: "...",
+        transporter_registration_id: "...",
+        driver_registration_id: ...,
+        gdc_number: "..."
+      }
+    */
 
-  if (loginRole === "TRANSPORTER") {
-    navigate("/transporter-dashboard");
-  } else {
-    navigate("/driver/dashboard");
+    if (!res.exists) {
+      setError("Login failed");
+      return;
+    }
+
+    // ✅ SAVE EXACT BACKEND RESPONSE (SNAKE_CASE)
+    localStorage.setItem(
+      "user_context",
+      JSON.stringify(res)
+    );
+
+    // ✅ ROLE BASED NAVIGATION
+    if (res.role === "TRANSPORTER") {
+      navigate("/transporter-dashboard");
+    } else if (res.role === "DRIVER") {
+      navigate("/driver/dashboard");
+    }
+
+  } catch (err) {
+    setError("Something went wrong");
   }
 };
+
 
 
   return (
