@@ -11,64 +11,56 @@ import {
   createPaymentOrder,
   verifyPayment,
 } from "../api/paymentsApi";
-import {
-  getTransporterNotifications,
-} from "../api/transporterNotificationApi";
+import api from "../api/axiosInstance";
 
 export default function TransporterDashboard() {
   const navigate = useNavigate();
 
+  const [notifications, setNotifications] = useState([]);
   const [showPayments, setShowPayments] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const [showTopup, setShowTopup] = useState(false);
   const [topupAmount, setTopupAmount] = useState("");
-
-  // 🔔 notifications
-  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const userContext = JSON.parse(
     localStorage.getItem("user_context") || "{}"
   );
 
+  const mobile = userContext?.mobile;
   const gdc_number = userContext?.gdc_number;
-  const type = "TRANSPORTER";
 
-  // ===== fetch notifications =====
-  useEffect(() => {
-    if (!gdc_number) return;
+  // ===== FETCH TRANSPORTER NOTIFICATIONS (ADMIN STYLE) =====
+  const fetchNotifications = async () => {
+    if (!mobile) return;
 
-    getTransporterNotifications(gdc_number)
-      .then((data) => setNotifications(data || []))
-      .catch((err) =>
-        console.error("Notification fetch failed", err)
+    try {
+      const res = await api.get(
+        `/api/notifications/transporter/${mobile}`
       );
-  }, [gdc_number]);
-
-  // ===== payment handler =====
-  const handlePayment = async (purpose, amount = null) => {
-    if (!gdc_number) {
-      alert("GDC missing. Login again.");
-      return;
+      setNotifications(res.data || []);
+    } catch (e) {
+      console.error("Failed to fetch notifications", e);
     }
+  };
 
+  useEffect(() => {
+    fetchNotifications();
+  }, [mobile]);
+
+  // ===== PAYMENT HANDLER =====
+  const handlePayment = async (purpose, amount = null) => {
     try {
       setLoading(true);
 
       const payload = {
         gdc_number,
-        type,
+        type: "TRANSPORTER",
         purpose,
       };
 
-      if (amount !== null) payload.amount = amount;
+      if (amount) payload.amount = amount;
 
       const order = await createPaymentOrder(payload);
-
-      if (!order?.order_id) {
-        alert("Order ID missing");
-        return;
-      }
 
       const options = {
         key: order.key,
@@ -76,15 +68,16 @@ export default function TransporterDashboard() {
         currency: order.currency,
         order_id: order.order_id,
         name: "Transporter Payments",
-        description: purpose.replaceAll("_", " "),
         handler: async (response) => {
           await verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
+            razorpay_payment_id:
+              response.razorpay_payment_id,
+            razorpay_signature:
+              response.razorpay_signature,
           });
 
-          alert("Payment Successful ✅");
+          alert("Payment successful ✅");
           setShowPayments(false);
           setShowTopup(false);
           setTopupAmount("");
@@ -92,7 +85,7 @@ export default function TransporterDashboard() {
       };
 
       new window.Razorpay(options).open();
-    } catch (err) {
+    } catch (e) {
       alert("Payment failed");
     } finally {
       setLoading(false);
@@ -101,11 +94,29 @@ export default function TransporterDashboard() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-8">
-        Transporter Dashboard
-      </h1>
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">
+          Transporter Dashboard
+        </h1>
 
-      {/* TOP STATS */}
+        {/* 🔔 NOTIFICATION BELL */}
+        <div
+          className="relative cursor-pointer"
+          onClick={() =>
+            navigate("/transporter/notifications")
+          }
+        >
+          <Bell className="w-6 h-6 text-gray-700" />
+          {notifications.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold">
+              {notifications.length}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
           title="Wallet Balance"
@@ -136,7 +147,9 @@ export default function TransporterDashboard() {
           desc="Need more drivers?"
           button="Raise Request"
           onClick={() =>
-            navigate("/transporter/raise-driver-request")
+            navigate(
+              "/transporter/raise-driver-request"
+            )
           }
         />
 
@@ -151,30 +164,22 @@ export default function TransporterDashboard() {
 
       {/* PAYMENTS MODAL */}
       {showPayments && (
-        <Modal
-          title="Payments"
-          onClose={() => setShowPayments(false)}
-        >
+        <Modal onClose={() => setShowPayments(false)}>
           <PaymentOption
-            text="Make advance for driver"
-            disabled={loading}
+            text="Make driver advance"
             onClick={() =>
               handlePayment("TRANSPORTER_ADVANCE")
             }
           />
-
           <PaymentOption
             text="Add to wallet"
-            disabled={loading}
             onClick={() => {
               setShowPayments(false);
               setShowTopup(true);
             }}
           />
-
           <PaymentOption
             text="Monthly settlement"
-            disabled={loading}
             onClick={() =>
               handlePayment("MONTHLY_SETTLEMENT")
             }
@@ -184,20 +189,16 @@ export default function TransporterDashboard() {
 
       {/* TOPUP MODAL */}
       {showTopup && (
-        <Modal
-          title="Add Wallet Amount"
-          onClose={() => setShowTopup(false)}
-        >
+        <Modal onClose={() => setShowTopup(false)}>
           <input
             type="number"
-            placeholder="Enter amount"
             value={topupAmount}
             onChange={(e) =>
               setTopupAmount(e.target.value)
             }
-            className="w-full border p-3 mb-4 rounded-lg"
+            className="w-full border p-3 rounded-lg mb-4"
+            placeholder="Enter amount"
           />
-
           <button
             disabled={!topupAmount || loading}
             onClick={() =>
@@ -216,7 +217,7 @@ export default function TransporterDashboard() {
   );
 }
 
-/* ===== UI ===== */
+/* ===== UI HELPERS ===== */
 
 function StatCard({ title, value, icon, onClick }) {
   return (
@@ -225,8 +226,12 @@ function StatCard({ title, value, icon, onClick }) {
       className="cursor-pointer bg-white rounded-2xl p-5 flex justify-between items-center border"
     >
       <div>
-        <p className="text-sm text-gray-500">{title}</p>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-sm text-gray-500">
+          {title}
+        </p>
+        <p className="text-2xl font-bold">
+          {value}
+        </p>
       </div>
       <div className="bg-green-100 p-3 rounded-xl text-green-600">
         {icon}
@@ -235,14 +240,24 @@ function StatCard({ title, value, icon, onClick }) {
   );
 }
 
-function ActionCard({ title, desc, button, onClick, icon }) {
+function ActionCard({
+  title,
+  desc,
+  button,
+  onClick,
+  icon,
+}) {
   return (
     <div className="bg-white rounded-2xl p-5 border">
       <div className="flex gap-2 mb-2">
         {icon}
-        <h2 className="font-semibold">{title}</h2>
+        <h2 className="font-semibold">
+          {title}
+        </h2>
       </div>
-      <p className="text-sm text-gray-600">{desc}</p>
+      <p className="text-sm text-gray-600">
+        {desc}
+      </p>
       <button
         onClick={onClick}
         className="mt-5 w-full bg-green-600 text-white py-2.5 rounded-xl"
@@ -253,28 +268,28 @@ function ActionCard({ title, desc, button, onClick, icon }) {
   );
 }
 
-function Modal({ title, onClose, children }) {
+function Modal({ onClose, children }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white w-full max-w-md rounded-2xl p-5">
-        <div className="flex justify-between mb-4">
-          <h2 className="font-semibold">{title}</h2>
+        <div className="flex justify-end mb-4">
           <X
-            onClick={onClose}
             className="cursor-pointer"
+            onClick={onClose}
           />
         </div>
-        <div className="space-y-3">{children}</div>
+        <div className="space-y-3">
+          {children}
+        </div>
       </div>
     </div>
   );
 }
 
-function PaymentOption({ text, onClick, disabled }) {
+function PaymentOption({ text, onClick }) {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
       className="w-full border rounded-xl py-3 px-4 text-left"
     >
       {text}
