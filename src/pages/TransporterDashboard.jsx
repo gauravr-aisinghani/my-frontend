@@ -52,7 +52,8 @@ export default function TransporterDashboard() {
 
       const order = await createPaymentOrder(payload);
 
-      if (!order?.orderId) {
+     if (!order?.order_id) {
+
         alert("Order ID missing from backend");
         return;
       }
