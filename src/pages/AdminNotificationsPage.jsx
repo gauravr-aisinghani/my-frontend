@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
-import { Bell, Truck, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Bell,
+  Truck,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 const PAGE_SIZE = 5;
 
@@ -10,6 +16,7 @@ export default function AdminNotificationsPage() {
   const [requestCache, setRequestCache] = useState({});
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [acceptingId, setAcceptingId] = useState(null);
 
   // ===== FETCH NOTIFICATIONS =====
   const fetchNotifications = async () => {
@@ -29,13 +36,14 @@ export default function AdminNotificationsPage() {
 
     try {
       const res = await api.get(`/api/driver-request/${requestId}`);
-      // convert keys to camelCase for frontend
       const data = res.data
         ? {
-            transporterRegistrationId: res.data.transporter_registration_id,
+            transporterRegistrationId:
+              res.data.transporter_registration_id,
             gdcNumber: res.data.gdc_number,
             route: res.data.route,
             monthlySalary: res.data.monthly_salary,
+            status: res.data.status,
           }
         : null;
 
@@ -45,6 +53,41 @@ export default function AdminNotificationsPage() {
       }));
     } catch (e) {
       console.error("Failed to fetch request", e);
+    }
+  };
+
+  // ===== ACCEPT DRIVER REQUEST =====
+  const confirmDriverRequest = async (notification) => {
+    const requestId = notification.reference_id;
+    if (!requestId) return;
+
+    try {
+      setAcceptingId(notification.id);
+
+      await api.put(`/api/driver-request/${requestId}/accept`);
+
+      // mark notification as read
+      await api.post(
+        `/api/notifications/admin/mark-read/${notification.id}`
+      );
+
+      // update UI
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === notification.id
+            ? { ...n, is_read: true }
+            : n
+        )
+      );
+
+      alert(
+        "Driver request confirmed.\nTransporter notified to pay 20% amount."
+      );
+    } catch (e) {
+      console.error(e);
+      alert("Failed to confirm driver request");
+    } finally {
+      setAcceptingId(null);
     }
   };
 
@@ -99,7 +142,9 @@ export default function AdminNotificationsPage() {
             <div
               key={n.id}
               className={`rounded-2xl border p-6 transition shadow-sm hover:shadow-md ${
-                n.is_read ? "bg-white border-gray-200" : "bg-blue-50 border-blue-400"
+                n.is_read
+                  ? "bg-white border-gray-200"
+                  : "bg-blue-50 border-blue-400"
               }`}
             >
               {/* HEADER */}
@@ -118,37 +163,25 @@ export default function AdminNotificationsPage() {
 
               <p className="text-sm text-gray-600 mt-2">{n.message}</p>
 
-              {/* EXPAND */}
+              {/* DETAILS */}
               {n.type === "DRIVER_REQUEST" && (
                 <>
-                 <button
-  onClick={() => toggleExpand(n)}
-  className="
-    flex items-center gap-2
-    px-4 py-2
-    rounded-lg
-    border border-blue-500
-    text-blue-600
-    bg-transparent
-    hover:bg-blue-50
-    hover:text-blue-700
-    transition
-  "
->
-  {expanded === n.id ? (
-    <>
-      <ChevronUp size={16} />
-      Hide details
-    </>
-  ) : (
-    <>
-      <ChevronDown size={16} />
-      View details
-    </>
-  )}
-</button>
-
-
+                  <button
+                    onClick={() => toggleExpand(n)}
+                    className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
+                  >
+                    {expanded === n.id ? (
+                      <>
+                        <ChevronUp size={16} />
+                        Hide details
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={16} />
+                        View details
+                      </>
+                    )}
+                  </button>
 
                   {expanded === n.id && (
                     <div className="mt-4 grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-xl">
@@ -182,26 +215,30 @@ export default function AdminNotificationsPage() {
 
               {/* ACTIONS */}
               <div className="mt-6 flex flex-wrap gap-4 items-center">
-                <button
-                  onClick={() =>
-                    alert(
-                      `Future: check drivers for request ${n.reference_id}`
-                    )
-                  }
-                  className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 min-w-[200px]"
-                >
-                  Check Driver Availability
-                </button>
+                {n.type === "DRIVER_REQUEST" && (
+                  <button
+                    disabled={n.is_read || acceptingId === n.id}
+                    onClick={() => confirmDriverRequest(n)}
+                    className={`px-5 py-2 rounded-lg min-w-[220px] text-white transition ${
+                      n.is_read
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                  >
+                    {acceptingId === n.id
+                      ? "Confirming..."
+                      : "Confirm Driver Request"}
+                  </button>
+                )}
 
                 {!n.is_read && (
-                <button
-  onClick={() => markAsRead(n.id)}
-  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition"
->
-  <CheckCircle size={16} />
-  Mark as read
-</button>
-
+                  <button
+                    onClick={() => markAsRead(n.id)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition"
+                  >
+                    <CheckCircle size={16} />
+                    Mark as read
+                  </button>
                 )}
               </div>
             </div>
