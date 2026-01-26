@@ -82,8 +82,8 @@ export default function EntrySelection() {
     JSON.stringify(loginResponse)
   );
 
-  if (role === "TRANSPORTER") {
-    navigate("/transporter/dashboard");
+  if (loginRole === "TRANSPORTER") {
+    navigate("/transporter-dashboard");
   } else {
     navigate("/driver/dashboard");
   }
