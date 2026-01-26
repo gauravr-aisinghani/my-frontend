@@ -31,7 +31,7 @@ export default function TransporterNotificationsPage() {
     localStorage.getItem("user_context") || "{}"
   );
 
-  const transporterMobile = userContext?.mobile;
+const transporterMobile = userContext?.userId;
   const gdc_number = userContext?.gdc_number;
 
   // ===== FETCH TRANSPORTER NOTIFICATIONS =====
@@ -130,10 +130,12 @@ export default function TransporterNotificationsPage() {
       fetchRequestDetail(n.referenceId);
     }
   };
-
-  useEffect(() => {
+useEffect(() => {
+  if (transporterMobile) {
     fetchNotifications();
-  }, []);
+  }
+}, [transporterMobile]);
+
 
   // ===== PAGINATION =====
   const start = (page - 1) * PAGE_SIZE;

@@ -26,7 +26,7 @@ export default function TransporterDashboard() {
     localStorage.getItem("user_context") || "{}"
   );
 
-  const mobile = userContext?.mobile;
+const mobile = userContext?.user_id;
   const gdc_number = userContext?.gdc_number;
 
   // ===== FETCH TRANSPORTER NOTIFICATIONS (ADMIN STYLE) =====
