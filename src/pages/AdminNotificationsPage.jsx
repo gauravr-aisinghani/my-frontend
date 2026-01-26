@@ -123,7 +123,7 @@ export default function AdminNotificationsPage() {
                 <>
                   <button
                     onClick={() => toggleExpand(n)}
-                    className="mt-4 flex items-center gap-1 text-blue-600 text-sm font-medium"
+                    className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 min-w-[200px]"
                   >
                     {expanded === n.id ? (
                       <>
@@ -182,7 +182,7 @@ export default function AdminNotificationsPage() {
                 {!n.is_read && (
                   <button
                     onClick={() => markAsRead(n.id)}
-                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                    className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 min-w-[200px]"
                   >
                     <CheckCircle size={18} />
                     Mark as read
