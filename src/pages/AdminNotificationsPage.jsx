@@ -3,7 +3,6 @@ import api from "../api/axiosInstance";
 import { CheckCircle } from "lucide-react";
 
 export default function AdminNotificationsPage() {
-  const adminId = localStorage.getItem("adminId"); // ya jaha store kr rakha ho
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,7 +10,17 @@ export default function AdminNotificationsPage() {
   const fetchNotifications = async () => {
     try {
       const res = await api.get(`/api/notifications/admin/ADMIN`);
-      setNotifications(res.data || []);
+
+      // 🔥 NORMALIZE BACKEND RESPONSE
+      const formatted = (res.data || []).map((n) => ({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        isRead: n.is_read,          // 👈 FIX
+        createdAt: n.created_at,    // 👈 FIX
+      }));
+
+      setNotifications(formatted);
     } catch (err) {
       console.error("Failed to load notifications", err);
     } finally {
@@ -23,6 +32,7 @@ export default function AdminNotificationsPage() {
   const markAsRead = async (notificationId) => {
     try {
       await api.put(`/api/notifications/${notificationId}/read`);
+
       setNotifications((prev) =>
         prev.map((n) =>
           n.id === notificationId ? { ...n, isRead: true } : n
@@ -61,11 +71,15 @@ export default function AdminNotificationsPage() {
               <h3 className="font-semibold text-gray-800">
                 {n.title}
               </h3>
+
               <p className="text-gray-600 text-sm mt-1">
                 {n.message}
               </p>
+
               <p className="text-xs text-gray-400 mt-2">
-                {new Date(n.createdAt).toLocaleString()}
+                {n.createdAt
+                  ? new Date(n.createdAt).toLocaleString()
+                  : "—"}
               </p>
             </div>
 
