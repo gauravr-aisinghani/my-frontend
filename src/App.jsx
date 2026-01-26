@@ -54,6 +54,7 @@ import TransporterLedger from "./pages/operations/TransporterLedger.jsx";
 import DriverLedger from "./pages/operations/DriverLedger.jsx";
 import TransporterDashboard from "./pages/TransporterDashboard.jsx";
 import RaiseDriverRequest from "./pages/RaiseDriverRequest.jsx";
+import TransporterNotificationsPage from "./pages/TransporterNotificationsPage.jsx";
 
 function App() {
   return (
@@ -157,6 +158,8 @@ function App() {
             <Route path="final-settlement" element={<FinalSettlement />} />
             <Route path="transporter-ledger" element={<TransporterLedger />} />
             <Route path="driver-ledger" element={<DriverLedger />} />
+            <Route path="transporter/notification" element={<TransporterNotificationsPage />} />
+
 
 
           </Route>
