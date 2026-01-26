@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import {
   createPaymentOrder,
   verifyPayment,
-} from "../api/paymentApi";
+} from "../api/paymentsApi";
 
 export default function TransporterDashboard() {
   const navigate = useNavigate();
