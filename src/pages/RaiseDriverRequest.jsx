@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import jwtDecode from "jwt-decode";
 import transporterDriverRequestApi from "../api/transporterDriverRequestApi";
 
 export default function RaiseDriverRequest() {
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
     transporter_registration_id: "",
@@ -18,28 +17,24 @@ export default function RaiseDriverRequest() {
     remarks: "",
   });
 
-  // 🔹 page load pe backend se transporter info laana
+  // 🔹 Page load pe token se values set karo
   useEffect(() => {
-    const fetchTransporterInfo = async () => {
-      try {
-        const res = await transporterDriverRequestApi.getTransporterContext();
-        // expected response example:
-        // { transporter_registration_id: 12, user_id: "9876543210" }
+    const token = localStorage.getItem("token");
 
-        setForm((prev) => ({
-          ...prev,
-          transporter_registration_id: res.transporter_registration_id,
-          transporter_phone: res.user_id, // 🔥 user_id → transporter_phone
-        }));
+    if (!token) {
+      alert("Session expired. Please login again.");
+      navigate("/login");
+      return;
+    }
 
-        setLoading(false);
-      } catch (err) {
-        alert("Failed to load transporter info");
-      }
-    };
+    const decoded = jwtDecode(token);
 
-    fetchTransporterInfo();
-  }, []);
+    setForm((prev) => ({
+      ...prev,
+      transporter_registration_id: decoded.transporter_registration_id,
+      transporter_phone: decoded.sub, // 🔥 user_id → transporter_phone
+    }));
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -57,10 +52,6 @@ export default function RaiseDriverRequest() {
     }
   };
 
-  if (loading) {
-    return <div className="p-6 text-center">Loading...</div>;
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
       <form
@@ -75,29 +66,29 @@ export default function RaiseDriverRequest() {
           <input
             name="gdc_number"
             placeholder="GDC Number"
-            className="border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
             onChange={handleChange}
           />
 
           <input
             name="vehicle_number"
             placeholder="Vehicle Number"
-            className="border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
             onChange={handleChange}
           />
 
           <input
             name="route"
             placeholder="Route"
-            className="border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
             onChange={handleChange}
           />
 
           <input
             name="monthly_salary"
-            placeholder="Monthly Salary"
             type="number"
-            className="border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Monthly Salary"
+            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
             onChange={handleChange}
           />
 
@@ -105,7 +96,7 @@ export default function RaiseDriverRequest() {
             name="remarks"
             placeholder="Remarks"
             rows="2"
-            className="md:col-span-3 border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="md:col-span-3 border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
             onChange={handleChange}
           />
         </div>
@@ -114,14 +105,14 @@ export default function RaiseDriverRequest() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-6 py-2 rounded-lg border border-gray-300"
+            className="px-6 py-2 border rounded-lg"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+            className="px-6 py-2 bg-green-600 text-white rounded-lg"
           >
             Save & Continue →
           </button>
