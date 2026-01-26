@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
-import {
-  Bell,
-  Truck,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { Bell, Truck, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 const PAGE_SIZE = 5;
 
@@ -35,9 +29,19 @@ export default function AdminNotificationsPage() {
 
     try {
       const res = await api.get(`/api/driver-request/${requestId}`);
+      // convert keys to camelCase for frontend
+      const data = res.data
+        ? {
+            transporterRegistrationId: res.data.transporter_registration_id,
+            gdcNumber: res.data.gdc_number,
+            route: res.data.route,
+            monthlySalary: res.data.monthly_salary,
+          }
+        : null;
+
       setRequestCache((prev) => ({
         ...prev,
-        [requestId]: res.data,
+        [requestId]: data,
       }));
     } catch (e) {
       console.error("Failed to fetch request", e);
@@ -49,7 +53,7 @@ export default function AdminNotificationsPage() {
     try {
       await api.post(`/api/notifications/admin/mark-read/${id}`);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
     } catch (e) {
       console.error(e);
@@ -61,7 +65,7 @@ export default function AdminNotificationsPage() {
       setExpanded(null);
     } else {
       setExpanded(n.id);
-      if (n.referenceId) fetchRequestDetail(n.referenceId);
+      if (n.reference_id) fetchRequestDetail(n.reference_id);
     }
   };
 
@@ -89,41 +93,37 @@ export default function AdminNotificationsPage() {
 
       <div className="space-y-6">
         {pageData.map((n) => {
-          const request = requestCache[n.referenceId];
+          const request = requestCache[n.reference_id];
 
           return (
             <div
               key={n.id}
-              className={`rounded-2xl border p-6 transition ${
-                n.isRead
-                  ? "bg-white"
-                  : "bg-blue-50 border-blue-400"
+              className={`rounded-2xl border p-6 transition shadow-sm hover:shadow-md ${
+                n.is_read ? "bg-white border-gray-200" : "bg-blue-50 border-blue-400"
               }`}
             >
               {/* HEADER */}
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <Truck className="text-blue-600" />
-                  <h2 className="text-lg font-semibold">
-                    {n.title}
-                  </h2>
+                  <h2 className="text-lg font-semibold">{n.title}</h2>
                 </div>
 
                 <span className="text-xs text-gray-400">
-                  {new Date(n.createdAt).toLocaleString()}
+                  {n.created_at
+                    ? new Date(n.created_at).toLocaleString()
+                    : "Invalid Date"}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 mt-2">
-                {n.message}
-              </p>
+              <p className="text-sm text-gray-600 mt-2">{n.message}</p>
 
               {/* EXPAND */}
               {n.type === "DRIVER_REQUEST" && (
                 <>
                   <button
                     onClick={() => toggleExpand(n)}
-                    className="mt-4 flex items-center gap-1 text-blue-600 text-sm"
+                    className="mt-4 flex items-center gap-1 text-blue-600 text-sm font-medium"
                   >
                     {expanded === n.id ? (
                       <>
@@ -151,8 +151,7 @@ export default function AdminNotificationsPage() {
                             {request.transporterRegistrationId}
                           </p>
                           <p>
-                            <b>GDC Number:</b>{" "}
-                            {request.gdcNumber}
+                            <b>GDC Number:</b> {request.gdcNumber}
                           </p>
                           <p>
                             <b>Route:</b> {request.route}
@@ -168,19 +167,19 @@ export default function AdminNotificationsPage() {
               )}
 
               {/* ACTIONS */}
-              <div className="mt-6 flex justify-between items-center">
+              <div className="mt-6 flex flex-wrap gap-3 justify-between items-center">
                 <button
                   onClick={() =>
                     alert(
-                      `Future: check drivers for request ${n.referenceId}`
+                      `Future: check drivers for request ${n.reference_id}`
                     )
                   }
-                  className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                  className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 min-w-[200px]"
                 >
                   Check Driver Availability
                 </button>
 
-                {!n.isRead && (
+                {!n.is_read && (
                   <button
                     onClick={() => markAsRead(n.id)}
                     className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
