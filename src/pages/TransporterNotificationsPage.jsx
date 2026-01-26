@@ -31,7 +31,7 @@ export default function TransporterNotificationsPage() {
     localStorage.getItem("user_context") || "{}"
   );
 
-const transporterMobile = userContext?.userId;
+const transporterMobile = userContext?.user_id;
   const gdc_number = userContext?.gdc_number;
 
   // ===== FETCH TRANSPORTER NOTIFICATIONS =====
