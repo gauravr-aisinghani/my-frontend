@@ -57,33 +57,29 @@ export default function TransporterDashboard() {
         return;
       }
 
-      const options = {
-        key: order.key,
-        amount: order.amount,
-        currency: order.currency,
-        order_id: order.orderId, // ✅ VERY IMPORTANT
-        name: "Transporter Payments",
-        description: purpose.replaceAll("_", " "),
+     const options = {
+  key: order.key,
+  amount: order.amount,
+  currency: order.currency,
+  order_id: order.order_id,
+  name: "Transporter Payments",
+  description: purpose.replaceAll("_", " "),
+  handler: async (response) => {
+    await verifyPayment({
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_signature: response.razorpay_signature,
+    });
 
-        handler: async (response) => {
+    alert("Payment Successful ✅");
 
-          console.log("RAZORPAY RESPONSE 👉", response);
+    setShowPayments(false);
+    setShowTopup(false);
+    setTopupAmount("");
+  },
+  theme: { color: "#16a34a" },
+};
 
-          await verifyPayment({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-          });
-
-          alert("Payment Successful ✅");
-
-          setShowPayments(false);
-          setShowTopup(false);
-          setTopupAmount("");
-        },
-
-        theme: { color: "#16a34a" },
-      };
 
       new window.Razorpay(options).open();
 
