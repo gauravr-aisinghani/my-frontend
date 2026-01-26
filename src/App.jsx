@@ -70,6 +70,8 @@ function App() {
           {/* 🌍 PUBLIC REGISTRATION */}
           <Route path="/driver/signup" element={<DriverRegistrationPage />} />
           <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
+                      <Route path="transporter-notification" element={<TransporterNotificationsPage />} />
+
 
           {/* 🌍 PUBLIC PAYMENT */}
           <Route path="/payment" element={<Payments />} />
@@ -158,7 +160,6 @@ function App() {
             <Route path="final-settlement" element={<FinalSettlement />} />
             <Route path="transporter-ledger" element={<TransporterLedger />} />
             <Route path="driver-ledger" element={<DriverLedger />} />
-            <Route path="transporter/notification" element={<TransporterNotificationsPage />} />
 
 
 

@@ -104,7 +104,7 @@ const mobile = userContext?.user_id;
         <div
           className="relative cursor-pointer"
           onClick={() =>
-            navigate("/transporter/notifications")
+            navigate("/transporter-notification")
           }
         >
           <Bell className="w-6 h-6 text-gray-700" />
