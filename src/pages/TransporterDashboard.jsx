@@ -19,7 +19,7 @@ export default function TransporterDashboard() {
   const [showPayments, setShowPayments] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔥 NEW STATES (TOPUP)
+  // 🔥 TOPUP STATES
   const [showTopup, setShowTopup] = useState(false);
   const [topupAmount, setTopupAmount] = useState("");
 
@@ -27,23 +27,35 @@ export default function TransporterDashboard() {
     localStorage.getItem("user_context") || "{}"
   );
 
-  const gdc_number = userContext.gdc_number;
+  const gdc_number = userContext?.gdc_number;
   const type = "TRANSPORTER";
 
   // ===============================
-  // PAYMENT HANDLER (BACKEND SYNC)
+  // COMMON PAYMENT HANDLER
   // ===============================
   const handlePayment = async (purpose, amount = null) => {
+    if (!gdc_number) {
+      alert("GDC number missing. Please login again.");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      // 🔥 backend decides amount (except MANUAL_TOPUP)
-      const order = await createPaymentOrder({
-        gdc_number,
+      const payload = {
+        gdc_number,   // ✅ snake_case
         type,
-        purpose,
-        ...(amount && { amount }),
-      });
+        purpose,      // ✅ enum string
+      };
+
+      // 🔥 only for MANUAL_TOPUP
+      if (amount !== null) {
+        payload.amount = amount;
+      }
+
+      console.log("PAYMENT PAYLOAD 👉", payload);
+
+      const order = await createPaymentOrder(payload);
 
       const options = {
         key: order.key,
@@ -51,7 +63,7 @@ export default function TransporterDashboard() {
         currency: order.currency,
         order_id: order.orderId,
         name: "Transporter Payments",
-        description: purpose.replace("_", " "),
+        description: purpose.replaceAll("_", " "),
         handler: async (response) => {
           await verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
@@ -60,6 +72,7 @@ export default function TransporterDashboard() {
           });
 
           alert("Payment Successful ✅");
+
           setShowPayments(false);
           setShowTopup(false);
           setTopupAmount("");
@@ -118,25 +131,33 @@ export default function TransporterDashboard() {
       {showPayments && (
         <Modal title="Payments" onClose={() => setShowPayments(false)}>
           <div className="space-y-3">
+
+            {/* TRANSPORTER ADVANCE */}
             <PaymentOption
               text="Make advance for driver"
-              onClick={() => handlePayment("TRANSPORTER_ADVANCE")}
               disabled={loading}
+              onClick={() =>
+                handlePayment("TRANSPORTER_ADVANCE")
+              }
             />
 
+            {/* MANUAL TOPUP */}
             <PaymentOption
               text="Add to your wallet"
+              disabled={loading}
               onClick={() => {
                 setShowPayments(false);
                 setShowTopup(true);
               }}
-              disabled={loading}
             />
 
+            {/* MONTHLY SETTLEMENT */}
             <PaymentOption
               text="Monthly settlement"
-              onClick={() => handlePayment("MONTHLY_SETTLEMENT")}
               disabled={loading}
+              onClick={() =>
+                handlePayment("MONTHLY_SETTLEMENT")
+              }
             />
           </div>
         </Modal>
@@ -144,7 +165,10 @@ export default function TransporterDashboard() {
 
       {/* ===== TOPUP MODAL ===== */}
       {showTopup && (
-        <Modal title="Add Money to Wallet" onClose={() => setShowTopup(false)}>
+        <Modal
+          title="Add Money to Wallet"
+          onClose={() => setShowTopup(false)}
+        >
           <input
             type="number"
             placeholder="Enter amount"
@@ -154,10 +178,13 @@ export default function TransporterDashboard() {
           />
 
           <button
-            onClick={() =>
-              handlePayment("MANUAL_TOPUP", Number(topupAmount))
-            }
             disabled={!topupAmount || loading}
+            onClick={() =>
+              handlePayment(
+                "MANUAL_TOPUP",
+                Number(topupAmount)
+              )
+            }
             className="w-full bg-green-600 text-white py-3 rounded-xl disabled:opacity-50"
           >
             Pay ₹{topupAmount || 0}
