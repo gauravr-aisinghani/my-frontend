@@ -8,6 +8,7 @@ export default function PaymentsContent() {
   const [step, setStep] = useState(0);
   const [category, setCategory] = useState(""); // DRIVER / TRANSPORTER
   const [paymentType, setPaymentType] = useState(""); // DRIVER / TRANSPORTER
+  const [purpose, setPurpose] = useState(""); // 🔥 NEW
   const [gdcRegistrationNumber, setGdcRegistrationNumber] = useState("");
   const [amount, setAmount] = useState(null);
   const [orderData, setOrderData] = useState(null);
@@ -18,6 +19,7 @@ export default function PaymentsContent() {
     setStep(0);
     setCategory("");
     setPaymentType("");
+    setPurpose("");
     setGdcRegistrationNumber("");
     setAmount(null);
     setOrderData(null);
@@ -26,10 +28,16 @@ export default function PaymentsContent() {
 
   const selectCategory = (cat) => {
     resetFlow();
-    setCategory(cat);
 
-    // ✅ BACKEND-COMPATIBLE ENUM
-    setPaymentType(cat); // DRIVER or TRANSPORTER
+    setCategory(cat);
+    setPaymentType(cat); // DRIVER / TRANSPORTER
+
+    // 🔥 BACKEND ENUM MAPPING
+    setPurpose(
+      cat === "DRIVER"
+        ? "DRIVER_REGISTRATION"
+        : "TRANSPORTER_REGISTRATION"
+    );
 
     setStep(1);
   };
@@ -47,14 +55,18 @@ export default function PaymentsContent() {
       setLoading(true);
       setError("");
 
-      const res = await createPaymentOrder({
-        gdc_number: gdcRegistrationNumber.trim(),
-        category,      // DRIVER / TRANSPORTER
-        type: paymentType, // ✅ DRIVER / TRANSPORTER
-      });
+      const payload = {
+        gdc_number: gdcRegistrationNumber.trim(), // ✅ snake_case
+        type: paymentType, // DRIVER / TRANSPORTER
+        purpose,           // 🔥 REQUIRED
+      };
 
-      if (!res?.order_id) {
-        throw new Error("order_id missing from backend");
+      console.log("PAYMENT PAYLOAD 👉", payload);
+
+      const res = await createPaymentOrder(payload);
+
+      if (!res?.order_id && !res?.orderId) {
+        throw new Error("order id missing from backend");
       }
 
       setOrderData(res);
@@ -83,11 +95,14 @@ export default function PaymentsContent() {
 
     const options = {
       key: orderData.key,
-      order_id: orderData.order_id,
+      order_id: orderData.order_id || orderData.orderId,
       amount: orderData.amount,
       currency: orderData.currency,
       name: "WTL Payments",
-      description: `${category} Registration Fee`,
+      description:
+        purpose === "DRIVER_REGISTRATION"
+          ? "Driver Registration Fee"
+          : "Transporter Registration Fee",
 
       handler: async function (response) {
         try {
@@ -151,7 +166,7 @@ export default function PaymentsContent() {
       {step === 1 && (
         <div className="space-y-5">
           <div className="text-lg font-semibold text-slate-700">
-            {category === "DRIVER"
+            {purpose === "DRIVER_REGISTRATION"
               ? "Driver Registration Fee"
               : "Transporter Registration Fee"}
           </div>
@@ -180,7 +195,7 @@ export default function PaymentsContent() {
       {/* STEP 2: CONFIRM */}
       {step === 2 && (
         <div className="space-y-4">
-          <p><b>Category:</b> {category}</p>
+          <p><b>Purpose:</b> {purpose}</p>
           <p><b>GDC:</b> {gdcRegistrationNumber}</p>
           <p className="text-xl font-bold text-slate-800">
             Amount: ₹{amount}
