@@ -109,7 +109,13 @@ export default function TransporterDashboard() {
           highlight
         />
         <StatCard title="Active Drivers" value="18" icon={<Users />} />
-        <StatCard title="Notifications" value="3" icon={<Bell />} />
+       <StatCard
+  title="Notifications"
+  value="3"
+  icon={<Bell />}
+  onClick={() => navigate("/transporter/notifications")}
+/>
+
       </div>
 
       {/* MAIN ACTIONS */}

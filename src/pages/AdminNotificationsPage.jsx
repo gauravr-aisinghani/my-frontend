@@ -36,6 +36,7 @@ export default function AdminNotificationsPage() {
 
     try {
       const res = await api.get(`/api/driver-request/${requestId}`);
+
       const data = res.data
         ? {
             transporterRegistrationId:
@@ -56,7 +57,7 @@ export default function AdminNotificationsPage() {
     }
   };
 
-  // ===== ACCEPT DRIVER REQUEST =====
+  // ===== ACCEPT DRIVER REQUEST (FIXED) =====
   const confirmDriverRequest = async (notification) => {
     const requestId = notification.reference_id;
     if (!requestId) return;
@@ -64,14 +65,14 @@ export default function AdminNotificationsPage() {
     try {
       setAcceptingId(notification.id);
 
-      await api.put(`/api/driver-request/${requestId}/accept`);
+      // ✅ CORRECT ENDPOINT
+      await api.put(`/api/driver-request/accept/${requestId}`);
 
       // mark notification as read
       await api.post(
         `/api/notifications/admin/mark-read/${notification.id}`
       );
 
-      // update UI
       setNotifications((prev) =>
         prev.map((n) =>
           n.id === notification.id
