@@ -59,38 +59,39 @@ export default function AdminNotificationsPage() {
 
   // ===== ACCEPT DRIVER REQUEST (FIXED) =====
   const confirmDriverRequest = async (notification) => {
-    const requestId = notification.reference_id;
-    if (!requestId) return;
+  const requestId = notification.reference_id;
+  if (!requestId) return;
 
-    try {
-      setAcceptingId(notification.id);
+  try {
+    setAcceptingId(notification.id);
 
-      // ✅ CORRECT ENDPOINT
-      await api.put(`/api/driver-request/accept/${requestId}`);
+    // ✅ POST instead of PUT
+    await api.post(`/api/driver-request/accept/${requestId}`);
 
-      // mark notification as read
-      await api.post(
-        `/api/notifications/admin/mark-read/${notification.id}`
-      );
+    // mark notification as read
+    await api.post(
+      `/api/notifications/admin/mark-read/${notification.id}`
+    );
 
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notification.id
-            ? { ...n, is_read: true }
-            : n
-        )
-      );
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === notification.id
+          ? { ...n, is_read: true }
+          : n
+      )
+    );
 
-      alert(
-        "Driver request confirmed.\nTransporter notified to pay 20% amount."
-      );
-    } catch (e) {
-      console.error(e);
-      alert("Failed to confirm driver request");
-    } finally {
-      setAcceptingId(null);
-    }
-  };
+    alert(
+      "Driver request confirmed.\nTransporter notified to pay 20% amount."
+    );
+  } catch (e) {
+    console.error(e);
+    alert("Failed to confirm driver request");
+  } finally {
+    setAcceptingId(null);
+  }
+};
+
 
   // ===== MARK AS READ =====
   const markAsRead = async (id) => {
