@@ -7,7 +7,13 @@ export const getTransporterNotifications = async (mobile) => {
   const res = await axios.get(
     `${API_BASE}/transporter/${mobile}`
   );
-  return res.data;
+ return res.data.map(n => ({
+  ...n,
+  isRead: n.is_read,
+  createdAt: n.created_at,
+  referenceId: n.reference_id,
+}));
+
 };
 
 // ✅ Mark notification as read
