@@ -123,18 +123,31 @@ export default function AdminNotificationsPage() {
                 <>
                  <button
   onClick={() => toggleExpand(n)}
-  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
+  className="
+    flex items-center gap-2
+    px-4 py-2
+    rounded-lg
+    border border-blue-500
+    text-blue-600
+    bg-transparent
+    hover:bg-blue-50
+    hover:text-blue-700
+    transition
+  "
 >
   {expanded === n.id ? (
     <>
-      <ChevronUp size={16} /> Hide details
+      <ChevronUp size={16} />
+      Hide details
     </>
   ) : (
     <>
-      <ChevronDown size={16} /> View details
+      <ChevronDown size={16} />
+      View details
     </>
   )}
 </button>
+
 
 
                   {expanded === n.id && (
