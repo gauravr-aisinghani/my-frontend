@@ -28,9 +28,9 @@ export default function RaiseDriverRequest() {
 
     setForm((prev) => ({
       ...prev,
-      transporter_registration_id: context.transporterRegistrationId,
-      transporter_phone: context.userId, // userId → transporter_phone
-      gdc_number: context.gdcNumber,
+      transporter_registration_id: context.transporter_registration_id,
+      transporter_phone: context.user_id, // userId → transporter_phone
+      gdc_number: context.gdc_number,
     }));
   }, [navigate]);
 
