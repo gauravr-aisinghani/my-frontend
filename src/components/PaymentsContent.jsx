@@ -6,8 +6,8 @@ import {
 
 export default function PaymentsContent() {
   const [step, setStep] = useState(0);
-  const [category, setCategory] = useState("");
-  const [paymentType, setPaymentType] = useState("");
+  const [category, setCategory] = useState(""); // DRIVER / TRANSPORTER
+  const [paymentType, setPaymentType] = useState(""); // DRIVER / TRANSPORTER
   const [gdcRegistrationNumber, setGdcRegistrationNumber] = useState("");
   const [amount, setAmount] = useState(null);
   const [orderData, setOrderData] = useState(null);
@@ -28,12 +28,8 @@ export default function PaymentsContent() {
     resetFlow();
     setCategory(cat);
 
-    // 👇 auto-select registration type
-    if (cat === "DRIVER") {
-      setPaymentType("DRIVER_REGISTRATION");
-    } else {
-      setPaymentType("TRANSPORTER_REGISTRATION");
-    }
+    // ✅ BACKEND-COMPATIBLE ENUM
+    setPaymentType(cat); // DRIVER or TRANSPORTER
 
     setStep(1);
   };
@@ -53,8 +49,8 @@ export default function PaymentsContent() {
 
       const res = await createPaymentOrder({
         gdc_number: gdcRegistrationNumber.trim(),
-        category,
-        type: paymentType,
+        category,      // DRIVER / TRANSPORTER
+        type: paymentType, // ✅ DRIVER / TRANSPORTER
       });
 
       if (!res?.order_id) {
@@ -136,7 +132,7 @@ export default function PaymentsContent() {
               text-white font-semibold text-lg
               hover:scale-105 transition-transform shadow-lg"
           >
-            🚚 Driver Registration
+            🚚 Driver Registration Fee
           </div>
 
           <div
@@ -146,7 +142,7 @@ export default function PaymentsContent() {
               text-white font-semibold text-lg
               hover:scale-105 transition-transform shadow-lg"
           >
-            🏢 Transporter Registration
+            🏢 Transporter Registration Fee
           </div>
         </div>
       )}
@@ -164,7 +160,8 @@ export default function PaymentsContent() {
             value={gdcRegistrationNumber}
             onChange={(e) => setGdcRegistrationNumber(e.target.value)}
             placeholder="Enter GDC Registration Number"
-            className="w-full p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-4 border rounded-xl
+              focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           {error && <p className="text-red-600">{error}</p>}
