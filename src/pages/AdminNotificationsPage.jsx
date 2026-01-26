@@ -121,20 +121,21 @@ export default function AdminNotificationsPage() {
               {/* EXPAND */}
               {n.type === "DRIVER_REQUEST" && (
                 <>
-                  <button
-                    onClick={() => toggleExpand(n)}
-                    className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 min-w-[200px]"
-                  >
-                    {expanded === n.id ? (
-                      <>
-                        <ChevronUp size={16} /> Hide details
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown size={16} /> View request details
-                      </>
-                    )}
-                  </button>
+                 <button
+  onClick={() => toggleExpand(n)}
+  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
+>
+  {expanded === n.id ? (
+    <>
+      <ChevronUp size={16} /> Hide details
+    </>
+  ) : (
+    <>
+      <ChevronDown size={16} /> View details
+    </>
+  )}
+</button>
+
 
                   {expanded === n.id && (
                     <div className="mt-4 grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-xl">
@@ -167,7 +168,7 @@ export default function AdminNotificationsPage() {
               )}
 
               {/* ACTIONS */}
-              <div className="mt-6 flex flex-wrap gap-3 justify-between items-center">
+              <div className="mt-6 flex flex-wrap gap-4 items-center">
                 <button
                   onClick={() =>
                     alert(
@@ -180,13 +181,14 @@ export default function AdminNotificationsPage() {
                 </button>
 
                 {!n.is_read && (
-                  <button
-                    onClick={() => markAsRead(n.id)}
-                    className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 min-w-[200px]"
-                  >
-                    <CheckCircle size={18} />
-                    Mark as read
-                  </button>
+                <button
+  onClick={() => markAsRead(n.id)}
+  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition"
+>
+  <CheckCircle size={16} />
+  Mark as read
+</button>
+
                 )}
               </div>
             </div>
