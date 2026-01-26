@@ -56,23 +56,39 @@ export default function EntrySelection() {
   };
 
   // ================= VERIFY OTP =================
-  const verifyOtp = () => {
-    if (otp.length !== 6) {
-      setError("Enter valid 6 digit OTP");
-      return;
-    }
+ const verifyOtp = () => {
+  if (otp.length !== 6) {
+    setError("Enter valid 6 digit OTP");
+    return;
+  }
 
-    if (otp !== generatedOtp) {
-      setError("Invalid OTP");
-      return;
-    }
+  if (otp !== generatedOtp) {
+    setError("Invalid OTP");
+    return;
+  }
 
-    if (loginRole === "TRANSPORTER") {
-      navigate("/transporter-dashboard");
-    } else {
-      navigate("/driver/dashboard");
-    }
+  // 🔥 Normally ye backend response hoga
+  const loginResponse = {
+    role: loginRole,
+    userId: mobile,
+    transporterRegistrationId: "TR-10021",
+    driverRegistrationId: null,
+    gdcNumber: "GDC-TR-8899",
   };
+
+  // ✅ SAVE CONTEXT
+  localStorage.setItem(
+    "user_context",
+    JSON.stringify(loginResponse)
+  );
+
+  if (loginRole === "TRANSPORTER") {
+    navigate("/transporter/dashboard");
+  } else {
+    navigate("/driver/dashboard");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-white">

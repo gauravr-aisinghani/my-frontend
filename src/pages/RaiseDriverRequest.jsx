@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import jwtDecode from "jwt-decode";
 import transporterDriverRequestApi from "../api/transporterDriverRequestApi";
 
 export default function RaiseDriverRequest() {
@@ -9,30 +8,29 @@ export default function RaiseDriverRequest() {
   const [form, setForm] = useState({
     transporter_registration_id: "",
     transporter_phone: "",
-
     gdc_number: "",
+
     vehicle_number: "",
     route: "",
     monthly_salary: "",
     remarks: "",
   });
 
-  // 🔹 Page load pe token se values set karo
+  // 🔥 Page load pe login context uthao
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const context = JSON.parse(localStorage.getItem("user_context"));
 
-    if (!token) {
-      alert("Session expired. Please login again.");
+    if (!context || context.role !== "TRANSPORTER") {
+      alert("Unauthorized access");
       navigate("/login");
       return;
     }
 
-    const decoded = jwtDecode(token);
-
     setForm((prev) => ({
       ...prev,
-      transporter_registration_id: decoded.transporter_registration_id,
-      transporter_phone: decoded.sub, // 🔥 user_id → transporter_phone
+      transporter_registration_id: context.transporterRegistrationId,
+      transporter_phone: context.userId, // userId → transporter_phone
+      gdc_number: context.gdcNumber,
     }));
   }, [navigate]);
 
@@ -48,6 +46,7 @@ export default function RaiseDriverRequest() {
       alert("Driver request raised successfully");
       navigate("/transporter/dashboard");
     } catch (err) {
+      console.error(err);
       alert("Failed to raise request");
     }
   };
@@ -58,29 +57,29 @@ export default function RaiseDriverRequest() {
         onSubmit={handleSubmit}
         className="bg-white w-full max-w-4xl rounded-xl shadow p-8"
       >
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+        <h2 className="text-2xl font-semibold mb-6">
           Raise Driver Requirement
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <input
             name="gdc_number"
-            placeholder="GDC Number"
-            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
-            onChange={handleChange}
+            value={form.gdc_number}
+            disabled
+            className="border rounded-lg px-4 py-3 bg-gray-100"
           />
 
           <input
             name="vehicle_number"
             placeholder="Vehicle Number"
-            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
+            className="border rounded-lg px-4 py-3"
             onChange={handleChange}
           />
 
           <input
             name="route"
             placeholder="Route"
-            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
+            className="border rounded-lg px-4 py-3"
             onChange={handleChange}
           />
 
@@ -88,7 +87,7 @@ export default function RaiseDriverRequest() {
             name="monthly_salary"
             type="number"
             placeholder="Monthly Salary"
-            className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
+            className="border rounded-lg px-4 py-3"
             onChange={handleChange}
           />
 
@@ -96,7 +95,7 @@ export default function RaiseDriverRequest() {
             name="remarks"
             placeholder="Remarks"
             rows="2"
-            className="md:col-span-3 border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
+            className="md:col-span-3 border rounded-lg px-4 py-3"
             onChange={handleChange}
           />
         </div>
@@ -114,7 +113,7 @@ export default function RaiseDriverRequest() {
             type="submit"
             className="px-6 py-2 bg-green-600 text-white rounded-lg"
           >
-            Save & Continue →
+            Submit Request
           </button>
         </div>
       </form>
