@@ -2,7 +2,6 @@ import api from "./axiosInstance";
 
 /**
  * CREATE PAYMENT ORDER
- * purpose: enum string (TRANSPORTER_ADVANCE | MANUAL_TOPUP | MONTHLY_SETTLEMENT)
  */
 export const createPaymentOrder = async ({
   gdc_number,
@@ -10,15 +9,25 @@ export const createPaymentOrder = async ({
   purpose,
   amount,
 }) => {
-  const res = await api.post("/api/payments/create-order", {
+
+  const payload = {
     gdc_number,
     type,
-    purpose, // 🔥 IMPORTANT (enum value)
-    amount,  // optional (monthly settlement me backend calculate karega)
-  });
+    purpose,
+  };
+
+  // only when manual topup
+  if (amount !== undefined && amount !== null) {
+    payload.amount = amount;
+  }
+
+  console.log("CREATE PAYMENT PAYLOAD 👉", payload);
+
+  const res = await api.post("/api/payments/create-order", payload);
 
   return res.data;
 };
+
 
 /**
  * VERIFY PAYMENT
@@ -28,11 +37,16 @@ export const verifyPayment = async ({
   razorpay_payment_id,
   razorpay_signature,
 }) => {
-  const res = await api.post("/api/payments/verify", {
+
+  const payload = {
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
-  });
+  };
+
+  console.log("VERIFY PAYMENT PAYLOAD 👉", payload);
+
+  const res = await api.post("/api/payments/verify", payload);
 
   return res.data;
 };

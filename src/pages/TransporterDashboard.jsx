@@ -13,29 +13,27 @@ import {
 } from "../api/paymentsApi";
 
 export default function TransporterDashboard() {
+
   const navigate = useNavigate();
 
   const [showWallet, setShowWallet] = useState(false);
   const [showPayments, setShowPayments] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔥 TOPUP STATES
   const [showTopup, setShowTopup] = useState(false);
   const [topupAmount, setTopupAmount] = useState("");
 
-  const userContext = JSON.parse(
-    localStorage.getItem("user_context") || "{}"
-  );
+  const userContext = JSON.parse(localStorage.getItem("user_context") || "{}");
 
   const gdc_number = userContext?.gdc_number;
   const type = "TRANSPORTER";
 
-  // ===============================
-  // COMMON PAYMENT HANDLER
-  // ===============================
+  // ================= PAYMENT HANDLER =================
+
   const handlePayment = async (purpose, amount = null) => {
+
     if (!gdc_number) {
-      alert("GDC number missing. Please login again.");
+      alert("GDC missing. Login again.");
       return;
     }
 
@@ -43,28 +41,34 @@ export default function TransporterDashboard() {
       setLoading(true);
 
       const payload = {
-        gdc_number,   // ✅ snake_case
+        gdc_number,
         type,
-        purpose,      // ✅ enum string
+        purpose,
       };
 
-      // 🔥 only for MANUAL_TOPUP
-      if (amount !== null) {
-        payload.amount = amount;
-      }
+      if (amount !== null) payload.amount = amount;
 
-      console.log("PAYMENT PAYLOAD 👉", payload);
+      console.log("CREATE ORDER 👉", payload);
 
       const order = await createPaymentOrder(payload);
+
+      if (!order?.orderId) {
+        alert("Order ID missing from backend");
+        return;
+      }
 
       const options = {
         key: order.key,
         amount: order.amount,
         currency: order.currency,
-        order_id: order.orderId,
+        order_id: order.orderId, // ✅ VERY IMPORTANT
         name: "Transporter Payments",
         description: purpose.replaceAll("_", " "),
+
         handler: async (response) => {
+
+          console.log("RAZORPAY RESPONSE 👉", response);
+
           await verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
@@ -77,13 +81,15 @@ export default function TransporterDashboard() {
           setShowTopup(false);
           setTopupAmount("");
         },
+
         theme: { color: "#16a34a" },
       };
 
       new window.Razorpay(options).open();
+
     } catch (err) {
       console.error(err);
-      alert("Payment failed ❌");
+      alert(err?.response?.data?.message || "Payment failed");
     } finally {
       setLoading(false);
     }
@@ -91,11 +97,12 @@ export default function TransporterDashboard() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+
       <h1 className="text-3xl font-bold mb-8 text-gray-800">
         Transporter Dashboard
       </h1>
 
-      {/* ===== TOP STATS ===== */}
+      {/* TOP STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
           title="Wallet Balance"
@@ -108,42 +115,40 @@ export default function TransporterDashboard() {
         <StatCard title="Notifications" value="3" icon={<Bell />} />
       </div>
 
-      {/* ===== MAIN ACTIONS ===== */}
+      {/* MAIN ACTIONS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
         <ActionCard
           title="Raise Driver Requirement"
-          desc="Need more drivers? Raise a requirement request."
+          desc="Need more drivers?"
           button="Raise Request"
           onClick={() => navigate("/transporter/raise-driver-request")}
         />
 
         <ActionCard
           title="Payments"
-          desc="Manage advances, wallet & settlements"
+          desc="Advance, wallet & settlement"
           button="Open Payments"
           onClick={() => setShowPayments(true)}
           icon={<CreditCard />}
           highlight
         />
+
       </div>
 
-      {/* ===== PAYMENTS MODAL ===== */}
+      {/* PAYMENTS MODAL */}
       {showPayments && (
         <Modal title="Payments" onClose={() => setShowPayments(false)}>
           <div className="space-y-3">
 
-            {/* TRANSPORTER ADVANCE */}
             <PaymentOption
               text="Make advance for driver"
               disabled={loading}
-              onClick={() =>
-                handlePayment("TRANSPORTER_ADVANCE")
-              }
+              onClick={() => handlePayment("TRANSPORTER_ADVANCE")}
             />
 
-            {/* MANUAL TOPUP */}
             <PaymentOption
-              text="Add to your wallet"
+              text="Add to wallet"
               disabled={loading}
               onClick={() => {
                 setShowPayments(false);
@@ -151,24 +156,20 @@ export default function TransporterDashboard() {
               }}
             />
 
-            {/* MONTHLY SETTLEMENT */}
             <PaymentOption
               text="Monthly settlement"
               disabled={loading}
-              onClick={() =>
-                handlePayment("MONTHLY_SETTLEMENT")
-              }
+              onClick={() => handlePayment("MONTHLY_SETTLEMENT")}
             />
+
           </div>
         </Modal>
       )}
 
-      {/* ===== TOPUP MODAL ===== */}
+      {/* TOPUP MODAL */}
       {showTopup && (
-        <Modal
-          title="Add Money to Wallet"
-          onClose={() => setShowTopup(false)}
-        >
+        <Modal title="Add Wallet Amount" onClose={() => setShowTopup(false)}>
+
           <input
             type="number"
             placeholder="Enter amount"
@@ -180,73 +181,56 @@ export default function TransporterDashboard() {
           <button
             disabled={!topupAmount || loading}
             onClick={() =>
-              handlePayment(
-                "MANUAL_TOPUP",
-                Number(topupAmount)
-              )
+              handlePayment("MANUAL_TOPUP", Number(topupAmount))
             }
             className="w-full bg-green-600 text-white py-3 rounded-xl disabled:opacity-50"
           >
             Pay ₹{topupAmount || 0}
           </button>
+
         </Modal>
       )}
+
     </div>
   );
 }
 
-/* ===== SAME COMPONENTS (UNCHANGED) ===== */
+/* ===== UI COMPONENTS ===== */
 
 function StatCard({ title, value, icon, onClick, highlight }) {
   return (
     <div
       onClick={onClick}
-      className={`cursor-pointer bg-white rounded-2xl p-5 flex justify-between items-center
-      border transition hover:shadow-lg
+      className={`cursor-pointer bg-white rounded-2xl p-5 flex justify-between items-center border hover:shadow
       ${highlight ? "border-green-500" : "border-gray-200"}`}
     >
       <div>
         <p className="text-sm text-gray-500">{title}</p>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-2xl font-bold">{value}</p>
       </div>
-      <div className="bg-green-100 p-3 rounded-xl text-green-600">
-        {icon}
-      </div>
+      <div className="bg-green-100 p-3 rounded-xl text-green-600">{icon}</div>
     </div>
   );
 }
 
-function ActionCard({
-  title,
-  desc,
-  button,
-  onClick,
-  children,
-  icon,
-  highlight,
-}) {
+function ActionCard({ title, desc, button, onClick, icon, highlight }) {
   return (
-    <div
-      className={`bg-white rounded-2xl p-5 border transition hover:shadow-lg
-      ${highlight ? "border-green-500" : "border-gray-200"}`}
-    >
-      <div className="flex items-center gap-2 mb-2">
-        {icon && <div className="text-green-600">{icon}</div>}
-        <h2 className="font-semibold text-lg">{title}</h2>
+    <div className={`bg-white rounded-2xl p-5 border hover:shadow
+      ${highlight ? "border-green-500" : "border-gray-200"}`}>
+
+      <div className="flex gap-2 mb-2">
+        {icon}
+        <h2 className="font-semibold">{title}</h2>
       </div>
 
       <p className="text-sm text-gray-600">{desc}</p>
 
-      {children}
-
-      {button && (
-        <button
-          onClick={onClick}
-          className="mt-5 w-full bg-green-600 text-white py-2.5 rounded-xl hover:bg-green-700 transition"
-        >
-          {button}
-        </button>
-      )}
+      <button
+        onClick={onClick}
+        className="mt-5 w-full bg-green-600 text-white py-2.5 rounded-xl"
+      >
+        {button}
+      </button>
     </div>
   );
 }
@@ -255,12 +239,9 @@ function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white w-full max-w-md rounded-2xl p-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg">{title}</h2>
-          <X
-            className="cursor-pointer text-gray-600 hover:text-black"
-            onClick={onClose}
-          />
+        <div className="flex justify-between mb-4">
+          <h2 className="font-semibold">{title}</h2>
+          <X onClick={onClose} className="cursor-pointer" />
         </div>
         {children}
       </div>
@@ -273,8 +254,7 @@ function PaymentOption({ text, onClick, disabled }) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-full border border-gray-200 rounded-xl py-3 px-4 text-left
-      hover:bg-green-50 transition disabled:opacity-50"
+      className="w-full border rounded-xl py-3 px-4 text-left hover:bg-green-50 disabled:opacity-50"
     >
       {text}
     </button>
