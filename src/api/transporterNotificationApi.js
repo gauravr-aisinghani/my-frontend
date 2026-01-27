@@ -1,11 +1,11 @@
-import axios from "axios";
+import api from "./axiosInstance";
 
 const API_BASE = "/api/notifications";
 
 export const getTransporterNotifications = async (mobile) => {
-  const res = await axios.get(
-    `${API_BASE}/transporter/${mobile}`
-  );
+  const res = await api.get(`${API_BASE}/transporter/${mobile}`, {
+    headers: { "Cache-Control": "no-cache" },
+  });
 
   return res.data.map((n) => ({
     ...n,
@@ -16,7 +16,5 @@ export const getTransporterNotifications = async (mobile) => {
 };
 
 export const markNotificationRead = async (id) => {
-  await axios.post(
-    `${API_BASE}/mark-read/${id}`
-  );
+  await api.post(`${API_BASE}/mark-read/${id}`);
 };
