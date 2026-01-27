@@ -55,6 +55,7 @@ import DriverLedger from "./pages/operations/DriverLedger.jsx";
 import TransporterDashboard from "./pages/TransporterDashboard.jsx";
 import RaiseDriverRequest from "./pages/RaiseDriverRequest.jsx";
 import TransporterNotificationsPage from "./pages/TransporterNotificationsPage.jsx";
+import TransporterWallet from "./pages/TransporterWallet.jsx";
 
 function App() {
   return (
@@ -71,6 +72,9 @@ function App() {
           <Route path="/driver/signup" element={<DriverRegistrationPage />} />
           <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
            <Route path="/transporter-notification" element={<TransporterNotificationsPage />} />
+
+           <Route path="/transporter/wallet" element={<TransporterWallet/>}/>
+
 <Route
   path="/transporter-notification/:mobile"
   element={<TransporterNotificationsPage />}
