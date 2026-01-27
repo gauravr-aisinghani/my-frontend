@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
+
 import {
   Bell,
   Truck,
@@ -17,6 +19,7 @@ export default function AdminNotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [acceptingId, setAcceptingId] = useState(null);
+const navigate = useNavigate();
 
   // ===== FETCH NOTIFICATIONS =====
   const fetchNotifications = async () => {
@@ -217,20 +220,27 @@ export default function AdminNotificationsPage() {
 
               {/* ACTIONS */}
               <div className="mt-6 flex flex-wrap gap-4 items-center">
-                {n.type === "DRIVER_REQUEST" && (
-                  <button
-                    disabled={n.is_read || acceptingId === n.id}
-                    onClick={() => confirmDriverRequest(n)}
-                    className={`px-5 py-2 rounded-lg min-w-[220px] text-white transition ${
-                      n.is_read
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
-                  >
-                    {acceptingId === n.id
-                      ? "Confirming..."
-                      : "Confirm Driver Request"}
-                  </button>
+                {(n.type === "DRIVER_REQUEST" || n.type === "DRIVER_ASSIGN") && (
+                <button
+  disabled={n.is_read || acceptingId === n.id}
+  onClick={() =>
+    n.type === "DRIVER_ASSIGN"
+      ? navigate(`/admin/assign-driver/${n.reference_id}`)
+      : confirmDriverRequest(n)
+  }
+  className={`px-5 py-2 rounded-lg min-w-[220px] text-white transition ${
+    n.is_read
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-green-600 hover:bg-green-700"
+  }`}
+>
+  {acceptingId === n.id
+    ? "Processing..."
+    : n.type === "DRIVER_ASSIGN"
+    ? "Assign Driver"
+    : "Confirm Driver Request"}
+</button>
+
                 )}
 
                 {!n.is_read && (
