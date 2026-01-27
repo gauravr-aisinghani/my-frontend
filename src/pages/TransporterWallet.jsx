@@ -46,10 +46,10 @@ export default function TransporterWallet(){
         <tbody>
           {txns.map((t,i)=>(
             <tr key={i} className="border-t">
-              <td className="p-2">{t.txnType}</td>
+              <td className="p-2">{t.txn_type}</td>
               <td>{t.purpose}</td>
               <td>₹{t.amount}</td>
-              <td>₹{t.closingBalance}</td>
+              <td>₹{t.closing_balance}</td>
             </tr>
           ))}
         </tbody>
