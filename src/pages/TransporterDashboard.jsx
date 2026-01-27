@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Wallet,
-  Users,
-  Bell,
-  CreditCard,
-  X,
-} from "lucide-react";
+import { Wallet, Users, CreditCard, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   createPaymentOrder,
@@ -26,20 +20,19 @@ export default function TransporterDashboard() {
     localStorage.getItem("user_context") || "{}"
   );
 
-const mobile = userContext?.user_id;
+  const mobile = userContext?.user_id;
   const gdc_number = userContext?.gdc_number;
 
-  // ===== FETCH TRANSPORTER NOTIFICATIONS (ADMIN STYLE) =====
+  // 🔔 fetch notification count
   const fetchNotifications = async () => {
     if (!mobile) return;
-
     try {
       const res = await api.get(
         `/api/notifications/transporter/${mobile}`
       );
       setNotifications(res.data || []);
     } catch (e) {
-      console.error("Failed to fetch notifications", e);
+      console.error(e);
     }
   };
 
@@ -47,7 +40,7 @@ const mobile = userContext?.user_id;
     fetchNotifications();
   }, [mobile]);
 
-  // ===== PAYMENT HANDLER =====
+  // 💳 payment handler
   const handlePayment = async (purpose, amount = null) => {
     try {
       setLoading(true);
@@ -85,7 +78,7 @@ const mobile = userContext?.user_id;
       };
 
       new window.Razorpay(options).open();
-    } catch (e) {
+    } catch {
       alert("Payment failed");
     } finally {
       setLoading(false);
@@ -94,48 +87,23 @@ const mobile = userContext?.user_id;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Transporter Dashboard
-        </h1>
-
-        {/* 🔔 NOTIFICATION BELL */}
-        <div
-          className="relative cursor-pointer"
-          onClick={() =>
-            navigate("/transporter-notification")
-          }
-        >
-          <Bell className="w-6 h-6 text-gray-700" />
-          {notifications.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold">
-              {notifications.length}
-            </span>
-          )}
-        </div>
-      </div>
+      <h1 className="text-3xl font-bold mb-8">
+        Transporter Dashboard
+      </h1>
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard
-          title="Wallet Balance"
-          value="₹45,000"
-          icon={<Wallet />}
-        />
+        <StatCard title="Wallet Balance" value="₹45,000" icon={<Wallet />} />
+        <StatCard title="Active Drivers" value="18" icon={<Users />} />
 
-        <StatCard
-          title="Active Drivers"
-          value="18"
-          icon={<Users />}
-        />
-
+        {/* 🔔 Notification CARD ONLY */}
         <StatCard
           title="Notifications"
           value={notifications.length}
-          icon={<Bell />}
           onClick={() =>
-            navigate("/transporter-notification")
+            navigate(
+              `/transporter-notification/${mobile}`
+            )
           }
         />
       </div>
@@ -187,7 +155,6 @@ const mobile = userContext?.user_id;
         </Modal>
       )}
 
-      {/* TOPUP MODAL */}
       {showTopup && (
         <Modal onClose={() => setShowTopup(false)}>
           <input
@@ -217,7 +184,7 @@ const mobile = userContext?.user_id;
   );
 }
 
-/* ===== UI HELPERS ===== */
+/* UI helpers */
 
 function StatCard({ title, value, icon, onClick }) {
   return (
@@ -233,9 +200,11 @@ function StatCard({ title, value, icon, onClick }) {
           {value}
         </p>
       </div>
-      <div className="bg-green-100 p-3 rounded-xl text-green-600">
-        {icon}
-      </div>
+      {icon && (
+        <div className="bg-green-100 p-3 rounded-xl text-green-600">
+          {icon}
+        </div>
+      )}
     </div>
   );
 }

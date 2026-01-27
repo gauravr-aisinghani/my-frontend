@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  Bell,
   Truck,
   CheckCircle,
   ChevronDown,
   ChevronUp,
   CreditCard,
 } from "lucide-react";
+import { useParams } from "react-router-dom";
 import api from "../api/axiosInstance";
 import {
   createPaymentOrder,
@@ -20,6 +20,8 @@ import {
 const PAGE_SIZE = 5;
 
 export default function TransporterNotificationsPage() {
+  const { mobile } = useParams(); // ✅ MAIN FIX
+
   const [notifications, setNotifications] = useState([]);
   const [expanded, setExpanded] = useState(null);
   const [requestCache, setRequestCache] = useState({});
@@ -30,25 +32,16 @@ export default function TransporterNotificationsPage() {
   const userContext = JSON.parse(
     localStorage.getItem("user_context") || "{}"
   );
-
-const transporterMobile = userContext?.user_id;
   const gdc_number = userContext?.gdc_number;
 
-  // ===== FETCH TRANSPORTER NOTIFICATIONS =====
-
-
-
   const fetchNotifications = async () => {
-
-      if (!transporterMobile) {
-  console.warn("❌ transporterMobile missing");
-  return;
-}
+    if (!mobile) return;
     try {
       setLoading(true);
-      const data = await getTransporterNotifications(
-        transporterMobile
-      );
+      const data =
+        await getTransporterNotifications(
+          mobile
+        );
       setNotifications(data || []);
     } catch (e) {
       console.error(e);
@@ -57,94 +50,59 @@ const transporterMobile = userContext?.user_id;
     }
   };
 
-  // ===== FETCH REQUEST DETAILS (ON CLICK) =====
-  const fetchRequestDetail = async (requestId) => {
-    if (!requestId || requestCache[requestId]) return;
+  useEffect(() => {
+    fetchNotifications();
+  }, [mobile]);
 
-    try {
-      const res = await api.get(
-        `/api/driver-request/${requestId}`
-      );
+  const fetchRequestDetail = async (id) => {
+    if (!id || requestCache[id]) return;
+    const res = await api.get(
+      `/api/driver-request/${id}`
+    );
+    if (!res.data) return;
 
-      if (!res.data) return;
-
-      setRequestCache((prev) => ({
-        ...prev,
-        [requestId]: {
-          gdcNumber: res.data.gdc_number,
-          route: res.data.route,
-          monthlySalary: res.data.monthly_salary,
-        },
-      }));
-    } catch (e) {
-      console.error(e);
-    }
+    setRequestCache((p) => ({
+      ...p,
+      [id]: {
+        gdcNumber: res.data.gdc_number,
+        route: res.data.route,
+        monthlySalary: res.data.monthly_salary,
+      },
+    }));
   };
 
-  // ===== MAKE ADVANCE PAYMENT =====
-  const makeAdvancePayment = async (notification) => {
+  const makeAdvancePayment = async (n) => {
     try {
-      setPayingId(notification.id);
+      setPayingId(n.id);
+      const order =
+        await createPaymentOrder({
+          gdc_number,
+          type: "TRANSPORTER",
+          purpose: "TRANSPORTER_ADVANCE",
+        });
 
-      const order = await createPaymentOrder({
-        gdc_number,
-        type: "TRANSPORTER",
-        purpose: "TRANSPORTER_ADVANCE",
-      });
-
-      const options = {
+      new window.Razorpay({
         key: order.key,
         amount: order.amount,
         currency: order.currency,
         order_id: order.order_id,
-        name: "Driver Advance Payment",
-        handler: async (response) => {
-          await verifyPayment({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-          });
-
-          alert("Advance payment successful ✅");
-
-          await markNotificationRead(notification.id);
+        handler: async (r) => {
+          await verifyPayment(r);
+          await markNotificationRead(n.id);
           fetchNotifications();
         },
-        theme: { color: "#16a34a" },
-      };
-
-      new window.Razorpay(options).open();
-    } catch (e) {
-      console.error(e);
-      alert("Payment failed");
+      }).open();
     } finally {
       setPayingId(null);
     }
   };
 
-  // ===== MARK AS READ =====
-  const markAsRead = async (id) => {
-    await markNotificationRead(id);
-    setNotifications((prev) =>
-      prev.map((n) =>
-        n.id === id ? { ...n, isRead: true } : n
-      )
-    );
-  };
-
   const toggleExpand = (n) => {
     setExpanded(expanded === n.id ? null : n.id);
-    if (n.referenceId) {
+    if (n.referenceId)
       fetchRequestDetail(n.referenceId);
-    }
   };
-useEffect(() => {
-  fetchNotifications();
-}, []);
 
-
-
-  // ===== PAGINATION =====
   const start = (page - 1) * PAGE_SIZE;
   const pageData = notifications.slice(
     start,
@@ -156,139 +114,113 @@ useEffect(() => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-8 flex items-center gap-3">
-        <Bell className="text-green-600" />
+      <h1 className="text-3xl font-semibold mb-8">
         Transporter Notifications
       </h1>
 
       {loading && (
-        <p className="text-gray-500">
-          Loading notifications…
-        </p>
+        <p>Loading notifications…</p>
       )}
 
-      <div className="space-y-6">
-        {pageData.map((n) => {
-          const request =
-            requestCache[n.referenceId];
-
-          return (
-            <div
-              key={n.id}
-              className={`rounded-2xl border p-6 shadow-sm ${
-                n.isRead
-                  ? "bg-white border-gray-200"
-                  : "bg-green-50 border-green-400"
-              }`}
-            >
-              {/* HEADER */}
-              <div className="flex justify-between">
-                <div className="flex gap-2 items-center">
-                  <Truck className="text-green-600" />
-                  <h2 className="font-semibold">
-                    {n.title}
-                  </h2>
-                </div>
-                <span className="text-xs text-gray-400">
-                  {new Date(
-                    n.createdAt
-                  ).toLocaleString()}
-                </span>
+      {pageData.map((n) => {
+        const request =
+          requestCache[n.referenceId];
+        return (
+          <div
+            key={n.id}
+            className={`rounded-2xl border p-6 mb-5 ${
+              n.isRead
+                ? "bg-white"
+                : "bg-green-50 border-green-400"
+            }`}
+          >
+            <div className="flex justify-between">
+              <div className="flex gap-2 items-center">
+                <Truck className="text-green-600" />
+                <b>{n.title}</b>
               </div>
+              <small>
+                {new Date(
+                  n.createdAt
+                ).toLocaleString()}
+              </small>
+            </div>
 
-              <p className="text-sm text-gray-600 mt-2">
-                {n.message}
-              </p>
+            <p className="mt-2">{n.message}</p>
 
-              {/* DETAILS TOGGLE */}
-              {n.referenceId && (
-                <button
-                  onClick={() => toggleExpand(n)}
-                  className="mt-4 flex gap-2 px-4 py-2 border rounded-lg text-green-600 hover:bg-green-50"
-                >
-                  {expanded === n.id ? (
-                    <>
-                      <ChevronUp size={16} />
-                      Hide details
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={16} />
-                      View details
-                    </>
-                  )}
-                </button>
-              )}
+            {n.referenceId && (
+              <button
+                onClick={() => toggleExpand(n)}
+                className="mt-3 text-green-600"
+              >
+                {expanded === n.id ? (
+                  <ChevronUp />
+                ) : (
+                  <ChevronDown />
+                )}
+              </button>
+            )}
 
-              {/* DETAILS */}
-              {expanded === n.id && request && (
-                <div className="mt-4 grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl text-sm">
+            {expanded === n.id &&
+              request && (
+                <div className="mt-3 bg-gray-50 p-3 rounded">
+                  <p>GDC: {request.gdcNumber}</p>
+                  <p>Route: {request.route}</p>
                   <p>
-                    <b>GDC:</b> {request.gdcNumber}
-                  </p>
-                  <p>
-                    <b>Route:</b> {request.route}
-                  </p>
-                  <p>
-                    <b>Salary:</b> ₹
+                    Salary: ₹
                     {request.monthlySalary}
                   </p>
                 </div>
               )}
 
-              {/* ACTIONS */}
-              <div className="mt-6 flex gap-4 flex-wrap">
+            <div className="mt-4 flex gap-3">
+              <button
+                disabled={
+                  payingId === n.id || n.isRead
+                }
+                onClick={() =>
+                  makeAdvancePayment(n)
+                }
+                className="bg-green-600 text-white px-4 py-2 rounded"
+              >
+                <CreditCard size={14} /> Pay
+                Advance
+              </button>
+
+              {!n.isRead && (
                 <button
-                  disabled={payingId === n.id || n.isRead}
                   onClick={() =>
-                    makeAdvancePayment(n)
+                    markNotificationRead(n.id)
                   }
-                  className="px-5 py-2 rounded-lg bg-green-600 text-white disabled:opacity-50"
+                  className="bg-green-100 px-4 py-2 rounded"
                 >
-                  <CreditCard
-                    size={16}
-                    className="inline mr-1"
-                  />
-                  Pay 20% Advance
+                  <CheckCircle size={14} />{" "}
+                  Mark Read
                 </button>
-
-                {!n.isRead && (
-                  <button
-                    onClick={() =>
-                      markAsRead(n.id)
-                    }
-                    className="px-4 py-2 rounded-lg bg-green-100 text-green-700"
-                  >
-                    <CheckCircle
-                      size={16}
-                      className="inline mr-1"
-                    />
-                    Mark as read
-                  </button>
-                )}
-              </div>
+              )}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
 
-      {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-4 mt-10">
+        <div className="flex justify-center gap-4">
           <button
             disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="px-4 py-2 rounded border"
+            onClick={() =>
+              setPage(page - 1)
+            }
           >
             Prev
           </button>
-          <span className="px-4 py-2">
+          <span>
             Page {page} of {totalPages}
           </span>
           <button
             disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-4 py-2 rounded border"
+            onClick={() =>
+              setPage(page + 1)
+            }
           >
             Next
           </button>

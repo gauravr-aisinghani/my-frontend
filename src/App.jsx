@@ -71,6 +71,10 @@ function App() {
           <Route path="/driver/signup" element={<DriverRegistrationPage />} />
           <Route path="/transporter/signup" element={<TransporterRegistrationPage />} />
            <Route path="/transporter-notification" element={<TransporterNotificationsPage />} />
+<Route
+  path="/transporter-notification/:mobile"
+  element={<TransporterNotificationsPage />}
+/>
 
 
           {/* 🌍 PUBLIC PAYMENT */}
