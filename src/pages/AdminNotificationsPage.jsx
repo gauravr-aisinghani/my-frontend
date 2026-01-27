@@ -70,7 +70,7 @@ export default function AdminNotificationsPage() {
 
     // mark notification as read
     await api.post(
-      `/api/notifications/admin/mark-read/${notification.id}`
+      `/api/notifications/mark-read/${notification.id}`
     );
 
     setNotifications((prev) =>
@@ -96,7 +96,7 @@ export default function AdminNotificationsPage() {
   // ===== MARK AS READ =====
   const markAsRead = async (id) => {
     try {
-      await api.post(`/api/notifications/admin/mark-read/${id}`);
+      await api.post(`/api/notifications/mark-read/${id}`);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
