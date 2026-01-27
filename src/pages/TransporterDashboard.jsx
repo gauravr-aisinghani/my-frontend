@@ -135,7 +135,7 @@ const mobile = userContext?.user_id;
           value={notifications.length}
           icon={<Bell />}
           onClick={() =>
-            navigate("/transporter/notifications")
+            navigate("/transporter-notification")
           }
         />
       </div>

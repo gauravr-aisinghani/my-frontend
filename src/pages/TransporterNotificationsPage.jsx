@@ -35,7 +35,15 @@ const transporterMobile = userContext?.user_id;
   const gdc_number = userContext?.gdc_number;
 
   // ===== FETCH TRANSPORTER NOTIFICATIONS =====
+
+
+
   const fetchNotifications = async () => {
+
+      if (!transporterMobile) {
+  console.warn("❌ transporterMobile missing");
+  return;
+}
     try {
       setLoading(true);
       const data = await getTransporterNotifications(
@@ -131,10 +139,9 @@ const transporterMobile = userContext?.user_id;
     }
   };
 useEffect(() => {
-  if (transporterMobile) {
-    fetchNotifications();
-  }
-}, [transporterMobile]);
+  fetchNotifications();
+}, []);
+
 
 
   // ===== PAGINATION =====
