@@ -10,6 +10,7 @@ export default function RaiseDriverRequest() {
     transporter_phone: "",
     gdc_number: "",
 
+    vehicle_grade: "", // ✅ NEW FIELD (snake_case)
     vehicle_number: "",
     route: "",
     monthly_salary: "",
@@ -29,7 +30,7 @@ export default function RaiseDriverRequest() {
     setForm((prev) => ({
       ...prev,
       transporter_registration_id: context.transporter_registration_id,
-      transporter_phone: context.user_id, // userId → transporter_phone
+      transporter_phone: context.user_id,
       gdc_number: context.gdc_number,
     }));
   }, [navigate]);
@@ -68,6 +69,23 @@ export default function RaiseDriverRequest() {
             disabled
             className="border rounded-lg px-4 py-3 bg-gray-100"
           />
+
+          {/* ✅ VEHICLE GRADE DROPDOWN */}
+          <select
+            name="vehicle_grade"
+            value={form.vehicle_grade}
+            onChange={handleChange}
+            required
+            className="border rounded-lg px-4 py-3"
+          >
+            <option value="">Select Grade</option>
+            <option value="LMV">LMV</option>
+            <option value="HMV">HMV</option>
+            <option value="MCWG">MCWG</option>
+            <option value="MCWOG">MCWOG</option>
+            <option value="TRANS">TRANS</option>
+            <option value="TRAILER">TRAILER</option>
+          </select>
 
           <input
             name="vehicle_number"
