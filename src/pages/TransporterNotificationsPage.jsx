@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Truck, CreditCard } from "lucide-react";
+import { Bell, Truck, CreditCard, CheckCircle } from "lucide-react";
 import {
   createAdvancePaymentOrder,
   verifyPayment,
@@ -15,6 +15,7 @@ export default function TransporterNotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [processingId, setProcessingId] = useState(null);
 
   const userContext = JSON.parse(localStorage.getItem("user_context") || "{}");
   const mobile = userContext?.user_id;
@@ -32,9 +33,23 @@ export default function TransporterNotificationsPage() {
     fetchNotifications();
   }, [mobile]);
 
-  // 🔥 ADVANCE PAYMENT + MARK AS READ
+  // ===== MARK AS READ =====
+  const handleMarkAsRead = async (id) => {
+    try {
+      await markNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // ===== ADVANCE PAYMENT =====
   const handleAdvancePayment = async (notificationId, reference_id) => {
     try {
+      setProcessingId(notificationId);
+
       const order = await createAdvancePaymentOrder({
         gdc_number,
         type: "TRANSPORTER",
@@ -49,16 +64,12 @@ export default function TransporterNotificationsPage() {
         order_id: order.order_id,
         name: "Driver Advance",
         handler: async (res) => {
-          // ✅ verify payment
           await verifyPayment(res);
 
-          // 🔥 mark as read just like original working code
-          await markNotificationRead(notificationId);
+          // 🔥 mark notification as read just like Admin page
+          await handleMarkAsRead(notificationId);
 
           alert("Advance paid successfully ✅");
-
-          // 🔁 fetch again so UI updates
-          fetchNotifications();
         },
       };
 
@@ -66,6 +77,8 @@ export default function TransporterNotificationsPage() {
     } catch (err) {
       console.error(err);
       alert("Advance payment failed ❌");
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -85,7 +98,7 @@ export default function TransporterNotificationsPage() {
         <div
           key={n.id}
           className={`border p-6 rounded-2xl mb-4 ${
-            n.isRead ? "bg-white" : "bg-green-50 border-green-400"
+            n.is_read ? "bg-white" : "bg-green-50 border-green-400"
           }`}
         >
           <div className="flex justify-between">
@@ -93,38 +106,57 @@ export default function TransporterNotificationsPage() {
               <Truck /> {n.title}
             </div>
             <span className="text-xs">
-              {new Date(n.createdAt).toLocaleString()}
+              {new Date(n.created_at || n.createdAt).toLocaleString()}
             </span>
           </div>
 
           <p className="mt-2 text-sm">{n.message}</p>
 
-          {/* 🔥 MAKE ADVANCE BUTTON */}
-          {!n.isRead && n.reference_id && (
-            <button
-              onClick={() =>
-                handleAdvancePayment(n.id, n.reference_id)
-              }
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg"
-            >
-              <CreditCard size={14} className="inline mr-2" />
-              Make Driver Advance
-            </button>
-          )}
+          <div className="mt-4 flex gap-4">
+            {/* 🔥 ADVANCE BUTTON */}
+            {!n.is_read && n.reference_id && (
+              <button
+                disabled={processingId === n.id}
+                onClick={() =>
+                  handleAdvancePayment(n.id, n.reference_id)
+                }
+                className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2"
+              >
+                <CreditCard size={14} />
+                {processingId === n.id ? "Processing..." : "Make Driver Advance"}
+              </button>
+            )}
+
+            {/* 🔥 MANUAL MARK AS READ */}
+            {!n.is_read && (
+              <button
+                onClick={() => handleMarkAsRead(n.id)}
+                className="px-4 py-2 bg-green-100 text-green-700 rounded-lg flex items-center gap-2"
+              >
+                <CheckCircle size={14} /> Mark as read
+              </button>
+            )}
+          </div>
         </div>
       ))}
 
+      {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-4 mt-10">
-          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-4 py-2 rounded border disabled:opacity-40"
+          >
             Prev
           </button>
-          <span>
-            Page {page} / {totalPages}
+          <span className="px-4 py-2 text-sm">
+            Page {page} of {totalPages}
           </span>
           <button
             disabled={page === totalPages}
             onClick={() => setPage(page + 1)}
+            className="px-4 py-2 rounded border disabled:opacity-40"
           >
             Next
           </button>
