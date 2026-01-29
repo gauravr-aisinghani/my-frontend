@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Truck, CreditCard, CheckCircle } from "lucide-react";
+import { Bell, Truck, CreditCard } from "lucide-react";
 import {
   createAdvancePaymentOrder,
   verifyPayment,
@@ -21,6 +21,7 @@ export default function TransporterNotificationsPage() {
   const mobile = userContext?.user_id;
   const gdc_number = userContext?.gdc_number;
 
+  // ===== FETCH NOTIFICATIONS =====
   const fetchNotifications = async () => {
     if (!mobile) return;
     setLoading(true);
@@ -32,18 +33,6 @@ export default function TransporterNotificationsPage() {
   useEffect(() => {
     fetchNotifications();
   }, [mobile]);
-
-  // ===== MARK AS READ =====
-  const handleMarkAsRead = async (id) => {
-    try {
-      await markNotificationRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-      );
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   // ===== ADVANCE PAYMENT =====
   const handleAdvancePayment = async (notificationId, reference_id) => {
@@ -64,10 +53,16 @@ export default function TransporterNotificationsPage() {
         order_id: order.order_id,
         name: "Driver Advance",
         handler: async (res) => {
+          // 🔹 Verify payment
           await verifyPayment(res);
 
-          // 🔥 mark notification as read just like Admin page
-          await handleMarkAsRead(notificationId);
+          // 🔹 MARK AS READ on backend
+          await markNotificationRead(notificationId);
+
+          // 🔹 REMOVE notification locally (UI se gayab)
+          setNotifications((prev) =>
+            prev.filter((n) => n.id !== notificationId)
+          );
 
           alert("Advance paid successfully ✅");
         },
@@ -82,6 +77,7 @@ export default function TransporterNotificationsPage() {
     }
   };
 
+  // ===== PAGINATION =====
   const start = (page - 1) * PAGE_SIZE;
   const pageData = notifications.slice(start, start + PAGE_SIZE);
   const totalPages = Math.ceil(notifications.length / PAGE_SIZE);
@@ -112,31 +108,19 @@ export default function TransporterNotificationsPage() {
 
           <p className="mt-2 text-sm">{n.message}</p>
 
-          <div className="mt-4 flex gap-4">
-            {/* 🔥 ADVANCE BUTTON */}
-            {!n.is_read && n.reference_id && (
-              <button
-                disabled={processingId === n.id}
-                onClick={() =>
-                  handleAdvancePayment(n.id, n.reference_id)
-                }
-                className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2"
-              >
-                <CreditCard size={14} />
-                {processingId === n.id ? "Processing..." : "Make Driver Advance"}
-              </button>
-            )}
-
-            {/* 🔥 MANUAL MARK AS READ */}
-            {!n.is_read && (
-              <button
-                onClick={() => handleMarkAsRead(n.id)}
-                className="px-4 py-2 bg-green-100 text-green-700 rounded-lg flex items-center gap-2"
-              >
-                <CheckCircle size={14} /> Mark as read
-              </button>
-            )}
-          </div>
+          {/* 🔹 ADVANCE PAYMENT BUTTON */}
+          {n.reference_id && (
+            <button
+              disabled={processingId === n.id}
+              onClick={() =>
+                handleAdvancePayment(n.id, n.reference_id)
+              }
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2"
+            >
+              <CreditCard size={14} />
+              {processingId === n.id ? "Processing..." : "Make Driver Advance"}
+            </button>
+          )}
         </div>
       ))}
 
