@@ -32,7 +32,7 @@ export default function TransporterNotificationsPage() {
     fetchNotifications();
   }, [mobile]);
 
-  // 🔥 ADVANCE PAYMENT HANDLER
+  // 🔥 ADVANCE PAYMENT + MARK AS READ
   const handleAdvancePayment = async (notificationId, reference_id) => {
     try {
       const order = await createAdvancePaymentOrder({
@@ -52,12 +52,12 @@ export default function TransporterNotificationsPage() {
           // ✅ verify payment
           await verifyPayment(res);
 
-          // 🔥 PAYMENT SUCCESS → MARK NOTIFICATION AS READ
+          // 🔥 mark as read just like original working code
           await markNotificationRead(notificationId);
 
           alert("Advance paid successfully ✅");
 
-          // 🔁 REFRESH NOTIFICATIONS (paid one will disappear)
+          // 🔁 fetch again so UI updates
           fetchNotifications();
         },
       };
@@ -85,7 +85,7 @@ export default function TransporterNotificationsPage() {
         <div
           key={n.id}
           className={`border p-6 rounded-2xl mb-4 ${
-            n.is_read ? "bg-white" : "bg-green-50 border-green-400"
+            n.isRead ? "bg-white" : "bg-green-50 border-green-400"
           }`}
         >
           <div className="flex justify-between">
@@ -93,14 +93,14 @@ export default function TransporterNotificationsPage() {
               <Truck /> {n.title}
             </div>
             <span className="text-xs">
-              {new Date(n.created_at).toLocaleString()}
+              {new Date(n.createdAt).toLocaleString()}
             </span>
           </div>
 
           <p className="mt-2 text-sm">{n.message}</p>
 
           {/* 🔥 MAKE ADVANCE BUTTON */}
-          {!n.is_read && n.reference_id && (
+          {!n.isRead && n.reference_id && (
             <button
               onClick={() =>
                 handleAdvancePayment(n.id, n.reference_id)
