@@ -40,24 +40,32 @@ export default function RaiseDriverRequest() {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      await transporterDriverRequestApi.raiseRequest({
-        ...form,
-        monthlySalary: Number(form.monthlySalary),
-      });
+  const payload = {
+    transporter_registration_id: form.transporterRegistrationId,
+    transporter_phone: form.transporterPhone,
+    gdc_number: form.gdcNumber,
 
-      alert("Driver request raised successfully");
-      navigate("/transporter/dashboard");
-    } catch (err) {
-      console.error(err);
-      alert(
-        err?.response?.data || "Failed to raise driver request"
-      );
-    }
+    vehicle_grade: form.vehicleGrade,
+    vehicle_number: form.vehicleNumber,
+    route: form.route,
+    monthly_salary: Number(form.monthlySalary),
+    remarks: form.remarks,
   };
+
+  try {
+    await transporterDriverRequestApi.raiseRequest(payload);
+
+    alert("Driver request raised successfully");
+    navigate("/transporter/dashboard");
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data || "Failed to raise driver request");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
