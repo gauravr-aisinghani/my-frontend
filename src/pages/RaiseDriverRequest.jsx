@@ -6,18 +6,18 @@ export default function RaiseDriverRequest() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    transporter_registration_id: "",
-    transporter_phone: "",
-    gdc_number: "",
+    transporterRegistrationId: "",
+    transporterPhone: "",
+    gdcNumber: "",
 
-    vehicle_grade: "", // ✅ NEW FIELD (snake_case)
-    vehicle_number: "",
+    vehicleGrade: "",
+    vehicleNumber: "",
     route: "",
-    monthly_salary: "",
+    monthlySalary: "",
     remarks: "",
   });
 
-  // 🔥 Page load pe login context uthao
+  // 🔥 load transporter context
   useEffect(() => {
     const context = JSON.parse(localStorage.getItem("user_context"));
 
@@ -29,26 +29,33 @@ export default function RaiseDriverRequest() {
 
     setForm((prev) => ({
       ...prev,
-      transporter_registration_id: context.transporter_registration_id,
-      transporter_phone: context.user_id,
-      gdc_number: context.gdc_number,
+      transporterRegistrationId: context.transporter_registration_id,
+      transporterPhone: context.user_id,
+      gdcNumber: context.gdc_number,
     }));
   }, [navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await transporterDriverRequestApi.raiseRequest(form);
+      await transporterDriverRequestApi.raiseRequest({
+        ...form,
+        monthlySalary: Number(form.monthlySalary),
+      });
+
       alert("Driver request raised successfully");
       navigate("/transporter/dashboard");
     } catch (err) {
       console.error(err);
-      alert("Failed to raise request");
+      alert(
+        err?.response?.data || "Failed to raise driver request"
+      );
     }
   };
 
@@ -64,21 +71,21 @@ export default function RaiseDriverRequest() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <input
-            name="gdc_number"
-            value={form.gdc_number}
+            name="gdcNumber"
+            value={form.gdcNumber}
             disabled
             className="border rounded-lg px-4 py-3 bg-gray-100"
           />
 
-          {/* ✅ VEHICLE GRADE DROPDOWN */}
+          {/* VEHICLE GRADE */}
           <select
-            name="vehicle_grade"
-            value={form.vehicle_grade}
+            name="vehicleGrade"
+            value={form.vehicleGrade}
             onChange={handleChange}
             required
             className="border rounded-lg px-4 py-3"
           >
-            <option value="">Select Grade</option>
+            <option value="">Select Vehicle Grade</option>
             <option value="LMV">LMV</option>
             <option value="HMV">HMV</option>
             <option value="MCWG">MCWG</option>
@@ -88,33 +95,40 @@ export default function RaiseDriverRequest() {
           </select>
 
           <input
-            name="vehicle_number"
+            name="vehicleNumber"
             placeholder="Vehicle Number"
-            className="border rounded-lg px-4 py-3"
+            value={form.vehicleNumber}
             onChange={handleChange}
+            className="border rounded-lg px-4 py-3"
+            required
           />
 
           <input
             name="route"
             placeholder="Route"
-            className="border rounded-lg px-4 py-3"
+            value={form.route}
             onChange={handleChange}
+            className="border rounded-lg px-4 py-3"
+            required
           />
 
           <input
-            name="monthly_salary"
+            name="monthlySalary"
             type="number"
             placeholder="Monthly Salary"
-            className="border rounded-lg px-4 py-3"
+            value={form.monthlySalary}
             onChange={handleChange}
+            className="border rounded-lg px-4 py-3"
+            required
           />
 
           <textarea
             name="remarks"
-            placeholder="Remarks"
+            placeholder="Remarks (optional)"
+            value={form.remarks}
             rows="2"
-            className="md:col-span-3 border rounded-lg px-4 py-3"
             onChange={handleChange}
+            className="md:col-span-3 border rounded-lg px-4 py-3"
           />
         </div>
 
