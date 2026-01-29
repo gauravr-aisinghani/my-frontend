@@ -4,7 +4,10 @@ import {
   createAdvancePaymentOrder,
   verifyPayment,
 } from "../api/paymentsApi";
-import { getTransporterNotifications } from "../api/transporterNotificationApi";
+import {
+  getTransporterNotifications,
+  markNotificationRead,
+} from "../api/transporterNotificationApi";
 
 const PAGE_SIZE = 5;
 
@@ -29,13 +32,14 @@ export default function TransporterNotificationsPage() {
     fetchNotifications();
   }, [mobile]);
 
-  const handleAdvancePayment = async (reference_id) => {
+  // 🔥 ADVANCE PAYMENT HANDLER
+  const handleAdvancePayment = async (notificationId, reference_id) => {
     try {
       const order = await createAdvancePaymentOrder({
         gdc_number,
         type: "TRANSPORTER",
         purpose: "TRANSPORTER_ADVANCE",
-        request_id: reference_id, // 🔥 backend ko yahi chahiye
+        request_id: reference_id,
       });
 
       const options = {
@@ -45,8 +49,15 @@ export default function TransporterNotificationsPage() {
         order_id: order.order_id,
         name: "Driver Advance",
         handler: async (res) => {
+          // ✅ verify payment
           await verifyPayment(res);
+
+          // 🔥 PAYMENT SUCCESS → MARK NOTIFICATION AS READ
+          await markNotificationRead(notificationId);
+
           alert("Advance paid successfully ✅");
+
+          // 🔁 REFRESH NOTIFICATIONS (paid one will disappear)
           fetchNotifications();
         },
       };
@@ -89,9 +100,11 @@ export default function TransporterNotificationsPage() {
           <p className="mt-2 text-sm">{n.message}</p>
 
           {/* 🔥 MAKE ADVANCE BUTTON */}
-          {n.reference_id && (
+          {!n.is_read && n.reference_id && (
             <button
-              onClick={() => handleAdvancePayment(n.reference_id)}
+              onClick={() =>
+                handleAdvancePayment(n.id, n.reference_id)
+              }
               className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg"
             >
               <CreditCard size={14} className="inline mr-2" />
