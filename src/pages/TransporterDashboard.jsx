@@ -163,24 +163,24 @@ export default function TransporterDashboard() {
 
       {/* PAYMENTS MODAL */}
       {showPayments && (
-        <Modal onClose={() => setShowPayments(false)}>
-          <PaymentOption
-            text="Make driver advance"
-            onClick={() => handlePayment("TRANSPORTER_ADVANCE")}
-          />
-          <PaymentOption
-            text="Add to wallet"
-            onClick={() => {
-              setShowPayments(false);
-              setShowTopup(true);
-            }}
-          />
-          <PaymentOption
-            text="Monthly settlement"
-            onClick={() => handlePayment("MONTHLY_SETTLEMENT")}
-          />
-        </Modal>
-      )}
+  <Modal onClose={() => setShowPayments(false)}>
+
+    <PaymentOption
+      text="Add to wallet"
+      onClick={() => {
+        setShowPayments(false);
+        setShowTopup(true);
+      }}
+    />
+
+    <PaymentOption
+      text="Monthly settlement"
+      onClick={() => handlePayment("MONTHLY_SETTLEMENT")}
+    />
+
+  </Modal>
+)}
+
 
       {/* TOPUP MODAL */}
       {showTopup && (

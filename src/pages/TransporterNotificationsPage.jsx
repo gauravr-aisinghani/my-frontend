@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Truck, CheckCircle, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
-import api from "../api/axiosInstance";
-import { createPaymentOrder, verifyPayment } from "../api/paymentsApi";
-import { getTransporterNotifications, markNotificationRead } from "../api/transporterNotificationApi";
+import { Bell, Truck, CreditCard } from "lucide-react";
+import {
+  createAdvancePaymentOrder,
+  verifyPayment,
+} from "../api/paymentsApi";
+import { getTransporterNotifications } from "../api/transporterNotificationApi";
 
 const PAGE_SIZE = 5;
 
 export default function TransporterNotificationsPage() {
   const [notifications, setNotifications] = useState([]);
-  const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
@@ -20,13 +21,42 @@ export default function TransporterNotificationsPage() {
     if (!mobile) return;
     setLoading(true);
     const data = await getTransporterNotifications(mobile);
-    setNotifications(data);
+    setNotifications(data || []);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchNotifications();
   }, [mobile]);
+
+  const handleAdvancePayment = async (reference_id) => {
+    try {
+      const order = await createAdvancePaymentOrder({
+        gdc_number,
+        type: "TRANSPORTER",
+        purpose: "TRANSPORTER_ADVANCE",
+        request_id: reference_id, // 🔥 backend ko yahi chahiye
+      });
+
+      const options = {
+        key: order.key,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.order_id,
+        name: "Driver Advance",
+        handler: async (res) => {
+          await verifyPayment(res);
+          alert("Advance paid successfully ✅");
+          fetchNotifications();
+        },
+      };
+
+      new window.Razorpay(options).open();
+    } catch (err) {
+      console.error(err);
+      alert("Advance payment failed ❌");
+    }
+  };
 
   const start = (page - 1) * PAGE_SIZE;
   const pageData = notifications.slice(start, start + PAGE_SIZE);
@@ -41,23 +71,31 @@ export default function TransporterNotificationsPage() {
       {loading && <p>Loading…</p>}
 
       {pageData.map((n) => (
-        <div key={n.id} className={`border p-6 rounded-2xl ${n.isRead ? "bg-white" : "bg-green-50 border-green-400"}`}>
+        <div
+          key={n.id}
+          className={`border p-6 rounded-2xl mb-4 ${
+            n.is_read ? "bg-white" : "bg-green-50 border-green-400"
+          }`}
+        >
           <div className="flex justify-between">
-            <div className="flex gap-2 items-center"><Truck /> {n.title}</div>
-            <span className="text-xs">{new Date(n.createdAt).toLocaleString()}</span>
+            <div className="flex gap-2 items-center">
+              <Truck /> {n.title}
+            </div>
+            <span className="text-xs">
+              {new Date(n.created_at).toLocaleString()}
+            </span>
           </div>
 
           <p className="mt-2 text-sm">{n.message}</p>
 
-          {!n.isRead && (
+          {/* 🔥 MAKE ADVANCE BUTTON */}
+          {n.reference_id && (
             <button
-              onClick={async () => {
-                await markNotificationRead(n.id);
-                fetchNotifications();
-              }}
-              className="mt-4 px-4 py-2 bg-green-100 rounded"
+              onClick={() => handleAdvancePayment(n.reference_id)}
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg"
             >
-              <CheckCircle size={14} className="inline mr-1" /> Mark as read
+              <CreditCard size={14} className="inline mr-2" />
+              Make Driver Advance
             </button>
           )}
         </div>
@@ -65,9 +103,18 @@ export default function TransporterNotificationsPage() {
 
       {totalPages > 1 && (
         <div className="flex justify-center gap-4 mt-10">
-          <button disabled={page === 1} onClick={() => setPage(page - 1)}>Prev</button>
-          <span>Page {page} / {totalPages}</span>
-          <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
+          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+            Prev
+          </button>
+          <span>
+            Page {page} / {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
