@@ -40,7 +40,7 @@ export default function TransporterLedger() {
   // PER TRANSPORTER LEDGER
   if (selected) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="max-w-7xl mx-auto">
 
         <Button onClick={() => setSelected(null)}>← Back</Button>
 

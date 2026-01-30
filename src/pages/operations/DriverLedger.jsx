@@ -43,7 +43,7 @@ export default function DriverLedger() {
   // PER DRIVER LEDGER VIEW
   if (selectedDriver) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="max-w-7xl mx-auto">
 
         <Button onClick={() => setSelectedDriver(null)}>← Back</Button>
 
