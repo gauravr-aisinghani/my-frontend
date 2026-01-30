@@ -1,6 +1,6 @@
 import api from "./axiosInstance";
 
-const BASE_URL = "/admin/driver-assignments";
+const BASE_URL = "/driver-assignments";
 
 // ================= 1️⃣ ADVANCE PAID TRANSPORTER REQUESTS =================
 export const getAdvancePaidTransporterRequests = async () => {
