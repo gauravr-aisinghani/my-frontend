@@ -59,7 +59,8 @@ export default function TransporterLedger() {
       transporter.transporter_id
     );
 
-    setLedger(data.transactions || []);
+    setLedger(data);
+
   };
 
   // ===============================

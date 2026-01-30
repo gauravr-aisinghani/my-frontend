@@ -59,7 +59,8 @@ export default function DriverLedger() {
       driver.driver_id
     );
 
-    setLedger(data.transactions || []);
+    setLedger(data);
+
   };
 
   // ===============================
@@ -79,12 +80,9 @@ export default function DriverLedger() {
         <table className="w-full text-sm bg-white shadow rounded">
           <thead className="bg-gray-100">
             <tr>
-              <th>DATE</th>
-              <th>JOIN</th>
-              <th>END</th>
-              <th>DAYS</th>
-              <th>PER DAY</th>
-              <th>SALARY</th>
+              <th>DATE</th>        
+              
+             
               <th>CREDIT</th>
               <th>DEBIT</th>
               <th>BALANCE</th>
