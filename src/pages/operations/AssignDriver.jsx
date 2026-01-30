@@ -181,7 +181,7 @@ export default function AssignDriver() {
                       key={d.driver_registration_id}
                       value={d.driver_registration_id}
                     >
-                      {d.driver_name} ({d.vehicle_grade})
+                      {d.gdc_registration_number}
                     </option>
                   ))}
                 </select>
