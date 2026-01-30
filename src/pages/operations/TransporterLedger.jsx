@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   fetchTransporterLedgers,
   fetchSingleTransporterLedger,
-} from "../api/transporterLedgerApi";
+} from "../../api/transporterLedgerApi";
 
 const Button = ({ children, ...props }) => (
   <button
