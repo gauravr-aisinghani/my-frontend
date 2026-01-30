@@ -1,65 +1,71 @@
-import React, { useState } from "react";
-
-/* 🔹 Dummy data (API se replace hoga) */
-const dummyRequests = [
-  {
-    request_id: 11,
-    transporter_name: "ABC Transport",
-    transporter_phone: "9876543210",
-    transporter_registration_id: "uuid-111",
-    route: "Delhi – Jaipur",
-    vehicle_grade: "HMV",
-    vehicle_number: "RJ14 AB 1234",
-    monthly_salary: 25000,
-  },
-  {
-    request_id: 12,
-    transporter_name: "FastMove Logistics",
-    transporter_phone: "9123456789",
-    transporter_registration_id: "uuid-222",
-    route: "Jaipur – Ajmer",
-    vehicle_grade: "LMV",
-    vehicle_number: "RJ02 CD 8899",
-    monthly_salary: 18000,
-  },
-];
-
-const dummyDrivers = [
-  { id: 101, name: "Ramesh Kumar", licence: "HMV" },
-  { id: 102, name: "Suresh Singh", licence: "LMV" },
-];
+import React, { useEffect, useState } from "react";
+import {
+  getAdvancePaidTransporterRequests,
+  getAvailableDrivers,
+  assignDriverToRequest,
+} from "../../api/driverAssignmentApi";
 
 export default function AssignDriver() {
+  const [requests, setRequests] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     assigned_driver_registration_id: "",
-    joining_date: "",
-    duration_months: "",
-    underload: false,
-    overload: false,
     remarks: "",
   });
 
-  const handleAssign = () => {
+  // ================= LOAD DATA =================
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [reqRes, driverRes] = await Promise.all([
+        getAdvancePaidTransporterRequests(),
+        getAvailableDrivers(),
+      ]);
+      setRequests(reqRes || []);
+      setDrivers(driverRes || []);
+    } catch (err) {
+      alert("Failed to load data");
+    }
+  };
+
+  // ================= ASSIGN DRIVER =================
+  const handleAssign = async () => {
     if (!selectedRequest || !form.assigned_driver_registration_id) {
-      alert("Please select transporter & driver");
+      alert("Please select transporter request and driver");
       return;
     }
 
-    /* 🔥 FINAL PAYLOAD (yfs_driver_assignments) */
+    // 🔥 FINAL SNAKE_CASE PAYLOAD
     const payload = {
       request_id: selectedRequest.request_id,
-      assigned_driver_registration_id:
-        form.assigned_driver_registration_id,
-      transporter_registration_id:
-        selectedRequest.transporter_registration_id,
-      transporter_phone: selectedRequest.transporter_phone,
+      assigned_driver_registration_id: Number(
+        form.assigned_driver_registration_id
+      ),
+      assigned_by: 1, // admin id (auth se aayega)
       remarks: form.remarks,
     };
 
-    console.log("FINAL ASSIGN PAYLOAD 👉", payload);
-    alert("Driver Assigned Successfully");
+    try {
+      setLoading(true);
+      await assignDriverToRequest(payload);
+      alert("Driver assigned successfully");
+      setSelectedRequest(null);
+      setForm({ assigned_driver_registration_id: "", remarks: "" });
+      fetchData();
+    } catch (err) {
+      alert(
+        err?.response?.data?.message ||
+          "Failed to assign driver"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,7 +75,7 @@ export default function AssignDriver() {
       </h2>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* ================= LEFT : DRIVER REQUESTS ================= */}
+        {/* ================= LEFT : REQUESTS ================= */}
         <div className="bg-white border shadow rounded">
           <table className="w-full text-sm">
             <thead className="bg-gray-100">
@@ -82,10 +88,21 @@ export default function AssignDriver() {
               </tr>
             </thead>
             <tbody>
-              {dummyRequests.map((r) => (
+              {requests.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="text-center p-4 text-gray-500"
+                  >
+                    No advance paid requests found
+                  </td>
+                </tr>
+              )}
+
+              {requests.map((r) => (
                 <tr key={r.request_id}>
                   <td className="p-3 border">
-                    {r.transporter_name}
+                    {r.transporter_name || "—"}
                   </td>
                   <td className="p-3 border">{r.route}</td>
                   <td className="p-3 border">
@@ -108,7 +125,7 @@ export default function AssignDriver() {
           </table>
         </div>
 
-        {/* ================= RIGHT : ASSIGNMENT ================= */}
+        {/* ================= RIGHT : ASSIGN ================= */}
         <div className="bg-white border shadow rounded p-4 space-y-3">
           <h3 className="font-semibold text-lg">
             Assignment Details
@@ -122,12 +139,7 @@ export default function AssignDriver() {
 
           {selectedRequest && (
             <>
-              {/* READ ONLY INFO */}
               <div className="text-sm space-y-1 bg-gray-50 p-3 rounded">
-                <p>
-                  <strong>Transporter:</strong>{" "}
-                  {selectedRequest.transporter_name}
-                </p>
                 <p>
                   <strong>Phone:</strong>{" "}
                   {selectedRequest.transporter_phone}
@@ -154,6 +166,7 @@ export default function AssignDriver() {
                 </label>
                 <select
                   className="w-full border p-2 rounded text-sm"
+                  value={form.assigned_driver_registration_id}
                   onChange={(e) =>
                     setForm({
                       ...form,
@@ -163,77 +176,15 @@ export default function AssignDriver() {
                   }
                 >
                   <option value="">-- Select --</option>
-                  {dummyDrivers.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name} ({d.licence})
+                  {drivers.map((d) => (
+                    <option
+                      key={d.driver_registration_id}
+                      value={d.driver_registration_id}
+                    >
+                      {d.driver_name} ({d.vehicle_grade})
                     </option>
                   ))}
                 </select>
-              </div>
-
-              {/* JOINING DATE */}
-              <div>
-                <label className="text-sm font-medium">
-                  Joining Date
-                </label>
-                <input
-                  type="date"
-                  className="w-full border p-2 rounded text-sm"
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      joining_date: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              {/* DURATION */}
-              <div>
-                <label className="text-sm font-medium">
-                  Duration (Months)
-                </label>
-                <input
-                  type="number"
-                  className="w-full border p-2 rounded text-sm"
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      duration_months: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              {/* FLAGS */}
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.underload}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        underload: e.target.checked,
-                      })
-                    }
-                  />
-                  Underload
-                </label>
-
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.overload}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        overload: e.target.checked,
-                      })
-                    }
-                  />
-                  Overload
-                </label>
               </div>
 
               {/* REMARKS */}
@@ -244,6 +195,7 @@ export default function AssignDriver() {
                 <textarea
                   className="w-full border p-2 rounded text-sm"
                   rows="2"
+                  value={form.remarks}
                   onChange={(e) =>
                     setForm({
                       ...form,
@@ -254,10 +206,11 @@ export default function AssignDriver() {
               </div>
 
               <button
+                disabled={loading}
                 onClick={handleAssign}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded text-sm"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded text-sm disabled:opacity-50"
               >
-                Assign Driver
+                {loading ? "Assigning..." : "Assign Driver"}
               </button>
             </>
           )}
