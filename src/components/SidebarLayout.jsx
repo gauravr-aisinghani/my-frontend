@@ -1,5 +1,5 @@
 // src/components/SidebarLayout.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Home,
@@ -15,6 +15,7 @@ import {
 
 import SessionManager from "./SessionManager";
 
+/* ================= PAGE TITLES ================= */
 const pageTitles = {
   "": "Dashboard",
   "daily-visitors": "Visitors Driver",
@@ -23,12 +24,20 @@ const pageTitles = {
   "daily-visitor-table": "Visitor Drivers List",
   "driver-verification": "Pending Drivers",
   "generate-gdc": "Generate GDC",
+
   "transport-visitor": "Visitor Transporter",
+  "visitor-transporters-list": "Visitor Transporters List",
+  "selected-transporters-list": "Final Transporter",
   "transporter-registration": "Transporter Signup",
+  "transporter-verification": "Transporter Verification",
+  "generate-gdc-transporter": "Generate GDC Transporter",
+
   "payments": "Payments",
-  "drivers-reports": "Drivers Reports",
+
+  "drivers-reports": "Driver Reports",
   "transporter-reports": "Transporter Reports",
   "payment-reports": "Payment Reports",
+
   "assign-driver": "Assign Driver",
   "paid-by-transporter": "Paid By Transporter",
   "payment-verified": "Payment Verified",
@@ -38,6 +47,7 @@ const pageTitles = {
   "driver-ledger": "Driver Ledger",
 };
 
+/* ================= SIDEBAR DATA ================= */
 const sidebarSections = [
   {
     title: "Dashboard",
@@ -49,14 +59,20 @@ const sidebarSections = [
       { label: "Visitors Driver", path: "daily-visitors", icon: <Users size={18} /> },
       { label: "Final Drivers", path: "selected-drivers", icon: <CheckSquare size={18} /> },
       { label: "Driver Signup", path: "driver-registration", icon: <FilePlus2 size={18} /> },
+      { label: "Visitor Drivers List", path: "daily-visitor-table", icon: <FilePlus2 size={18} /> },
       { label: "Pending Drivers Verification", path: "driver-verification", icon: <CheckSquare size={18} /> },
+      { label: "Generate GDC", path: "generate-gdc", icon: <CheckSquare size={18} /> },
     ],
   },
   {
     title: "Transporters",
     items: [
+      { label: "Visitors Transporter", path: "transport-visitor", icon: <Truck size={18} /> },
+      { label: "Visitor Transporters List", path: "visitor-transporters-list", icon: <Truck size={18} /> },
+      { label: "Final Transporter", path: "selected-transporters-list", icon: <CheckSquare size={18} /> },
       { label: "Transporter Signup", path: "transporter-registration", icon: <FilePlus2 size={18} /> },
       { label: "Pending Verification", path: "transporter-verification", icon: <CheckSquare size={18} /> },
+      { label: "Generate GDC", path: "generate-gdc-transporter", icon: <CheckSquare size={18} /> },
     ],
   },
   {
@@ -76,6 +92,11 @@ const sidebarSections = [
     items: [
       { label: "Assign Driver", path: "assign-driver", icon: <Users size={18} /> },
       { label: "Paid By Transporter", path: "paid-by-transporter", icon: <DollarSign size={18} /> },
+      { label: "Payment Verified", path: "payment-verified", icon: <CheckSquare size={18} /> },
+      { label: "Current Posting", path: "current-posting", icon: <Truck size={18} /> },
+      { label: "Final Settlement", path: "final-settlement", icon: <CheckSquare size={18} /> },
+      { label: "Transporter Ledger", path: "transporter-ledger", icon: <FilePlus2 size={18} /> },
+      { label: "Driver Ledger", path: "driver-ledger", icon: <Users size={18} /> },
     ],
   },
 ];
@@ -85,13 +106,12 @@ export default function SidebarLayout({ onLogout }) {
   const currentPath = location.pathname.replace("/dashboard/", "");
   const pageTitle = pageTitles[currentPath] || "Dashboard";
 
-  const [openSections, setOpenSections] = useState({});
+  const [openSections, setOpenSections] = useState({
+    Dashboard: true,
+  });
 
   const toggleSection = (title) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
+    setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
   const base = "/dashboard";
@@ -100,8 +120,8 @@ export default function SidebarLayout({ onLogout }) {
     <div className="min-h-screen flex bg-gray-100">
       <SessionManager />
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r shadow-sm fixed inset-y-0">
+      {/* ================= SIDEBAR ================= */}
+      <aside className="w-64 bg-white border-r fixed inset-y-0 shadow-sm">
         <div className="flex items-center justify-between p-4 border-b">
           <span className="text-2xl font-bold text-green-600">WTL</span>
           <button className="p-2 rounded-md hover:bg-gray-100">
@@ -112,10 +132,11 @@ export default function SidebarLayout({ onLogout }) {
         <nav className="p-3 text-sm">
           {sidebarSections.map((section) => (
             <div key={section.title} className="mb-4">
-              {/* Heading */}
+              {/* SECTION HEADING */}
               <button
                 onClick={() => toggleSection(section.title)}
-                className="w-full flex items-center justify-between text-gray-500 font-semibold tracking-wide px-2 py-1 hover:text-gray-800"
+                className="w-full flex items-center justify-between px-2 py-1
+                text-green-700 font-semibold uppercase tracking-wide hover:text-green-900"
               >
                 {section.title}
                 <ChevronDown
@@ -126,10 +147,10 @@ export default function SidebarLayout({ onLogout }) {
                 />
               </button>
 
-              {/* Items */}
+              {/* ITEMS */}
               <div
-                className={`mt-2 space-y-1 overflow-hidden transition-all ${
-                  openSections[section.title] ? "max-h-96" : "max-h-0"
+                className={`mt-2 ml-2 space-y-1 overflow-hidden transition-all duration-300 ${
+                  openSections[section.title] ? "max-h-[500px]" : "max-h-0"
                 }`}
               >
                 {section.items.map((item) => {
@@ -140,10 +161,10 @@ export default function SidebarLayout({ onLogout }) {
                       to={to}
                       end={item.path === ""}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-2 rounded-md transition
+                        `flex items-center gap-3 px-3 py-2 rounded-md transition-all
                         ${
                           isActive
-                            ? "bg-green-50 text-green-700 border-l-4 border-green-600"
+                            ? "bg-green-50 text-green-800 border-l-4 border-green-600"
                             : "text-gray-700 hover:bg-gray-100"
                         }`
                       }
@@ -157,7 +178,7 @@ export default function SidebarLayout({ onLogout }) {
             </div>
           ))}
 
-          {/* Logout */}
+          {/* LOGOUT */}
           <button
             onClick={onLogout}
             className="mt-6 w-full flex items-center gap-3 px-4 py-3 rounded-lg
@@ -169,7 +190,7 @@ export default function SidebarLayout({ onLogout }) {
         </nav>
       </aside>
 
-      {/* Main */}
+      {/* ================= MAIN ================= */}
       <main className="ml-64 flex-1">
         <header className="p-5 bg-white border-b shadow-sm sticky top-0 z-10">
           <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
