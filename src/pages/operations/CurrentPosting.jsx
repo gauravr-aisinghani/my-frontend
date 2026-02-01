@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import currentPostingApi from "../api/currentPostingApi";
+import currentPostingApi from "../../api/currentPostingApi";
 
 export default function CurrentPosting() {
   const [allData, setAllData] = useState([]);
