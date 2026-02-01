@@ -106,9 +106,7 @@ export default function SidebarLayout({ onLogout }) {
   const currentPath = location.pathname.replace("/dashboard/", "");
   const pageTitle = pageTitles[currentPath] || "Dashboard";
 
-  const [openSections, setOpenSections] = useState({
-    Dashboard: true,
-  });
+  const [openSections, setOpenSections] = useState({ Dashboard: true });
 
   const toggleSection = (title) => {
     setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -120,8 +118,8 @@ export default function SidebarLayout({ onLogout }) {
     <div className="min-h-screen flex bg-gray-100">
       <SessionManager />
 
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-white border-r fixed inset-y-0 shadow-sm">
+      {/* SIDEBAR */}
+      <aside className="w-64 bg-white border-r fixed inset-y-0">
         <div className="flex items-center justify-between p-4 border-b">
           <span className="text-2xl font-bold text-green-600">WTL</span>
           <button className="p-2 rounded-md hover:bg-gray-100">
@@ -132,11 +130,12 @@ export default function SidebarLayout({ onLogout }) {
         <nav className="p-3 text-sm">
           {sidebarSections.map((section) => (
             <div key={section.title} className="mb-4">
-              {/* SECTION HEADING */}
+              {/* HEADING – NO BACKGROUND */}
               <button
                 onClick={() => toggleSection(section.title)}
                 className="w-full flex items-center justify-between px-2 py-1
-                text-green-700 font-semibold uppercase tracking-wide hover:text-green-900"
+                text-green-700 font-semibold uppercase tracking-wide
+                bg-transparent hover:text-green-900"
               >
                 {section.title}
                 <ChevronDown
@@ -149,8 +148,8 @@ export default function SidebarLayout({ onLogout }) {
 
               {/* ITEMS */}
               <div
-                className={`mt-2 ml-2 space-y-1 overflow-hidden transition-all duration-300 ${
-                  openSections[section.title] ? "max-h-[500px]" : "max-h-0"
+                className={`mt-2 ml-3 space-y-1 overflow-hidden transition-all duration-300 ${
+                  openSections[section.title] ? "max-h-[600px]" : "max-h-0"
                 }`}
               >
                 {section.items.map((item) => {
@@ -161,7 +160,7 @@ export default function SidebarLayout({ onLogout }) {
                       to={to}
                       end={item.path === ""}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 rounded-md transition-all
+                        `flex items-center gap-3 px-3 py-2 rounded-md
                         ${
                           isActive
                             ? "bg-green-50 text-green-800 border-l-4 border-green-600"
@@ -190,9 +189,9 @@ export default function SidebarLayout({ onLogout }) {
         </nav>
       </aside>
 
-      {/* ================= MAIN ================= */}
+      {/* MAIN */}
       <main className="ml-64 flex-1">
-        <header className="p-5 bg-white border-b shadow-sm sticky top-0 z-10">
+        <header className="p-5 bg-white border-b sticky top-0">
           <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
         </header>
 
