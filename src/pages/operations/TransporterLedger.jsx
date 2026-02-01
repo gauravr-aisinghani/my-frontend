@@ -53,15 +53,15 @@ export default function TransporterLedger() {
   // OPEN PARTICULAR TRANSPORTER LEDGER
   // ===============================
   const openLedger = async (transporter) => {
-    setSelected(transporter);
+  setSelected(transporter);
 
-    const data = await fetchSingleTransporterLedger(
-      transporter.transporter_id
-    );
+  const data = await fetchSingleTransporterLedger(
+    transporter.code   // ✅ GDC NUMBER
+  );
 
-    setLedger(data);
+  setLedger(data);
+};
 
-  };
 
   // ===============================
   // SINGLE TRANSPORTER LEDGER VIEW
@@ -73,8 +73,8 @@ export default function TransporterLedger() {
         <Button onClick={() => setSelected(null)}>← Back</Button>
 
         <div className="bg-orange-300 p-2 font-semibold rounded">
-          Transporter : {selected.transporter_name} | ID :{" "}
-          {selected.transporter_code}
+          Transporter : {selected.name} | ID :{" "}
+          {selected.code}
         </div>
 
         <table className="w-full text-sm bg-white shadow rounded">
