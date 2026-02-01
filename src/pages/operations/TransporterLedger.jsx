@@ -139,14 +139,14 @@ export default function TransporterLedger() {
 
         <tbody>
           {transporters.map((x) => (
-            <tr key={x.transporter_id} className="border-t text-center">
+            <tr key={x.id} className="border-t text-center">
               <td
                 className="text-blue-600 cursor-pointer"
                 onClick={() => openLedger(x)}
               >
-                {x.transporter_name}
+                {x.name}
               </td>
-              <td>{x.transporter_code}</td>
+              <td>{x.code}</td>
               <td>{x.balance}</td>
               <td>
                 <Button onClick={() => openLedger(x)}>View</Button>
