@@ -39,7 +39,7 @@ const pageTitles = {
   "payment-reports": "Payment Reports",
 
   "assign-driver": "Assign Driver",
-  "paid-by-transporter": "Paid By Transporter",
+  "ideal-drivers": "Ideal Drivers",
   "payment-verified": "Payment Verified",
   "current-posting": "Current Posting",
   "final-settlement": "Final Settlement",
@@ -91,7 +91,7 @@ const sidebarSections = [
     title: "Operations",
     items: [
       { label: "Assign Driver", path: "assign-driver", icon: <Users size={18} /> },
-      { label: "Paid By Transporter", path: "paid-by-transporter", icon: <DollarSign size={18} /> },
+      { label: "Ideal Drivers", path: "ideal-drivers", icon: <DollarSign size={18} /> },
       { label: "Payment Verified", path: "payment-verified", icon: <CheckSquare size={18} /> },
       { label: "Current Posting", path: "current-posting", icon: <Truck size={18} /> },
       { label: "Final Settlement", path: "final-settlement", icon: <CheckSquare size={18} /> },

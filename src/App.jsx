@@ -56,6 +56,7 @@ import TransporterDashboard from "./pages/TransporterDashboard.jsx";
 import RaiseDriverRequest from "./pages/RaiseDriverRequest.jsx";
 import TransporterNotificationsPage from "./pages/TransporterNotificationsPage.jsx";
 import TransporterWallet from "./pages/TransporterWallet.jsx";
+import IdealDrivers from "./pages/IdealDrivers.jsx";
 
 function App() {
   return (
@@ -137,7 +138,8 @@ function App() {
             <Route path="transporter-registration" element={<TransporterRegistrationPage />} />
             <Route path="driver-registration" element={<DriverRegistrationPage />} />
             <Route path="create-table" element={<CreateTable />} />
- 
+             <Route path="ideal-drivers" element={<IdealDrivers />} />
+
 
 
             <Route path="xml-table" element={<XmlTableCreator />} />
