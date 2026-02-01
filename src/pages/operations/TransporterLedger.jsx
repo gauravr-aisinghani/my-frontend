@@ -4,6 +4,9 @@ import {
   fetchSingleTransporterLedger,
 } from "../../api/transporterLedgerApi";
 
+/* ===============================
+   UI HELPERS
+================================ */
 const Button = ({ children, ...props }) => (
   <button
     {...props}
@@ -17,6 +20,27 @@ const Input = (props) => (
   <input {...props} className="border px-3 py-2 rounded w-full" />
 );
 
+const formatDate = (iso) => {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  return d.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const formatText = (text) =>
+  text
+    ?.toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+/* ===============================
+   COMPONENT
+================================ */
 export default function TransporterLedger() {
   const [transporters, setTransporters] = useState([]);
   const [ledger, setLedger] = useState([]);
@@ -29,9 +53,9 @@ export default function TransporterLedger() {
   const [page, setPage] = useState(1);
   const perPage = 8;
 
-  // ===============================
-  // LOAD ALL TRANSPORTERS
-  // ===============================
+  /* ===============================
+     LOAD ALL TRANSPORTERS
+  ================================ */
   const loadTransporters = async () => {
     const data = await fetchTransporterLedgers({
       search,
@@ -41,7 +65,6 @@ export default function TransporterLedger() {
       size: perPage,
     });
 
-    // backend may send { content: [] } or direct []
     setTransporters(data.content || data);
   };
 
@@ -49,57 +72,60 @@ export default function TransporterLedger() {
     loadTransporters();
   }, [page]);
 
-  // ===============================
-  // OPEN PARTICULAR TRANSPORTER LEDGER
-  // ===============================
+  /* ===============================
+     OPEN TRANSPORTER LEDGER
+  ================================ */
   const openLedger = async (transporter) => {
-  setSelected(transporter);
+    setSelected(transporter);
 
-  const data = await fetchSingleTransporterLedger(
-    transporter.code   // ✅ GDC NUMBER
-  );
+    const data = await fetchSingleTransporterLedger(
+      transporter.code // ✅ GDC NUMBER
+    );
 
-  setLedger(data);
-};
+    setLedger(data);
+  };
 
-
-  // ===============================
-  // SINGLE TRANSPORTER LEDGER VIEW
-  // ===============================
+  /* ===============================
+     SINGLE LEDGER VIEW
+  ================================ */
   if (selected) {
     return (
       <div className="max-w-7xl mx-auto p-4 space-y-3">
-
         <Button onClick={() => setSelected(null)}>← Back</Button>
 
-        <div className="bg-orange-300 p-2 font-semibold rounded">
-          Transporter : {selected.name} | ID :{" "}
-          {selected.code}
+        <div className="bg-orange-300 p-3 font-semibold rounded">
+          Transporter : {selected.name} | GDC : {selected.code}
         </div>
 
         <table className="w-full text-sm bg-white shadow rounded">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-200 text-gray-700">
             <tr>
               <th>DATE</th>
               <th>DESCRIPTION</th>
-              <th>CREDIT</th>
-              <th>DEBIT</th>
-              <th>BALANCE</th>
+              <th className="text-right">CREDIT</th>
+              <th className="text-right">DEBIT</th>
+              <th className="text-right">BALANCE</th>
             </tr>
           </thead>
 
           <tbody>
             {ledger.map((x, i) => (
               <tr key={i} className="border-t text-center">
-                <td>{x.txn_date}</td>
-                <td>{x.description}</td>
-                <td className="text-green-600">
-                  {x.credit_amount || "-"}
+                <td>{formatDate(x.txn_date)}</td>
+
+                <td>{formatText(x.description)}</td>
+
+                <td className="text-green-600 text-right font-medium">
+                  {x.credit_amount ? `₹ ${x.credit_amount}` : "-"}
                 </td>
-                <td className="text-red-500">
-                  {x.debit_amount || "-"}
+
+                <td className="text-red-500 text-right font-medium">
+                  {x.debit_amount ? `₹ ${x.debit_amount}` : "-"}
                 </td>
-                <td>{x.closing_balance}</td>
+
+                <td className="text-right font-semibold">
+                  ₹ {x.closing_balance}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -108,12 +134,11 @@ export default function TransporterLedger() {
     );
   }
 
-  // ===============================
-  // ALL TRANSPORTER LIST VIEW
-  // ===============================
+  /* ===============================
+     TRANSPORTER LIST VIEW
+  ================================ */
   return (
     <div className="p-6 space-y-4">
-
       <h2 className="font-semibold text-lg">Transporter Ledger</h2>
 
       <div className="grid grid-cols-4 gap-3">
@@ -128,10 +153,10 @@ export default function TransporterLedger() {
       </div>
 
       <table className="w-full text-sm bg-white shadow rounded">
-        <thead className="bg-gray-100">
+        <thead className="bg-gray-200 text-gray-700">
           <tr>
             <th>TRANSPORTER</th>
-            <th>ID</th>
+            <th>GDC</th>
             <th>BALANCE</th>
             <th>ACTION</th>
           </tr>
@@ -147,7 +172,7 @@ export default function TransporterLedger() {
                 {x.name}
               </td>
               <td>{x.code}</td>
-              <td>{x.balance}</td>
+              <td className="font-medium">₹ {x.balance}</td>
               <td>
                 <Button onClick={() => openLedger(x)}>View</Button>
               </td>
@@ -161,11 +186,8 @@ export default function TransporterLedger() {
           Prev
         </Button>
         <span>Page {page}</span>
-        <Button onClick={() => setPage(page + 1)}>
-          Next
-        </Button>
+        <Button onClick={() => setPage(page + 1)}>Next</Button>
       </div>
-
     </div>
   );
 }
